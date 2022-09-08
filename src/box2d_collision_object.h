@@ -12,23 +12,26 @@ using namespace godot;
 
 class Box2DCollisionObject {
 private:
-    RID self;
+	RID self;
 
-    b2Body *body = nullptr;
-    Box2DSpace* space = nullptr;
+	b2Body *body = nullptr;
+	Box2DSpace* space = nullptr;
 
 protected:
-    void _set_space(Box2DSpace* p_space);
+	void _set_space(Box2DSpace* p_space);
 
 public:
-    _FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
-    _FORCE_INLINE_ RID get_self() const { return self; }
+	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
+	_FORCE_INLINE_ RID get_self() const { return self; }
 
-    virtual void set_space(Box2DSpace* p_space) = 0;
-    _FORCE_INLINE_ Box2DSpace *get_space() const { return space; }
+	b2Body *get_b2Body() { return body; }
+	void set_b2Body(b2Body* p_body) { body = p_body; }
 
-    Box2DCollisionObject();
-    virtual ~Box2DCollisionObject();
+	virtual void set_space(Box2DSpace* p_space) = 0;
+	_FORCE_INLINE_ Box2DSpace *get_space() const { return space; }
+
+	Box2DCollisionObject();
+	virtual ~Box2DCollisionObject();
 };
 
 #endif // BOX2D_COLLISION_OBJECT_H

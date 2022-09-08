@@ -8,17 +8,22 @@
 
 using namespace godot;
 
+class Box2DCollisionObject;
+
 class Box2DSpace {
 private:
-    RID self;
+	RID self;
 
-    b2World *world = nullptr;
+	b2World *world = nullptr;
 public:
-    _FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
-    _FORCE_INLINE_ RID get_self() const { return self; }
+	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
+	_FORCE_INLINE_ RID get_self() const { return self; }
 
-    Box2DSpace();
-    ~Box2DSpace();
+	void add_object(Box2DCollisionObject *p_object);
+	void remove_object(Box2DCollisionObject *p_object);
+
+	Box2DSpace();
+	~Box2DSpace();
 };
 
 #endif // BOX2D_SPACE_H
