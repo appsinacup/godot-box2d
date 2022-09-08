@@ -16,6 +16,7 @@
 #include <godot_cpp/templates/rid_owner.hpp>
 
 #include "box2d_space.h"
+#include "box2d_body.h"
 
 using namespace godot;
 
@@ -28,6 +29,7 @@ class PhysicsServerBox2D : public PhysicsServer2DExtension
 	HashSet<const Box2DSpace *> active_spaces;
 
 	mutable RID_PtrOwner<Box2DSpace, true> space_owner;
+	mutable RID_PtrOwner<Box2DBody, true> body_owner;
 
 protected:
 	static void _bind_methods() {};
@@ -36,6 +38,10 @@ public:
 	virtual RID _space_create() override;
 	virtual void _space_set_active(const RID &p_space, bool p_active) override;
 	virtual bool _space_is_active(const RID &p_space) const override;
+
+	virtual RID _body_create() override;
+	virtual void _body_set_space(const RID &body, const RID &space) override;
+	virtual RID _body_get_space(const RID &body) const override;
 
 	virtual void _free_rid(const RID &p_rid) override;
 
