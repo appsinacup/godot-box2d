@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="PhysicsServerBox2D demo"
+run/main_scene="res://world.tscn"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 config/icon="res://icon.svg"
 

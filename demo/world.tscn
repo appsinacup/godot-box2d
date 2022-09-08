@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://bkd3jvy83di6t"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0osea"]
+size = Vector2(500, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ruwi5"]
+
+[node name="World" type="Node2D"]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("RectangleShape2D_0osea")
+
+[node name="RigidBody2D" type="RigidBody2D" parent="."]
+position = Vector2(0, -62)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RigidBody2D"]
+shape = SubResource("RectangleShape2D_ruwi5")
+
+[node name="Camera2D" type="Camera2D" parent="RigidBody2D"]
+current = true
