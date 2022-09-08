@@ -15,6 +15,7 @@
 #include <godot_cpp/templates/hash_set.hpp>
 #include <godot_cpp/templates/rid_owner.hpp>
 
+#include "box2d_shape.h"
 #include "box2d_space.h"
 #include "box2d_body.h"
 
@@ -28,13 +29,18 @@ class PhysicsServerBox2D : public PhysicsServer2DExtension
 
 	HashSet<const Box2DSpace *> active_spaces;
 
+	mutable RID_PtrOwner<Box2DShape, true> shape_owner;
 	mutable RID_PtrOwner<Box2DSpace, true> space_owner;
 	mutable RID_PtrOwner<Box2DBody, true> body_owner;
+
+	RID _shape_create(ShapeType p_shape);
 
 protected:
 	static void _bind_methods() {};
 
 public:
+	virtual RID _rectangle_shape_create() override;
+
 	virtual RID _space_create() override;
 	virtual void _space_set_active(const RID &p_space, bool p_active) override;
 	virtual bool _space_is_active(const RID &p_space) const override;

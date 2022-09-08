@@ -2,7 +2,25 @@
 
 #include <godot_cpp/core/class_db.hpp>
 
-#include "box2d_space.h"
+/* SHAPE API */
+
+RID PhysicsServerBox2D::_shape_create(ShapeType p_shape) {
+	Box2DShape *shape = nullptr;
+	switch (p_shape) {
+		case SHAPE_RECTANGLE: {
+			shape = memnew(Box2DShapeRectangle);
+		}
+	}
+
+	RID id = shape_owner.make_rid(shape);
+	shape->set_self(id);
+
+	return id;
+}
+
+RID PhysicsServerBox2D::_rectangle_shape_create() {
+	return _shape_create(SHAPE_RECTANGLE);
+}
 
 /* SPACE API */
 
@@ -71,7 +89,15 @@ RID PhysicsServerBox2D::_body_get_space(const RID &p_body) const {
 /* MISC */
 
 void PhysicsServerBox2D::_free_rid(const RID &p_rid) {
-	if (body_owner.owns(p_rid)) {
+	if (shape_owner.owns(p_rid)) {
+		Box2DShape *shape = shape_owner.get_or_null(p_rid);
+
+		// TODO: remove from owners?
+
+		shape_owner.free(p_rid);
+		memdelete(shape);
+	}
+	else if (body_owner.owns(p_rid)) {
 		Box2DBody *body = body_owner.get_or_null(p_rid);
 
 		body_set_space(p_rid, RID());
