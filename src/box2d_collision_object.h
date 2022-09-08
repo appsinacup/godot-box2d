@@ -28,7 +28,7 @@ public:
     _FORCE_INLINE_ Box2DSpace *get_space() const { return space; }
 
     Box2DCollisionObject();
-    ~Box2DCollisionObject();
+    virtual ~Box2DCollisionObject();
 };
 
 #endif // BOX2D_COLLISION_OBJECT_H
