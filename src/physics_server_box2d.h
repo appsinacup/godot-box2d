@@ -51,6 +51,15 @@ public:
 	virtual void _body_set_space(const RID &body, const RID &space) override;
 	virtual RID _body_get_space(const RID &body) const override;
 
+	virtual void _body_add_shape(const RID &body, const RID &shape, const Transform2D &transform, bool disabled) override;
+	virtual void _body_set_shape(const RID &body, int64_t shape_idx, const RID &shape) override;
+	virtual void _body_set_shape_transform(const RID &body, int64_t shape_idx, const Transform2D &transform) override;
+	virtual int64_t _body_get_shape_count(const RID &body) const override;
+	virtual RID _body_get_shape(const RID &body, int64_t shape_idx) const override;
+	virtual Transform2D _body_get_shape_transform(const RID &body, int64_t shape_idx) const override;
+	virtual void _body_remove_shape(const RID &body, int64_t shape_idx) override;
+	virtual void _body_clear_shapes(const RID &body) override;
+
 	virtual void _free_rid(const RID &p_rid) override;
 
 	virtual void _set_active(bool p_active) override;

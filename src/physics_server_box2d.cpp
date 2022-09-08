@@ -99,6 +99,74 @@ RID PhysicsServerBox2D::_body_get_space(const RID &p_body) const {
 	return space->get_self();
 }
 
+void PhysicsServerBox2D::_body_add_shape(const RID &p_body, const RID &p_shape, const Transform2D &p_transform, bool p_disabled) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	Box2DShape *shape = shape_owner.get_or_null(p_shape);
+	ERR_FAIL_COND(!shape);
+
+	body->add_shape(shape, p_transform, p_disabled);
+}
+
+void PhysicsServerBox2D::_body_set_shape(const RID &p_body, int64_t p_shape_idx, const RID &p_shape) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	Box2DShape *shape = shape_owner.get_or_null(p_shape);
+	ERR_FAIL_COND(!shape);
+	ERR_FAIL_COND(!shape->is_configured());
+
+	body->set_shape(p_shape_idx, shape);
+}
+
+void PhysicsServerBox2D::_body_set_shape_transform(const RID &p_body, int64_t p_shape_idx, const Transform2D &p_transform) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	body->set_shape_transform(p_shape_idx, p_transform);
+}
+
+int64_t PhysicsServerBox2D::_body_get_shape_count(const RID &p_body) const {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, -1);
+
+	return body->get_shape_count();
+}
+
+RID PhysicsServerBox2D::_body_get_shape(const RID &p_body, int64_t p_shape_idx) const {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, RID());
+
+	Box2DShape *shape = body->get_shape(p_shape_idx);
+	ERR_FAIL_COND_V(!shape, RID());
+
+	return shape->get_self();
+}
+
+Transform2D PhysicsServerBox2D::_body_get_shape_transform(const RID &p_body, int64_t p_shape_idx) const {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, Transform2D());
+
+	return body->get_shape_transform(p_shape_idx);
+}
+
+void PhysicsServerBox2D::_body_remove_shape(const RID &p_body, int64_t p_shape_idx) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	body->remove_shape(p_shape_idx);
+}
+
+void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	while (body->get_shape_count()) {
+		body->remove_shape(0);
+	}
+}
+
 /* MISC */
 
 void PhysicsServerBox2D::_free_rid(const RID &p_rid) {
