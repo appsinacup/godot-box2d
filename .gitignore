@@ -1,2 +1,9 @@
 # Godot 4+ specific ignores
 demo/.godot/
+
+# Binaries
+*.os
+*.dblite
+
+# Generated directories with binaries
+demo/bin/
