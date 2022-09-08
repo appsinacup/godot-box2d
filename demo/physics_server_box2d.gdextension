@@ -1,0 +1,18 @@
+[configuration]
+
+entry_symbol = "physics_server_box2d_library_init"
+
+[libraries]
+
+macos.debug = "res://bin/libphysics_server_box2d.macos.debug.framework"
+macos.release = "res://bin/libphysics_server_box2d.macos.release.framework"
+windows.debug.x86_32 = "res://bin/libphysics_server_box2d.windows.debug.x86_32.dll"
+windows.release.x86_32 = "res://bin/libphysics_server_box2d.windows.release.x86_32.dll"
+windows.debug.x86_64 = "res://bin/libphysics_server_box2d.windows.debug.x86_64.dll"
+windows.release.x86_64 = "res://bin/libphysics_server_box2d.windows.release.x86_64.dll"
+linux.debug.x86_64 = "res://bin/libphysics_server_box2d.linux.debug.x86_64.so"
+linux.release.x86_64 = "res://bin/libphysics_server_box2d.linux.release.x86_64.so"
+linux.debug.arm64 = "res://bin/libphysics_server_box2d.linux.debug.arm64.so"
+linux.release.arm64 = "res://bin/libphysics_server_box2d.linux.release.arm64.so"
+linux.debug.rv64 = "res://bin/libphysics_server_box2d.linux.debug.rv64.so"
+linux.release.rv64 = "res://bin/libphysics_server_box2d.linux.release.rv64.so"

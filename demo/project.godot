@@ -13,3 +13,7 @@ config_version=5
 config/name="PhysicsServerBox2D demo"
 config/features=PackedStringArray("4.0", "Vulkan Clustered")
 config/icon="res://icon.svg"
+
+[physics]
+
+2d/physics_engine="Box2D"
