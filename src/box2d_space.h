@@ -19,6 +19,8 @@ public:
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
 	_FORCE_INLINE_ RID get_self() const { return self; }
 
+	b2World *get_b2World() const { return world; }
+
 	void add_object(Box2DCollisionObject *p_object);
 	void remove_object(Box2DCollisionObject *p_object);
 

@@ -208,8 +208,13 @@ void PhysicsServerBox2D::_step(double p_step) {
 	if (!active) {
 		return;
 	}
+	// TODO: _update_shapes();
+
+	int32 velocityIterations = 6;
+	int32 positionIterations = 2;
+
 	for (const Box2DSpace *E : active_spaces) {
-		// TODO: step
+		E->get_b2World()->Step((float)p_step, velocityIterations, positionIterations);
 	}
 }
 
