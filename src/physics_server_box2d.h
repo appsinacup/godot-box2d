@@ -40,6 +40,8 @@ protected:
 
 public:
 	virtual RID _rectangle_shape_create() override;
+	virtual void _shape_set_data(const RID &shape, const Variant &data) override;
+	virtual Variant _shape_get_data(const RID &shape) const override;
 
 	virtual RID _space_create() override;
 	virtual void _space_set_active(const RID &p_space, bool p_active) override;

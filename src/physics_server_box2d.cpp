@@ -22,6 +22,19 @@ RID PhysicsServerBox2D::_rectangle_shape_create() {
 	return _shape_create(SHAPE_RECTANGLE);
 }
 
+void PhysicsServerBox2D::_shape_set_data(const RID &p_shape, const Variant &p_data) {
+	Box2DShape *shape = shape_owner.get_or_null(p_shape);
+	ERR_FAIL_COND(!shape);
+	shape->set_data(p_data);
+};
+
+Variant PhysicsServerBox2D::_shape_get_data(const RID &p_shape) const {
+	const Box2DShape *shape = shape_owner.get_or_null(p_shape);
+	ERR_FAIL_COND_V(!shape, Variant());
+	ERR_FAIL_COND_V(!shape->is_configured(), Variant());
+	return shape->get_data();
+};
+
 /* SPACE API */
 
 RID PhysicsServerBox2D::_space_create() {
