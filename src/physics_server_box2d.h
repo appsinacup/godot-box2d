@@ -12,19 +12,36 @@
 
 #include <godot_cpp/core/binder_common.hpp>
 
+#include <godot_cpp/templates/hash_set.hpp>
+#include <godot_cpp/templates/rid_owner.hpp>
+
+#include "box2d_space.h"
+
 using namespace godot;
 
 class PhysicsServerBox2D : public PhysicsServer2DExtension
 {
 	GDCLASS(PhysicsServerBox2D, PhysicsServer2DExtension);
 
+	bool active;
+
+	HashSet<const Box2DSpace *> active_spaces;
+
+	mutable RID_PtrOwner<Box2DSpace, true> space_owner;
+
 protected:
 	static void _bind_methods() {};
 
 public:
-	virtual void _set_active(bool active) override;
+	virtual RID _space_create() override;
+	virtual void _space_set_active(const RID &p_space, bool p_active) override;
+	virtual bool _space_is_active(const RID &p_space) const override;
+
+	virtual void _free_rid(const RID &p_rid) override;
+
+	virtual void _set_active(bool p_active) override;
 	virtual void _init() override;
-	virtual void _step(double step) override;
+	virtual void _step(double p_step) override;
 	virtual void _sync() override;
 	virtual void _end_sync() override;
 	virtual void _finish() override;
