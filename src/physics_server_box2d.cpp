@@ -197,7 +197,7 @@ PhysicsDirectBodyState2D *PhysicsServerBox2D::_body_get_direct_state(const RID &
 		return nullptr;
 	}
 
-	// TODO: check if space is locked
+	ERR_FAIL_COND_V_MSG(body->get_space()->is_locked(), nullptr, "Body state is inaccessible right now, wait for iteration or physics process notification.");
 
 	return body->get_direct_state();
 }
