@@ -2,6 +2,8 @@
 
 #include <godot_cpp/core/class_db.hpp>
 
+#include "box2d_direct_body_state.h"
+
 /* SHAPE API */
 
 RID PhysicsServerBox2D::_shape_create(ShapeType p_shape) {
@@ -165,6 +167,39 @@ void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
 	while (body->get_shape_count()) {
 		body->remove_shape(0);
 	}
+}
+
+void PhysicsServerBox2D::_body_set_state(const RID &p_body, PhysicsServer2D::BodyState p_state, const Variant &p_value) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	body->set_state(p_state, p_value);
+}
+
+Variant PhysicsServerBox2D::_body_get_state(const RID &p_body, PhysicsServer2D::BodyState p_state) const {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, Variant());
+
+	return body->get_state(p_state);
+}
+
+PhysicsDirectBodyState2D *PhysicsServerBox2D::_body_get_direct_state(const RID &p_body) {
+	// TODO: check if allowed
+
+	if (!body_owner.owns(p_body)) {
+		return nullptr;
+	}
+
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, nullptr);
+
+	if (!body->get_space()) {
+		return nullptr;
+	}
+
+	// TODO: check if space is locked
+
+	return body->get_direct_state();
 }
 
 /* MISC */
