@@ -1,9 +1,49 @@
 #include "box2d_body.h"
+#include "box2d_direct_body_state.h"
+
+Box2DDirectBodyState *Box2DBody::get_direct_state() {
+	if (!direct_state) {
+		direct_state = memnew(Box2DDirectBodyState);
+		direct_state->body = this;
+	}
+	return direct_state;
+}
+
+void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_variant) {
+	switch (p_state) {
+		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
+			// TODO: handle different body modes
+			if (true) // rigid body
+			{
+				Transform2D t = p_variant;
+				t.orthonormalize();
+				new_transform = get_transform(); // used as old to compute motion
+				if (t == new_transform) {
+					break;
+				}
+				_set_transform(t);
+				//_set_inv_transform(get_transform().inverse());
+				//_update_transform_dependent();
+			}
+		} break;
+		// TODO: other cases
+	}
+}
+
+Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
+	switch (p_state) {
+		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
+			return get_transform();
+		}
+		// TODO: other cases
+	}
+	return Variant();
+}
 
 void Box2DBody::set_space(Box2DSpace *p_space) {
-    // TODO: clean up previous space
-    _set_space(p_space);
-    // TODO: inform new space
+	// TODO: clean up previous space
+	_set_space(p_space);
+	// TODO: inform new space
 }
 
 Box2DBody::Box2DBody() {
