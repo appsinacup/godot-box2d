@@ -32,6 +32,15 @@ private:
 	void _update_shapes();
 
 protected:
+	_FORCE_INLINE_ void _set_transform(const Transform2D &p_transform, bool p_update_shapes = true) {
+		transform = p_transform;
+		if (p_update_shapes) {
+			_update_shapes();
+		}
+	}
+
+	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
+
 	void _set_space(Box2DSpace* p_space);
 
 public:
