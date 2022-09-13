@@ -8,6 +8,7 @@
 #include <godot_cpp/variant/callable.hpp>
 #include <godot_cpp/classes/physics_server2d_manager.hpp>
 
+#include "box2d_direct_body_state.h"
 #include "physics_server_box2d.h"
 
 using namespace godot;
@@ -18,6 +19,7 @@ void initialize_physics_server_box2d_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SERVERS) {
 		return;
 	}
+	ClassDB::register_class<Box2DDirectBodyState>();
 	ClassDB::register_class<PhysicsServerBox2D>();
 	ClassDB::register_class<PhysicsServerBox2DFactory>();
 
