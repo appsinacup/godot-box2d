@@ -84,9 +84,21 @@ Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
 }
 
 void Box2DBody::set_space(Box2DSpace *p_space) {
-	// TODO: clean up previous space
+	if (get_space()) {
+		// TODO: clean up more
+		if (active_list.in_list()) {
+			get_space()->body_remove_from_active_list(&active_list);
+		}
+	}
+
 	_set_space(p_space);
-	// TODO: inform new space
+
+	if (get_space()) {
+		// TODO: do more
+		if (active) {
+			get_space()->body_add_to_active_list(&active_list);
+		}
+	}
 }
 
 Box2DBody::Box2DBody() : active_list(this) {
