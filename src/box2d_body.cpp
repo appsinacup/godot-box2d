@@ -67,6 +67,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 				//_set_inv_transform(get_transform().inverse());
 				//_update_transform_dependent();
 			}
+			wakeup();
 		} break;
 		// TODO: other cases
 	}
