@@ -13,9 +13,16 @@ class Box2DDirectBodyState;
 class Box2DBody: public Box2DCollisionObject {
 	Transform2D new_transform;
 
+	typedef void (*BodyStateCallback)(void *p_instance, PhysicsDirectBodyState2D *p_state);
+
+	void *body_state_callback_instance = nullptr;
+	BodyStateCallback body_state_callback = nullptr;
+
 	Box2DDirectBodyState *direct_state = nullptr;
 	friend class Box2DDirectBodyState; // i give up, too many functions to expose
 public:
+	void set_state_sync_callback(void *p_instance, BodyStateCallback p_callback);
+
 	Box2DDirectBodyState *get_direct_state();
 
 	void set_state(PhysicsServer2D::BodyState p_state, const Variant &p_variant);

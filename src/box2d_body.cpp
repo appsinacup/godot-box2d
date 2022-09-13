@@ -1,6 +1,11 @@
 #include "box2d_body.h"
 #include "box2d_direct_body_state.h"
 
+void Box2DBody::set_state_sync_callback(void *p_instance, BodyStateCallback p_callback) {
+	body_state_callback_instance = p_instance;
+	body_state_callback = p_callback;
+}
+
 Box2DDirectBodyState *Box2DBody::get_direct_state() {
 	if (!direct_state) {
 		direct_state = memnew(Box2DDirectBodyState);
