@@ -53,6 +53,9 @@ public:
 	virtual void _body_set_space(const RID &body, const RID &space) override;
 	virtual RID _body_get_space(const RID &body) const override;
 
+	virtual void _body_set_mode(const RID &p_body, BodyMode p_mode) override;
+	virtual BodyMode _body_get_mode(const RID &p_body) const override;
+
 	virtual void _body_add_shape(const RID &body, const RID &shape, const Transform2D &transform, bool disabled) override;
 	virtual void _body_set_shape(const RID &body, int64_t shape_idx, const RID &shape) override;
 	virtual void _body_set_shape_transform(const RID &body, int64_t shape_idx, const Transform2D &transform) override;

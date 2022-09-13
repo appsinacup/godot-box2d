@@ -3,18 +3,22 @@
 
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/variant/rid.hpp>
+#include <godot_cpp/templates/self_list.hpp>
 
 #include <box2d/b2_world.h>
 
 using namespace godot;
 
 class Box2DCollisionObject;
+class Box2DBody;
 
 class Box2DSpace {
 private:
 	RID self;
 
 	b2World *world = nullptr;
+
+	SelfList<Box2DBody>::List active_list;
 
 	bool locked = false;
 
@@ -24,12 +28,16 @@ public:
 
 	b2World *get_b2World() const { return world; }
 
-	bool is_locked() const { return locked; }
-	void lock() { locked = true; }
-	void unlock() { locked = false; }
+	const SelfList<Box2DBody>::List &get_active_body_list() const;
+	void body_add_to_active_list(SelfList<Box2DBody> *p_body);
+	void body_remove_from_active_list(SelfList<Box2DBody> *p_body);
 
 	void add_object(Box2DCollisionObject *p_object);
 	void remove_object(Box2DCollisionObject *p_object);
+
+	bool is_locked() const { return locked; }
+	void lock() { locked = true; }
+	void unlock() { locked = false; }
 
 	Box2DSpace();
 	~Box2DSpace();

@@ -14,6 +14,43 @@ Box2DDirectBodyState *Box2DBody::get_direct_state() {
 	return direct_state;
 }
 
+void Box2DBody::set_active(bool p_active) {
+	if (active == p_active) {
+		return;
+	}
+
+	active = p_active;
+
+	if (active) {
+		if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
+			// Static bodies can't be active.
+			active = false;
+		} else if (get_space()) {
+			get_space()->body_add_to_active_list(&active_list);
+		}
+	} else if (get_space()) {
+		get_space()->body_remove_from_active_list(&active_list);
+	}
+}
+
+void Box2DBody::set_mode(PhysicsServer2D::BodyMode p_mode) {
+	PhysicsServer2D::BodyMode prev = mode;
+	mode = p_mode;
+
+	switch (p_mode) {
+		case PhysicsServer2D::BODY_MODE_RIGID: {
+			// TODO: (inverse) mass calculation?
+			//_set_static(false);
+			set_active(true);
+		} break;
+		// TODO: other cases
+	}
+}
+
+PhysicsServer2D::BodyMode Box2DBody::get_mode() const {
+	return mode;
+}
+
 void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_variant) {
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
@@ -51,7 +88,7 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 	// TODO: inform new space
 }
 
-Box2DBody::Box2DBody() {
+Box2DBody::Box2DBody() : active_list(this) {
 }
 
 Box2DBody::~Box2DBody() {

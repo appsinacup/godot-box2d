@@ -101,6 +101,21 @@ RID PhysicsServerBox2D::_body_get_space(const RID &p_body) const {
 	return space->get_self();
 }
 
+void PhysicsServerBox2D::_body_set_mode(const RID &p_body, BodyMode p_mode) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+	//FLUSH_QUERY_CHECK(body);
+
+	body->set_mode(p_mode);
+};
+
+PhysicsServer2D::BodyMode PhysicsServerBox2D::_body_get_mode(const RID &p_body) const {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, BODY_MODE_STATIC);
+
+	return body->get_mode();
+};
+
 void PhysicsServerBox2D::_body_add_shape(const RID &p_body, const RID &p_shape, const Transform2D &p_transform, bool p_disabled) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);

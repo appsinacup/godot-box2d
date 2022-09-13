@@ -5,6 +5,19 @@
 #include <box2d/b2_body.h>
 
 #include "box2d_collision_object.h"
+#include "box2d_body.h"
+
+const SelfList<Box2DBody>::List &Box2DSpace::get_active_body_list() const {
+	return active_list;
+}
+
+void Box2DSpace::body_add_to_active_list(SelfList<Box2DBody> *p_body) {
+	active_list.add(p_body);
+}
+
+void Box2DSpace::body_remove_from_active_list(SelfList<Box2DBody> *p_body) {
+	active_list.remove(p_body);
+}
 
 void Box2DSpace::add_object(Box2DCollisionObject *p_object) {
 	ERR_FAIL_COND(!p_object);
