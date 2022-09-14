@@ -14,6 +14,7 @@ class Box2DBody: public Box2DCollisionObject {
 	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
 
 	SelfList<Box2DBody> active_list;
+	SelfList<Box2DBody> direct_state_query_list;
 
 	bool active = true;
 
@@ -48,6 +49,9 @@ public:
 	Variant get_state(PhysicsServer2D::BodyState p_state) const;
 
 	void set_space(Box2DSpace* p_space) override;
+
+	void after_step();
+	void call_queries();
 
 	Box2DBody();
 	~Box2DBody();

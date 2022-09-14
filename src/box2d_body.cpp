@@ -89,6 +89,10 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 		if (active_list.in_list()) {
 			get_space()->body_remove_from_active_list(&active_list);
 		}
+		if (direct_state_query_list.in_list()) {
+			get_space()->body_remove_from_state_query_list(&direct_state_query_list);
+		}
+
 	}
 
 	_set_space(p_space);
@@ -101,7 +105,20 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 	}
 }
 
-Box2DBody::Box2DBody() : active_list(this) {
+void Box2DBody::after_step() {
+	_set_transform_from_box2d();
+	if (body_state_callback) {
+		get_space()->body_add_to_state_query_list(&direct_state_query_list);
+	}
+}
+
+void Box2DBody::call_queries() {
+	if (body_state_callback) {
+		(body_state_callback)(body_state_callback_instance, get_direct_state());
+	}
+}
+
+Box2DBody::Box2DBody() : active_list(this), direct_state_query_list(this) {
 }
 
 Box2DBody::~Box2DBody() {

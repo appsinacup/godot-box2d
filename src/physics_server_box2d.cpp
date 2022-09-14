@@ -4,6 +4,9 @@
 
 #include "box2d_direct_body_state.h"
 
+#define FLUSH_QUERY_CHECK(m_object) \
+	ERR_FAIL_COND_MSG(m_object->get_space() && flushing_queries, "Can't change this state while flushing queries. Use call_deferred() or set_deferred() to change monitoring state instead.");
+
 /* SHAPE API */
 
 RID PhysicsServerBox2D::_shape_create(ShapeType p_shape) {
@@ -104,7 +107,7 @@ RID PhysicsServerBox2D::_body_get_space(const RID &p_body) const {
 void PhysicsServerBox2D::_body_set_mode(const RID &p_body, BodyMode p_mode) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
-	//FLUSH_QUERY_CHECK(body);
+	FLUSH_QUERY_CHECK(body);
 
 	body->set_mode(p_mode);
 };
@@ -205,7 +208,7 @@ void PhysicsServerBox2D::_body_set_state_sync_callback(const RID &p_body, Physic
 }
 
 PhysicsDirectBodyState2D *PhysicsServerBox2D::_body_get_direct_state(const RID &p_body) {
-	// TODO: check if allowed
+	ERR_FAIL_COND_V_MSG((using_threads && !doing_sync), nullptr, "Body state is inaccessible right now, wait for iteration or physics process notification.");
 
 	if (!body_owner.owns(p_body)) {
 		return nullptr;
@@ -266,18 +269,32 @@ void PhysicsServerBox2D::_step(double p_step) {
 	}
 	// TODO: _update_shapes();
 
-	int32 velocityIterations = 6;
-	int32 positionIterations = 2;
-
 	for (const Box2DSpace *E : active_spaces) {
-		E->get_b2World()->Step((float)p_step, velocityIterations, positionIterations);
+		E->step((float)p_step);
 	}
 }
 
 void PhysicsServerBox2D::_sync() {
+	doing_sync = true;
+}
+
+void PhysicsServerBox2D::_flush_queries() {
+	if (!active) {
+		return;
+	}
+
+	flushing_queries = true;
+
+	for (const Box2DSpace *E : active_spaces) {
+		Box2DSpace *space = const_cast<Box2DSpace *>(E);
+		space->call_queries();
+	}
+
+	flushing_queries = false;
 }
 
 void PhysicsServerBox2D::_end_sync() {
+	doing_sync = false;
 }
 
 void PhysicsServerBox2D::_finish() {

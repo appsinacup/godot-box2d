@@ -27,7 +27,12 @@ class PhysicsServerBox2D : public PhysicsServer2DExtension
 {
 	GDCLASS(PhysicsServerBox2D, PhysicsServer2DExtension);
 
-	bool active;
+	bool active = true;
+	bool doing_sync = false;
+
+	bool using_threads = false;
+
+	bool flushing_queries = false;
 
 	HashSet<const Box2DSpace *> active_spaces;
 
@@ -78,8 +83,11 @@ public:
 	virtual void _init() override;
 	virtual void _step(double p_step) override;
 	virtual void _sync() override;
+	virtual void _flush_queries() override;
 	virtual void _end_sync() override;
 	virtual void _finish() override;
+
+	virtual bool _is_flushing_queries() const override { return flushing_queries; };
 
 	PhysicsServerBox2D();
 	~PhysicsServerBox2D();

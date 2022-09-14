@@ -30,6 +30,37 @@ void Box2DSpace::remove_object(Box2DCollisionObject *p_object) {
 	world->DestroyBody(p_object->get_b2Body());
 }
 
+void Box2DSpace::body_add_to_state_query_list(SelfList<Box2DBody> *p_body) {
+	state_query_list.add(p_body);
+}
+
+void Box2DSpace::body_remove_from_state_query_list(SelfList<Box2DBody> *p_body) {
+	state_query_list.remove(p_body);
+}
+
+void Box2DSpace::call_queries() {
+	while (state_query_list.first()) {
+		Box2DBody *b = state_query_list.first()->self();
+		state_query_list.remove(state_query_list.first());
+		b->call_queries();
+	}
+	// TODO: areas
+}
+
+void Box2DSpace::step(float p_step) const {
+	const int32 velocityIterations = 10;
+	const int32 positionIterations = 8;
+
+	world->Step(p_step, velocityIterations, positionIterations);
+
+	const SelfList<Box2DBody>::List *body_list = &get_active_body_list();
+	const SelfList<Box2DBody> *b = body_list->first();
+	while (b) {
+		b->self()->after_step();
+		b = b->next();
+	}
+}
+
 Box2DSpace::Box2DSpace() {
 	b2Vec2 gravity(0.0f, -10.0f);
 	world = memnew(b2World(gravity));

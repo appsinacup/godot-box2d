@@ -19,6 +19,7 @@ private:
 	b2World *world = nullptr;
 
 	SelfList<Box2DBody>::List active_list;
+	SelfList<Box2DBody>::List state_query_list;
 
 	bool locked = false;
 
@@ -32,8 +33,14 @@ public:
 	void body_add_to_active_list(SelfList<Box2DBody> *p_body);
 	void body_remove_from_active_list(SelfList<Box2DBody> *p_body);
 
+	void body_add_to_state_query_list(SelfList<Box2DBody> *p_body);
+	void body_remove_from_state_query_list(SelfList<Box2DBody> *p_body);
+
 	void add_object(Box2DCollisionObject *p_object);
 	void remove_object(Box2DCollisionObject *p_object);
+
+	void step(float p_step) const;
+	void call_queries();
 
 	bool is_locked() const { return locked; }
 	void lock() { locked = true; }
