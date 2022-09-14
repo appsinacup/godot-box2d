@@ -18,6 +18,8 @@ public:
 
 	virtual void _set_transform(const Transform2D &p_transform) override;
 	virtual Transform2D _get_transform() const override;
+
+	~Box2DDirectBodyState() override = default;
 };
 
 #endif // BOX2D_DIRECT_BODY_STATE_H
