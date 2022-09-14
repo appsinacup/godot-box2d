@@ -105,4 +105,7 @@ Box2DBody::Box2DBody() : active_list(this) {
 }
 
 Box2DBody::~Box2DBody() {
+	if (direct_state) {
+		memdelete(direct_state);
+	}
 }
