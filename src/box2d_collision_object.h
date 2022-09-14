@@ -12,6 +12,9 @@
 
 using namespace godot;
 
+#define B_TO_G_FACTOR 50.0
+#define G_TO_B_FACTOR 1.0/50.0
+
 class Box2DCollisionObject {
 private:
 	RID self;
@@ -34,9 +37,18 @@ private:
 protected:
 	_FORCE_INLINE_ void _set_transform(const Transform2D &p_transform, bool p_update_shapes = true) {
 		transform = p_transform;
+		if (body) {
+			Vector2 pos = transform.get_origin();
+			body->SetTransform(b2Vec2(pos.x * G_TO_B_FACTOR, pos.y * G_TO_B_FACTOR), transform.get_rotation());
+		}
 		if (p_update_shapes) {
 			_update_shapes();
 		}
+	}
+	_FORCE_INLINE_ void _set_transform_from_box2d() {
+		ERR_FAIL_COND(!body);
+		b2Vec2 pos = body->GetPosition();
+		transform = Transform2D(body->GetAngle(), B_TO_G_FACTOR * Vector2(pos.x, pos.y));
 	}
 
 	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
