@@ -1,9 +1,8 @@
 #include "box2d_body.h"
 #include "box2d_direct_body_state.h"
 
-void Box2DBody::set_state_sync_callback(void *p_instance, BodyStateCallback p_callback) {
-	body_state_callback_instance = p_instance;
-	body_state_callback = p_callback;
+void Box2DBody::set_state_sync_callback(const Callable &p_callable) {
+	body_state_callback = p_callable;
 }
 
 Box2DDirectBodyState *Box2DBody::get_direct_state() {
@@ -107,14 +106,15 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 
 void Box2DBody::after_step() {
 	_set_transform_from_box2d();
-	if (body_state_callback) {
+	if (body_state_callback.is_valid()) {
 		get_space()->body_add_to_state_query_list(&direct_state_query_list);
 	}
 }
 
 void Box2DBody::call_queries() {
-	if (body_state_callback) {
-		(body_state_callback)(body_state_callback_instance, get_direct_state());
+	Variant direct_state = get_direct_state();
+	if (body_state_callback.is_valid()) {
+		body_state_callback.callv(Array::make(direct_state));
 	}
 }
 

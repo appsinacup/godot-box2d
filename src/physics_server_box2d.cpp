@@ -201,10 +201,10 @@ Variant PhysicsServerBox2D::_body_get_state(const RID &p_body, PhysicsServer2D::
 	return body->get_state(p_state);
 }
 
-void PhysicsServerBox2D::_body_set_state_sync_callback(const RID &p_body, PhysicsServer2DExtensionStateCallback *p_callback) {
+void PhysicsServerBox2D::_body_set_state_sync_callback(const RID &p_body, const Callable &p_callable) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
-	body->set_state_sync_callback(p_callback->instance, p_callback->callback);
+	body->set_state_sync_callback(p_callable);
 }
 
 PhysicsDirectBodyState2D *PhysicsServerBox2D::_body_get_direct_state(const RID &p_body) {

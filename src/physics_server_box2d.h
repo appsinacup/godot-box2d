@@ -9,8 +9,8 @@
 
 #include <godot_cpp/classes/physics_server2d.hpp>
 #include <godot_cpp/classes/physics_server2d_extension.hpp>
-#include <godot_cpp/classes/physics_server2d_extension_state_callback.hpp>
 #include <godot_cpp/classes/physics_direct_body_state2d.hpp>
+#include <godot_cpp/variant/callable.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
 
@@ -73,7 +73,7 @@ public:
 	virtual void _body_set_state(const RID &p_body, PhysicsServer2D::BodyState p_state, const Variant &p_value) override;
 	virtual Variant _body_get_state(const RID &p_body, PhysicsServer2D::BodyState p_state) const override;
 
-	virtual void _body_set_state_sync_callback(const RID &p_body, PhysicsServer2DExtensionStateCallback *p_callback) override;
+	virtual void _body_set_state_sync_callback(const RID &p_body, const Callable &p_callable) override;
 
 	virtual PhysicsDirectBodyState2D *_body_get_direct_state(const RID &p_body) override;
 

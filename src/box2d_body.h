@@ -2,6 +2,8 @@
 #define BOX2D_BODY_H
 
 #include <godot_cpp/classes/physics_server2d.hpp>
+#include <godot_cpp/variant/callable.hpp>
+#include <godot_cpp/variant/variant.hpp>
 
 #include "box2d_collision_object.h"
 #include "box2d_space.h"
@@ -20,15 +22,12 @@ class Box2DBody: public Box2DCollisionObject {
 
 	Transform2D new_transform;
 
-	typedef void (*BodyStateCallback)(void *p_instance, PhysicsDirectBodyState2D *p_state);
-
-	void *body_state_callback_instance = nullptr;
-	BodyStateCallback body_state_callback = nullptr;
+	Callable body_state_callback;
 
 	Box2DDirectBodyState *direct_state = nullptr;
 	friend class Box2DDirectBodyState; // i give up, too many functions to expose
 public:
-	void set_state_sync_callback(void *p_instance, BodyStateCallback p_callback);
+	void set_state_sync_callback(const Callable &p_callable);
 
 	Box2DDirectBodyState *get_direct_state();
 
