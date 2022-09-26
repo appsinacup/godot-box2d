@@ -52,8 +52,6 @@ protected:
 		transform = Transform2D(body->GetAngle(), B_TO_G_FACTOR * Vector2(pos.x, pos.y));
 	}
 
-	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
-
 	void _set_space(Box2DSpace* p_space);
 
 public:
@@ -82,6 +80,8 @@ public:
 
 	void remove_shape(Box2DShape *p_shape);
 	void remove_shape(int p_index);
+
+	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
 
 	virtual void set_space(Box2DSpace* p_space) = 0;
 	_FORCE_INLINE_ Box2DSpace *get_space() const { return space; }
