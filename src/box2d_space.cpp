@@ -21,8 +21,7 @@ void Box2DSpace::body_remove_from_active_list(SelfList<Box2DBody> *p_body) {
 
 void Box2DSpace::add_object(Box2DCollisionObject *p_object) {
 	ERR_FAIL_COND(!p_object);
-	b2BodyDef body_def;
-	p_object->set_b2Body(world->CreateBody(&body_def));
+	p_object->set_b2Body(world->CreateBody(p_object->get_b2BodyDef()));
 }
 
 void Box2DSpace::remove_object(Box2DCollisionObject *p_object) {

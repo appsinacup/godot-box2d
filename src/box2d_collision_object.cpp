@@ -105,4 +105,7 @@ Box2DCollisionObject::Box2DCollisionObject() {
 }
 
 Box2DCollisionObject::~Box2DCollisionObject() {
+	if (body_def) {
+		memdelete(body_def);
+	}
 }

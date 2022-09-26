@@ -20,6 +20,7 @@ private:
 	RID self;
 
 	b2Body *body = nullptr;
+	b2BodyDef *body_def = nullptr;
 	Box2DSpace* space = nullptr;
 
 	struct Shape {
@@ -59,6 +60,8 @@ public:
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
 	_FORCE_INLINE_ RID get_self() const { return self; }
 
+	b2BodyDef *get_b2BodyDef() { return body_def; }
+	void set_b2BodyDef(b2BodyDef* p_body_def) { body_def = p_body_def; }
 	b2Body *get_b2Body() { return body; }
 	void set_b2Body(b2Body* p_body) { body = p_body; }
 

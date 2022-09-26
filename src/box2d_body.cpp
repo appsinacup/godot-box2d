@@ -36,14 +36,29 @@ void Box2DBody::set_mode(PhysicsServer2D::BodyMode p_mode) {
 	PhysicsServer2D::BodyMode prev = mode;
 	mode = p_mode;
 
+	b2BodyDef* body_def = memnew(b2BodyDef);
+
 	switch (p_mode) {
-		case PhysicsServer2D::BODY_MODE_RIGID: {
+		case PhysicsServer2D::BODY_MODE_STATIC: {
+			// TODO: other stuff
+			body_def->type = b2_staticBody;
+			set_active(false);
+		}
+		case PhysicsServer2D::BODY_MODE_KINEMATIC: {
+			// TODO: other stuff
+			body_def->type = b2_kinematicBody;
+			set_active(true); // TODO: consider contacts
+		}
+		case PhysicsServer2D::BODY_MODE_RIGID:
+		case PhysicsServer2D::BODY_MODE_RIGID_LINEAR: {
 			// TODO: (inverse) mass calculation?
 			//_set_static(false);
+			body_def->type = b2_dynamicBody;
 			set_active(true);
 		} break;
-		// TODO: other cases
 	}
+
+	set_b2BodyDef(body_def);
 }
 
 PhysicsServer2D::BodyMode Box2DBody::get_mode() const {
