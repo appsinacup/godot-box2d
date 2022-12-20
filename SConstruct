@@ -73,18 +73,16 @@ sources = Glob("src/*.cpp")
 sources.extend([box2d_folder + 'src/' + box2d_src_file for box2d_src_file in box2d_src])
 
 if env["platform"] == "macos":
-    library = env.SharedLibrary(
-        "demo/bin/libphysics_server_box2d.{}.{}.framework/libphysics_server_box2d.{}.{}".format(
-            env["platform"], env["target"], env["platform"], env["target"]
-        ),
-        source=sources,
-    )
+	library = env.SharedLibrary(
+		"demo/bin/libphysics_server_box2d.{}.{}.framework/libphysics_server_box2d.{}.{}".format(
+			env["platform"], env["target"], env["platform"], env["target"]
+		),
+		source=sources,
+	)
 else:
-    library = env.SharedLibrary(
-        "demo/bin/libphysics_server_box2d.{}.{}.{}{}".format(
-            env["platform"], env["target"], env["arch_suffix"], env["SHLIBSUFFIX"]
-        ),
-        source=sources,
-    )
+	library = env.SharedLibrary(
+		"demo/bin/libphysics_server_box2d{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+		source=sources,
+	)
 
 Default(library)

@@ -1,6 +1,6 @@
 #include "register_types.h"
 
-#include <godot/gdnative_interface.h>
+#include <gdextension_interface.h>
 
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
@@ -19,7 +19,7 @@ void initialize_physics_server_box2d_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SERVERS) {
 		return;
 	}
-	ClassDB::register_class<Box2DDirectBodyState>();
+	ClassDB::register_class<Box2DDirectBodyState>(true);
 	ClassDB::register_class<PhysicsServerBox2D>();
 	ClassDB::register_class<PhysicsServerBox2DFactory>();
 
@@ -38,7 +38,7 @@ extern "C" {
 
 // Initialization.
 
-GDNativeBool GDN_EXPORT physics_server_box2d_library_init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
+GDExtensionBool GDE_EXPORT physics_server_box2d_library_init(const GDExtensionInterface *p_interface, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
 	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
 
 	init_obj.register_initializer(initialize_physics_server_box2d_module);
