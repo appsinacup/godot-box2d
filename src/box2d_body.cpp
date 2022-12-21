@@ -68,8 +68,15 @@ PhysicsServer2D::BodyMode Box2DBody::get_mode() const {
 void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_variant) {
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
-			// TODO: handle different body modes
-			if (true) // rigid body
+			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
+				// TODO
+			}
+			else if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
+				_set_transform(p_variant);
+				//_set_inv_transform(get_transform().affine_inverse());
+				//wakeup_neighbours();
+			}
+			else // rigid body
 			{
 				Transform2D t = p_variant;
 				t.orthonormalize();
