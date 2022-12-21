@@ -9,11 +9,9 @@
 
 #include "box2d_shape.h"
 #include "box2d_space.h"
+#include "box2d_type_conversions.h"
 
 using namespace godot;
-
-#define B_TO_G_FACTOR 50.0
-#define G_TO_B_FACTOR 1.0/50.0
 
 class Box2DCollisionObject {
 private:
@@ -38,9 +36,16 @@ private:
 protected:
 	_FORCE_INLINE_ void _set_transform(const Transform2D &p_transform, bool p_update_shapes = true) {
 		transform = p_transform;
+		if (body_def) {
+			godot_to_box2d(transform.get_origin(), body_def->position);
+			body_def->position.y *= -1; // NOTE: flip y
+		}
 		if (body) {
 			Vector2 pos = transform.get_origin();
-			body->SetTransform(b2Vec2(pos.x * G_TO_B_FACTOR, pos.y * G_TO_B_FACTOR), transform.get_rotation());
+			b2Vec2 box2d_pos;
+			godot_to_box2d(pos, box2d_pos);
+			box2d_pos.y *= -1.0; // NOTE: flip y
+			body->SetTransform(box2d_pos, transform.get_rotation());
 		}
 		if (p_update_shapes) {
 			_update_shapes();
@@ -48,8 +53,11 @@ protected:
 	}
 	_FORCE_INLINE_ void _set_transform_from_box2d() {
 		ERR_FAIL_COND(!body);
-		b2Vec2 pos = body->GetPosition();
-		transform = Transform2D(body->GetAngle(), B_TO_G_FACTOR * Vector2(pos.x, pos.y));
+		b2Vec2 box2d_pos = body->GetPosition();
+		Vector2 pos;
+		box2d_to_godot(box2d_pos, pos);
+		pos.y *= -1.0; // NOTE: flip y
+		transform = Transform2D(body->GetAngle(), pos);
 	}
 
 	void _set_space(Box2DSpace* p_space);
