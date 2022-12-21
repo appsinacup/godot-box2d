@@ -12,15 +12,22 @@
 RID PhysicsServerBox2D::_shape_create(ShapeType p_shape) {
 	Box2DShape *shape = nullptr;
 	switch (p_shape) {
+		case SHAPE_CIRCLE: {
+			shape = memnew(Box2DShapeCircle);
+		} break;
 		case SHAPE_RECTANGLE: {
 			shape = memnew(Box2DShapeRectangle);
-		}
+		} break;
 	}
 
 	RID id = shape_owner.make_rid(shape);
 	shape->set_self(id);
 
 	return id;
+}
+
+RID PhysicsServerBox2D::_circle_shape_create() {
+	return _shape_create(SHAPE_CIRCLE);
 }
 
 RID PhysicsServerBox2D::_rectangle_shape_create() {

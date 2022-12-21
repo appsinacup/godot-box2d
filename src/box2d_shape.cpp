@@ -3,6 +3,30 @@
 
 #include <godot_cpp/core/memory.hpp>
 
+#include <box2d/b2_circle_shape.h>
+#include <box2d/b2_polygon_shape.h>
+
+/* CIRCLE SHAPE */
+
+void Box2DShapeCircle::set_data(const Variant &p_data) {
+	ERR_FAIL_COND(p_data.get_type() != Variant::FLOAT);
+	radius = p_data;
+	godot_to_box2d(radius, static_cast<b2CircleShape*>(shape)->m_radius);
+	configured = true;
+}
+
+Variant Box2DShapeCircle::get_data() const {
+	return radius;
+}
+
+Box2DShapeCircle::Box2DShapeCircle() {
+	shape = memnew(b2CircleShape);
+}
+
+Box2DShapeCircle::~Box2DShapeCircle() {
+	memdelete(shape);
+}
+
 /* RECTANGLE SHAPE */
 
 void Box2DShapeRectangle::set_data(const Variant &p_data) {

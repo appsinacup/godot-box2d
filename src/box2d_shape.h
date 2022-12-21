@@ -7,7 +7,6 @@
 #include <godot_cpp/variant/vector2.hpp>
 
 #include <box2d/b2_shape.h>
-#include <box2d/b2_polygon_shape.h>
 
 using namespace godot;
 
@@ -31,6 +30,17 @@ public:
 
 	Box2DShape() {}
 	virtual ~Box2DShape() {};
+};
+
+class Box2DShapeCircle: public Box2DShape {
+	real_t radius;
+
+public:
+	virtual void set_data(const Variant &p_data) override;
+	virtual Variant get_data() const override;
+
+	Box2DShapeCircle();
+	~Box2DShapeCircle();
 };
 
 class Box2DShapeRectangle: public Box2DShape {
