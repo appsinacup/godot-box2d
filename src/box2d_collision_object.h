@@ -38,13 +38,12 @@ protected:
 		transform = p_transform;
 		if (body_def) {
 			godot_to_box2d(transform.get_origin(), body_def->position);
-			body_def->position.y *= -1; // NOTE: flip y
+			body_def->angle = transform.get_rotation();
 		}
 		if (body) {
 			Vector2 pos = transform.get_origin();
 			b2Vec2 box2d_pos;
 			godot_to_box2d(pos, box2d_pos);
-			box2d_pos.y *= -1.0; // NOTE: flip y
 			body->SetTransform(box2d_pos, transform.get_rotation());
 		}
 		if (p_update_shapes) {
@@ -56,7 +55,6 @@ protected:
 		b2Vec2 box2d_pos = body->GetPosition();
 		Vector2 pos;
 		box2d_to_godot(box2d_pos, pos);
-		pos.y *= -1.0; // NOTE: flip y
 		transform = Transform2D(body->GetAngle(), pos);
 	}
 

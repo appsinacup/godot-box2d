@@ -61,7 +61,7 @@ void Box2DSpace::step(float p_step) const {
 }
 
 Box2DSpace::Box2DSpace() {
-	b2Vec2 gravity(0.0f, -10.0f);
+	b2Vec2 gravity(0.0f, 10.0f);
 	world = memnew(b2World(gravity));
 }
 
