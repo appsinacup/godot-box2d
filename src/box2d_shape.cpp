@@ -49,3 +49,36 @@ Box2DShapeRectangle::Box2DShapeRectangle() {
 Box2DShapeRectangle::~Box2DShapeRectangle() {
 	memdelete(shape);
 }
+
+/* CONVEX POLYGON SHAPE */
+
+void Box2DShapeConvexPolygon::set_data(const Variant &p_data) {
+	ERR_FAIL_COND(p_data.get_type() != Variant::PACKED_VECTOR2_ARRAY);
+	PackedVector2Array points_array = p_data;
+	points.resize(points_array.size());
+	b2Vec2 *box2d_points = new b2Vec2[points_array.size()];
+	for (int i = 0; i < points_array.size(); i++) {
+		points.write[i] = points_array[i];
+		godot_to_box2d(points[i], box2d_points[i]);
+	}
+	static_cast<b2PolygonShape*>(shape)->Set(box2d_points, (int)points_array.size());
+	delete[] box2d_points;
+	configured = true;
+}
+
+Variant Box2DShapeConvexPolygon::get_data() const {
+	Array points_array;
+	points_array.resize(points.size());
+	for (int i = 0; i < points.size(); i++) {
+		points_array[i] = points[i];
+	}
+	return points_array;
+}
+
+Box2DShapeConvexPolygon::Box2DShapeConvexPolygon() {
+	shape = memnew(b2PolygonShape);
+}
+
+Box2DShapeConvexPolygon::~Box2DShapeConvexPolygon() {
+	memdelete(shape);
+}

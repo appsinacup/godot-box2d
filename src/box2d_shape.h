@@ -5,6 +5,7 @@
 #include <godot_cpp/variant/rid.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/vector2.hpp>
+#include <godot_cpp/templates/vector.hpp>
 
 #include <box2d/b2_shape.h>
 
@@ -52,6 +53,17 @@ public:
 
 	Box2DShapeRectangle();
 	~Box2DShapeRectangle();
+};
+
+class Box2DShapeConvexPolygon: public Box2DShape {
+	Vector<Vector2> points;
+
+public:
+	virtual void set_data(const Variant &p_data) override;
+	virtual Variant get_data() const override;
+
+	Box2DShapeConvexPolygon();
+	~Box2DShapeConvexPolygon();
 };
 
 #endif // BOX2D_SHAPE_H
