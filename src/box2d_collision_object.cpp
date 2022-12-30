@@ -16,12 +16,11 @@ void Box2DCollisionObject::_update_shapes() {
 		}
 
 		//not quite correct, should compute the next matrix..
-		Transform2D xform = transform * s.xform;
+		//Transform2D xform = transform * s.xform;
 
 		if (!s.fixture) {
 			b2FixtureDef fixture_def;
-			fixture_def.shape = s.shape->get_b2Shape();
-			// TODO: use xform here
+			fixture_def.shape = s.shape->get_transformed_b2Shape(s.xform);
 			fixture_def.density = 1.0f;
 			s.fixture = body->CreateFixture(&fixture_def);
 		}

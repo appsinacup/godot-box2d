@@ -15,19 +15,18 @@ class Box2DShape {
 	RID self;
 
 protected:
-	b2Shape *shape = nullptr;
 	bool configured = false;
 
 public:
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
 	_FORCE_INLINE_ RID get_self() const { return self; }
 
-	b2Shape* get_b2Shape() { return shape; }
-
 	_FORCE_INLINE_ bool is_configured() const { return configured; }
 
 	virtual void set_data(const Variant &p_data) = 0;
 	virtual Variant get_data() const = 0;
+
+	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) = 0;
 
 	Box2DShape() {}
 	virtual ~Box2DShape() {};
@@ -39,6 +38,7 @@ class Box2DShapeCircle: public Box2DShape {
 public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
+	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) override;
 
 	Box2DShapeCircle();
 	~Box2DShapeCircle();
@@ -50,6 +50,7 @@ class Box2DShapeRectangle: public Box2DShape {
 public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
+	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) override;
 
 	Box2DShapeRectangle();
 	~Box2DShapeRectangle();
@@ -61,6 +62,7 @@ class Box2DShapeConvexPolygon: public Box2DShape {
 public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
+	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) override;
 
 	Box2DShapeConvexPolygon();
 	~Box2DShapeConvexPolygon();
