@@ -67,6 +67,9 @@ env.Prepend(CPPPATH=[box2d_folder + folder for folder in box2d_include])
 # - CPPDEFINES are for pre-processor defines
 # - LINKFLAGS are for linking flags
 
+# Make Box2D include "b2_user_settings.h"
+env.Append(CPPDEFINES="B2_USER_SETTINGS")
+
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=["src/"])
 sources = Glob("src/*.cpp")
