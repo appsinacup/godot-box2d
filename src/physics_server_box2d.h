@@ -19,6 +19,7 @@
 
 #include "box2d_shape.h"
 #include "box2d_space.h"
+#include "box2d_area.h"
 #include "box2d_body.h"
 
 using namespace godot;
@@ -38,6 +39,7 @@ class PhysicsServerBox2D : public PhysicsServer2DExtension
 
 	mutable RID_PtrOwner<Box2DShape, true> shape_owner;
 	mutable RID_PtrOwner<Box2DSpace, true> space_owner;
+	mutable RID_PtrOwner<Box2DArea, true> area_owner;
 	mutable RID_PtrOwner<Box2DBody, true> body_owner;
 
 	RID _shape_create(ShapeType p_shape);
@@ -57,6 +59,21 @@ public:
 	virtual RID _space_create() override;
 	virtual void _space_set_active(const RID &p_space, bool p_active) override;
 	virtual bool _space_is_active(const RID &p_space) const override;
+
+	virtual RID _area_create() override;
+	virtual void _area_set_space(const RID &p_area, const RID &p_space) override;
+	virtual RID _area_get_space(const RID &p_area) const override;
+
+	virtual void _area_add_shape(const RID &p_area, const RID &p_shape, const Transform2D &p_transform, bool p_disabled) override;
+	virtual void _area_set_shape(const RID &p_area, int64_t p_shape_idx, const RID &p_shape) override;
+	virtual void _area_set_shape_transform(const RID &p_area, int64_t p_shape_idx, const Transform2D &p_transform) override;
+	virtual int64_t _area_get_shape_count(const RID &p_area) const override;
+	virtual RID _area_get_shape(const RID &p_area, int64_t p_shape_idx) const override;
+	virtual Transform2D _area_get_shape_transform(const RID &p_area, int64_t p_shape_idx) const override;
+	virtual void _area_remove_shape(const RID &p_area, int64_t p_shape_idx) override;
+	virtual void _area_clear_shapes(const RID &p_area) override;
+
+	virtual void _area_set_transform(const RID &p_area, const Transform2D &p_transform) override;
 
 	virtual RID _body_create() override;
 	virtual void _body_set_space(const RID &body, const RID &space) override;

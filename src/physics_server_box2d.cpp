@@ -95,6 +95,118 @@ bool PhysicsServerBox2D::_space_is_active(const RID &p_space) const {
 	return active_spaces.has(space);
 }
 
+/* AREA API */
+
+RID PhysicsServerBox2D::_area_create() {
+	Box2DArea *area = memnew(Box2DArea);
+	RID rid = area_owner.make_rid(area);
+	area->set_self(rid);
+	return rid;
+}
+
+void PhysicsServerBox2D::_area_set_space(const RID &p_area, const RID &p_space) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	Box2DSpace *space = nullptr;
+	if (p_space.is_valid()) {
+		space = space_owner.get_or_null(p_space);
+		ERR_FAIL_COND(!space);
+	}
+
+	if (area->get_space() == space) {
+		return; //pointless
+	}
+
+	//area->clear_constraints();
+	area->set_space(space);
+}
+
+RID PhysicsServerBox2D::_area_get_space(const RID &p_area) const {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND_V(!area, RID());
+
+	Box2DSpace *space = area->get_space();
+	if (!space) {
+		return RID();
+	}
+	return space->get_self();
+}
+
+void PhysicsServerBox2D::_area_add_shape(const RID &p_area, const RID &p_shape, const Transform2D &p_transform, bool p_disabled) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	Box2DShape *shape = shape_owner.get_or_null(p_shape);
+	ERR_FAIL_COND(!shape);
+
+	area->add_shape(shape, p_transform, p_disabled);
+}
+
+void PhysicsServerBox2D::_area_set_shape(const RID &p_area, int64_t p_shape_idx, const RID &p_shape) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	Box2DShape *shape = shape_owner.get_or_null(p_shape);
+	ERR_FAIL_COND(!shape);
+	ERR_FAIL_COND(!shape->is_configured());
+
+	area->set_shape(p_shape_idx, shape);
+}
+
+void PhysicsServerBox2D::_area_set_shape_transform(const RID &p_area, int64_t p_shape_idx, const Transform2D &p_transform) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	area->set_shape_transform(p_shape_idx, p_transform);
+}
+
+int64_t PhysicsServerBox2D::_area_get_shape_count(const RID &p_area) const {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND_V(!area, -1);
+
+	return area->get_shape_count();
+}
+
+RID PhysicsServerBox2D::_area_get_shape(const RID &p_area, int64_t p_shape_idx) const {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND_V(!area, RID());
+
+	Box2DShape *shape = area->get_shape(p_shape_idx);
+	ERR_FAIL_COND_V(!shape, RID());
+
+	return shape->get_self();
+}
+
+Transform2D PhysicsServerBox2D::_area_get_shape_transform(const RID &p_area, int64_t p_shape_idx) const {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND_V(!area, Transform2D());
+
+	return area->get_shape_transform(p_shape_idx);
+}
+
+void PhysicsServerBox2D::_area_remove_shape(const RID &p_area, int64_t p_shape_idx) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	area->remove_shape(p_shape_idx);
+}
+
+void PhysicsServerBox2D::_area_clear_shapes(const RID &p_area) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	while (area->get_shape_count()) {
+		area->remove_shape(0);
+	}
+}
+
+void PhysicsServerBox2D::_area_set_transform(const RID &p_area, const Transform2D &p_transform) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+	area->set_transform(p_transform);
+}
+
 /* BODY API */
 
 RID PhysicsServerBox2D::_body_create() {
