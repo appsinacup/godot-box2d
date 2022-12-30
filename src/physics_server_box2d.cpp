@@ -18,6 +18,9 @@ RID PhysicsServerBox2D::_shape_create(ShapeType p_shape) {
 		case SHAPE_RECTANGLE: {
 			shape = memnew(Box2DShapeRectangle);
 		} break;
+		case SHAPE_CAPSULE: {
+			shape = memnew(Box2DShapeCapsule);
+		} break;
 		case SHAPE_CONVEX_POLYGON: {
 			shape = memnew(Box2DShapeConvexPolygon);
 		} break;
@@ -35,6 +38,10 @@ RID PhysicsServerBox2D::_circle_shape_create() {
 
 RID PhysicsServerBox2D::_rectangle_shape_create() {
 	return _shape_create(SHAPE_RECTANGLE);
+}
+
+RID PhysicsServerBox2D::_capsule_shape_create() {
+	return _shape_create(SHAPE_CAPSULE);
 }
 
 RID PhysicsServerBox2D::_convex_polygon_shape_create() {

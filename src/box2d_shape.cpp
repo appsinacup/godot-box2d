@@ -61,6 +61,60 @@ Box2DShapeRectangle::Box2DShapeRectangle() {
 Box2DShapeRectangle::~Box2DShapeRectangle() {
 }
 
+/* CAPSULE SHAPE */
+
+void Box2DShapeCapsule::set_data(const Variant &p_data) {
+	ERR_FAIL_COND(p_data.get_type() != Variant::ARRAY && p_data.get_type() != Variant::VECTOR2);
+	if (p_data.get_type() == Variant::ARRAY) {
+		Array arr = p_data;
+		ERR_FAIL_COND(arr.size() != 2);
+		height = arr[0];
+		radius = arr[1];
+	} else {
+		Point2 p = p_data;
+		radius = p.x;
+		height = p.y;
+	}
+	configured = true;
+}
+
+Variant Box2DShapeCapsule::get_data() const {
+	return Vector2(height, radius);
+}
+
+int Box2DShapeCapsule::get_b2Shape_count() {
+	// TODO: Better handle the degenerate case when the capsule is a sphere.
+	return 3;
+}
+
+b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, const Transform2D &p_transform) {
+	ERR_FAIL_INDEX_V(p_index, 3, nullptr);
+	if (p_index == 0 || p_index == 1) {
+		b2CircleShape *shape = new b2CircleShape;
+		godot_to_box2d(radius, shape->m_radius);
+		real_t circle_height = (height * 0.5 - radius) * (p_index == 0 ? 1.0 : -1.0);
+		godot_to_box2d(p_transform.xform(Vector2(0, circle_height)), shape->m_p);
+		return shape;
+	}
+	else {
+		b2PolygonShape *shape = new b2PolygonShape;
+		Vector2 half_extents(radius, height * 0.5 - radius);
+		b2Vec2 box2d_half_extents;
+		godot_to_box2d(half_extents, box2d_half_extents);
+		b2Vec2 box2d_origin;
+		godot_to_box2d(p_transform.get_origin(), box2d_origin);
+		shape->SetAsBox(box2d_half_extents.x, box2d_half_extents.y, box2d_origin, p_transform.get_rotation());
+		return shape;
+	}
+	return nullptr; // This line is never reached, but it silences the compiler warning.
+}
+
+Box2DShapeCapsule::Box2DShapeCapsule() {
+}
+
+Box2DShapeCapsule::~Box2DShapeCapsule() {
+}
+
 /* CONVEX POLYGON SHAPE */
 
 void Box2DShapeConvexPolygon::set_data(const Variant &p_data) {

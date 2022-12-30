@@ -34,7 +34,7 @@ public:
 };
 
 class Box2DShapeCircle: public Box2DShape {
-	real_t radius;
+	real_t radius = 0.0;
 
 public:
 	virtual void set_data(const Variant &p_data) override;
@@ -57,6 +57,20 @@ public:
 
 	Box2DShapeRectangle();
 	~Box2DShapeRectangle();
+};
+
+class Box2DShapeCapsule: public Box2DShape {
+	real_t height = 0.0;
+	real_t radius = 0.0;
+
+public:
+	virtual void set_data(const Variant &p_data) override;
+	virtual Variant get_data() const override;
+	virtual int get_b2Shape_count() override;
+	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) override;
+
+	Box2DShapeCapsule();
+	~Box2DShapeCapsule();
 };
 
 class Box2DShapeConvexPolygon: public Box2DShape {
