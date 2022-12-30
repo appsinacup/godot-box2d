@@ -5,6 +5,7 @@
 
 #include <box2d/b2_circle_shape.h>
 #include <box2d/b2_polygon_shape.h>
+#include <box2d/b2_edge_shape.h>
 
 /* CIRCLE SHAPE */
 
@@ -152,4 +153,46 @@ Box2DShapeConvexPolygon::Box2DShapeConvexPolygon() {
 }
 
 Box2DShapeConvexPolygon::~Box2DShapeConvexPolygon() {
+}
+
+/* CONCAVE POLYGON SHAPE */
+
+void Box2DShapeConcavePolygon::set_data(const Variant &p_data) {
+	ERR_FAIL_COND(p_data.get_type() != Variant::PACKED_VECTOR2_ARRAY);
+	PackedVector2Array points_array = p_data;
+	points.resize(points_array.size());
+	for (int i = 0; i < points_array.size(); i++) {
+		points.write[i] = points_array[i];
+	}
+	configured = true;
+}
+
+Variant Box2DShapeConcavePolygon::get_data() const {
+	Array points_array;
+	points_array.resize(points.size());
+	for (int i = 0; i < points.size(); i++) {
+		points_array[i] = points[i];
+	}
+	return points_array;
+}
+
+int Box2DShapeConcavePolygon::get_b2Shape_count() {
+	// TODO: Split into chains instead of having separate edges?
+	return points.size() / 2;
+}
+
+b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, const Transform2D &p_transform) {
+	ERR_FAIL_INDEX_V(p_index, points.size() / 2, nullptr);
+	b2EdgeShape *shape = new b2EdgeShape;
+	b2Vec2 box2d_endpoints[2];
+	godot_to_box2d(p_transform.xform(points[2*p_index]), box2d_endpoints[0]);
+	godot_to_box2d(p_transform.xform(points[2*p_index + 1]), box2d_endpoints[1]);
+	shape->SetTwoSided(box2d_endpoints[0], box2d_endpoints[1]);
+	return shape;
+}
+
+Box2DShapeConcavePolygon::Box2DShapeConcavePolygon() {
+}
+
+Box2DShapeConcavePolygon::~Box2DShapeConcavePolygon() {
 }

@@ -24,6 +24,9 @@ RID PhysicsServerBox2D::_shape_create(ShapeType p_shape) {
 		case SHAPE_CONVEX_POLYGON: {
 			shape = memnew(Box2DShapeConvexPolygon);
 		} break;
+		case SHAPE_CONCAVE_POLYGON: {
+			shape = memnew(Box2DShapeConcavePolygon);
+		} break;
 	}
 
 	RID id = shape_owner.make_rid(shape);
@@ -46,6 +49,10 @@ RID PhysicsServerBox2D::_capsule_shape_create() {
 
 RID PhysicsServerBox2D::_convex_polygon_shape_create() {
 	return _shape_create(SHAPE_CONVEX_POLYGON);
+}
+
+RID PhysicsServerBox2D::_concave_polygon_shape_create() {
+	return _shape_create(SHAPE_CONCAVE_POLYGON);
 }
 
 void PhysicsServerBox2D::_shape_set_data(const RID &p_shape, const Variant &p_data) {

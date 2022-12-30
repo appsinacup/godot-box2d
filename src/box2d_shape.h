@@ -86,4 +86,17 @@ public:
 	~Box2DShapeConvexPolygon();
 };
 
+class Box2DShapeConcavePolygon: public Box2DShape {
+	Vector<Vector2> points;
+
+public:
+	virtual void set_data(const Variant &p_data) override;
+	virtual Variant get_data() const override;
+	virtual int get_b2Shape_count() override;
+	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) override;
+
+	Box2DShapeConcavePolygon();
+	~Box2DShapeConcavePolygon();
+};
+
 #endif // BOX2D_SHAPE_H

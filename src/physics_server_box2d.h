@@ -50,6 +50,7 @@ public:
 	virtual RID _rectangle_shape_create() override;
 	virtual RID _capsule_shape_create() override;
 	virtual RID _convex_polygon_shape_create() override;
+	virtual RID _concave_polygon_shape_create() override;
 	virtual void _shape_set_data(const RID &shape, const Variant &data) override;
 	virtual Variant _shape_get_data(const RID &shape) const override;
 
