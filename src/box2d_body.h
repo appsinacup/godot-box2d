@@ -31,6 +31,12 @@ public:
 
 	Box2DDirectBodyState *get_direct_state();
 
+	void set_linear_velocity(const Vector2 &p_linear_velocity);
+	Vector2 get_linear_velocity() const;
+
+	void set_angular_velocity(real_t p_angular_velocity);
+	real_t get_angular_velocity() const;
+
 	void set_active(bool p_active);
 	_FORCE_INLINE_ bool is_active() const { return active; }
 

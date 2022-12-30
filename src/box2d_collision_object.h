@@ -14,7 +14,7 @@
 using namespace godot;
 
 class Box2DCollisionObject {
-private:
+protected:
 	RID self;
 
 	b2Body *body = nullptr;

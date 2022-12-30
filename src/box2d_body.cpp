@@ -13,6 +13,32 @@ Box2DDirectBodyState *Box2DBody::get_direct_state() {
 	return direct_state;
 }
 
+void Box2DBody::set_linear_velocity(const Vector2 &p_linear_velocity) {
+	b2Vec2 box2d_linear_velocity;
+	godot_to_box2d(p_linear_velocity, box2d_linear_velocity);
+	body->SetLinearVelocity(box2d_linear_velocity);
+}
+
+Vector2 Box2DBody::get_linear_velocity() const {
+	b2Vec2 box2d_linear_velocity = body->GetLinearVelocity();
+	Vector2 linear_velocity;
+	box2d_to_godot(box2d_linear_velocity, linear_velocity);
+	return linear_velocity;
+}
+
+void Box2DBody::set_angular_velocity(real_t p_angular_velocity) {
+	float box2d_angular_velocity;
+	godot_to_box2d(p_angular_velocity, box2d_angular_velocity);
+	body->SetAngularVelocity(box2d_angular_velocity);
+}
+
+real_t Box2DBody::get_angular_velocity() const {
+	float box2d_angular_velocity = body->GetAngularVelocity();
+	real_t angular_velocity;
+	box2d_to_godot(box2d_angular_velocity, angular_velocity);
+	return angular_velocity;
+}
+
 void Box2DBody::set_active(bool p_active) {
 	if (active == p_active) {
 		return;
@@ -90,6 +116,16 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 			}
 			wakeup();
 		} break;
+		case PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY: {
+			Vector2 linear_velocity = p_variant;
+			set_linear_velocity(linear_velocity);
+			wakeup();
+		} break;
+		case PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY: {
+			float angular_velocity = p_variant;
+			set_angular_velocity(angular_velocity);
+			wakeup();
+		} break;
 		// TODO: other cases
 	}
 }
@@ -98,7 +134,13 @@ Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
 			return get_transform();
-		}
+		} break;
+		case PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY: {
+			return get_linear_velocity();
+		} break;
+		case PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY: {
+			return get_angular_velocity();
+		} break;
 		// TODO: other cases
 	}
 	return Variant();
