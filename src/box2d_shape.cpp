@@ -18,7 +18,8 @@ Variant Box2DShapeCircle::get_data() const {
 	return radius;
 }
 
-b2Shape* Box2DShapeCircle::get_transformed_b2Shape(const Transform2D &p_transform) {
+b2Shape *Box2DShapeCircle::get_transformed_b2Shape(int p_index, const Transform2D &p_transform) {
+	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	b2CircleShape *shape = new b2CircleShape;
 	godot_to_box2d(radius, shape->m_radius);
 	godot_to_box2d(p_transform.get_origin(), shape->m_p);
@@ -43,7 +44,8 @@ Variant Box2DShapeRectangle::get_data() const {
 	return half_extents;
 }
 
-b2Shape* Box2DShapeRectangle::get_transformed_b2Shape(const Transform2D &p_transform) {
+b2Shape *Box2DShapeRectangle::get_transformed_b2Shape(int p_index, const Transform2D &p_transform) {
+	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	b2PolygonShape *shape = new b2PolygonShape;
 	b2Vec2 box2d_half_extents;
 	godot_to_box2d(half_extents, box2d_half_extents);
@@ -80,7 +82,8 @@ Variant Box2DShapeConvexPolygon::get_data() const {
 	return points_array;
 }
 
-b2Shape* Box2DShapeConvexPolygon::get_transformed_b2Shape(const Transform2D &p_transform) {
+b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(int p_index, const Transform2D &p_transform) {
+	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	b2PolygonShape *shape = new b2PolygonShape;
 	b2Vec2 *box2d_points = new b2Vec2[points.size()];
 	for (int i = 0; i < points.size(); i++) {

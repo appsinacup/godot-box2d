@@ -24,7 +24,7 @@ private:
 	struct Shape {
 		Transform2D xform;
 		Box2DShape *shape = nullptr;
-		b2Fixture *fixture = nullptr;
+		Vector<b2Fixture*> fixtures;
 		bool disabled = false;
 	};
 

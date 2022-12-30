@@ -26,7 +26,8 @@ public:
 	virtual void set_data(const Variant &p_data) = 0;
 	virtual Variant get_data() const = 0;
 
-	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) = 0;
+	virtual int get_b2Shape_count() = 0;
+	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) = 0;
 
 	Box2DShape() {}
 	virtual ~Box2DShape() {};
@@ -38,7 +39,8 @@ class Box2DShapeCircle: public Box2DShape {
 public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
-	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) override;
+	virtual int get_b2Shape_count() override { return 1; };
+	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) override;
 
 	Box2DShapeCircle();
 	~Box2DShapeCircle();
@@ -50,7 +52,8 @@ class Box2DShapeRectangle: public Box2DShape {
 public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
-	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) override;
+	virtual int get_b2Shape_count() override { return 1; }
+	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) override;
 
 	Box2DShapeRectangle();
 	~Box2DShapeRectangle();
@@ -62,7 +65,8 @@ class Box2DShapeConvexPolygon: public Box2DShape {
 public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
-	virtual b2Shape* get_transformed_b2Shape(const Transform2D &p_transform) override;
+	virtual int get_b2Shape_count() override { return 1; }
+	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) override;
 
 	Box2DShapeConvexPolygon();
 	~Box2DShapeConvexPolygon();

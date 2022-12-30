@@ -18,11 +18,15 @@ void Box2DCollisionObject::_update_shapes() {
 		//not quite correct, should compute the next matrix..
 		//Transform2D xform = transform * s.xform;
 
-		if (!s.fixture) {
-			b2FixtureDef fixture_def;
-			fixture_def.shape = s.shape->get_transformed_b2Shape(s.xform);
-			fixture_def.density = 1.0f;
-			s.fixture = body->CreateFixture(&fixture_def);
+		if (s.fixtures.is_empty()) {
+			int box2d_shape_count = s.shape->get_b2Shape_count();
+			s.fixtures.resize(box2d_shape_count);
+			for (int j = 0; j < box2d_shape_count; j++) {
+				b2FixtureDef fixture_def;
+				fixture_def.shape = s.shape->get_transformed_b2Shape(j, s.xform);
+				fixture_def.density = 1.0f;
+				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
+			}
 		}
 		// TODO: use i?
 
@@ -70,12 +74,12 @@ void Box2DCollisionObject::remove_shape(int p_index) {
 	//remove anything from shape to be erased to end, so subindices don't change
 	ERR_FAIL_INDEX(p_index, shapes.size());
 	for (int i = p_index; i < shapes.size(); i++) {
-		if (!shapes[i].fixture) {
-			continue;
+		Shape &shape = shapes.write[i];
+		for (int j = 0; j < shape.fixtures.size(); j++) {
+			// should never get here with a null owner
+			body->DestroyFixture(shape.fixtures[j]);
+			shape.fixtures.write[j] = nullptr;
 		}
-		//should never get here with a null owner
-		body->DestroyFixture(shapes[i].fixture);
-		shapes.write[i].fixture = nullptr;
 	}
 	shapes.remove_at(p_index);
 
@@ -85,10 +89,10 @@ void Box2DCollisionObject::remove_shape(int p_index) {
 void Box2DCollisionObject::_set_space(Box2DSpace* p_space) {
 	if (space) {
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape &s = shapes.write[i];
-			if (s.fixture) {
-				body->DestroyFixture(shapes[i].fixture);
-				s.fixture = nullptr;
+			Shape &shape = shapes.write[i];
+			for (int j = 0; j < shape.fixtures.size(); j++) {
+				body->DestroyFixture(shape.fixtures[j]);
+				shape.fixtures.write[j] = nullptr;
 			}
 		}
 		space->remove_object(this);
