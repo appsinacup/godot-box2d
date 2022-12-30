@@ -36,10 +36,8 @@ protected:
 protected:
 	_FORCE_INLINE_ void _set_transform(const Transform2D &p_transform, bool p_update_shapes = true) {
 		transform = p_transform;
-		if (body_def) {
-			godot_to_box2d(transform.get_origin(), body_def->position);
-			body_def->angle = transform.get_rotation();
-		}
+		godot_to_box2d(transform.get_origin(), body_def->position);
+		body_def->angle = transform.get_rotation();
 		if (body) {
 			Vector2 pos = transform.get_origin();
 			b2Vec2 box2d_pos;

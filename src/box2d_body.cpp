@@ -62,8 +62,6 @@ void Box2DBody::set_mode(PhysicsServer2D::BodyMode p_mode) {
 	PhysicsServer2D::BodyMode prev = mode;
 	mode = p_mode;
 
-	b2BodyDef* body_def = memnew(b2BodyDef);
-
 	switch (p_mode) {
 		case PhysicsServer2D::BODY_MODE_STATIC: {
 			// TODO: other stuff
@@ -83,8 +81,6 @@ void Box2DBody::set_mode(PhysicsServer2D::BodyMode p_mode) {
 			set_active(true);
 		} break;
 	}
-
-	set_b2BodyDef(body_def);
 }
 
 PhysicsServer2D::BodyMode Box2DBody::get_mode() const {

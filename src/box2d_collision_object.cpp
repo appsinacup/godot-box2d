@@ -105,10 +105,10 @@ void Box2DCollisionObject::_set_space(Box2DSpace* p_space) {
 }
 
 Box2DCollisionObject::Box2DCollisionObject() {
+	body_def = memnew(b2BodyDef);
+	body_def->userData.collision_object = this;
 }
 
 Box2DCollisionObject::~Box2DCollisionObject() {
-	if (body_def) {
-		memdelete(body_def);
-	}
+	memdelete(body_def);
 }

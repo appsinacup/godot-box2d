@@ -18,16 +18,16 @@
 
 // User data
 
-/// You can define this to inject whatever data you want in b2Body
+class Box2DCollisionObject;
+
 struct B2_API b2BodyUserData
 {
 	b2BodyUserData()
 	{
-		pointer = 0;
+		collision_object = nullptr;
 	}
 
-	/// For legacy compatibility
-	uintptr_t pointer;
+	Box2DCollisionObject *collision_object;
 };
 
 /// You can define this to inject whatever data you want in b2Fixture
