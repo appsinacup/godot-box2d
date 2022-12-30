@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <godot_cpp/core/memory.hpp>
+
 // Tunable Constants
 
 /// You can use this to change the length scale used by your game.
@@ -52,22 +54,16 @@ struct B2_API b2JointUserData
 	uintptr_t pointer;
 };
 
-// Memory Allocation
+// Memory Allocation using Godot's functions
 
-/// Default allocation functions
-B2_API void* b2Alloc_Default(int32 size);
-B2_API void b2Free_Default(void* mem);
-
-/// Implement this function to use your own memory allocator.
 inline void* b2Alloc(int32 size)
 {
-	return b2Alloc_Default(size);
+	return memalloc(size);
 }
 
-/// If you implement b2Alloc, you should also implement this function.
 inline void b2Free(void* mem)
 {
-	b2Free_Default(mem);
+	memfree(mem);
 }
 
 /// Default logging function
