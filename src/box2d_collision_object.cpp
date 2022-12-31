@@ -25,6 +25,7 @@ void Box2DCollisionObject::_update_shapes() {
 				b2FixtureDef fixture_def;
 				fixture_def.shape = s.shape->get_transformed_b2Shape(j, s.xform);
 				fixture_def.density = 1.0f;
+				fixture_def.isSensor = type == Type::TYPE_AREA;
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
 			}
 		}
