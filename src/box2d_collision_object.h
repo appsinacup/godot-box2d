@@ -14,7 +14,14 @@
 using namespace godot;
 
 class Box2DCollisionObject {
+public:
+	enum Type {
+		TYPE_AREA,
+		TYPE_BODY
+	};
+
 protected:
+	Type type;
 	RID self;
 
 	b2Body *body = nullptr;
@@ -58,7 +65,11 @@ protected:
 
 	void _set_space(Box2DSpace* p_space);
 
+	Box2DCollisionObject(Type p_type);
+
 public:
+	_FORCE_INLINE_ Type get_type() const { return type; }
+
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
 	_FORCE_INLINE_ RID get_self() const { return self; }
 

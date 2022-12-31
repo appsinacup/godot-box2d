@@ -16,7 +16,9 @@ void Box2DArea::set_space(Box2DSpace* p_space) {
 	_set_space(p_space);
 }
 
-Box2DArea::Box2DArea() {
+Box2DArea::Box2DArea() :
+		Box2DCollisionObject(TYPE_AREA) {
+	//_set_static(true); //areas are not active by default
 }
 
 Box2DArea::~Box2DArea() {

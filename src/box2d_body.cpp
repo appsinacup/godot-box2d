@@ -178,7 +178,10 @@ void Box2DBody::call_queries() {
 	}
 }
 
-Box2DBody::Box2DBody() : active_list(this), direct_state_query_list(this) {
+Box2DBody::Box2DBody() :
+		Box2DCollisionObject(TYPE_BODY),
+		active_list(this),
+		direct_state_query_list(this) {
 }
 
 Box2DBody::~Box2DBody() {
