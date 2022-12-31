@@ -27,16 +27,11 @@ Vector2 Box2DBody::get_linear_velocity() const {
 }
 
 void Box2DBody::set_angular_velocity(real_t p_angular_velocity) {
-	float box2d_angular_velocity;
-	godot_to_box2d(p_angular_velocity, box2d_angular_velocity);
-	body->SetAngularVelocity(box2d_angular_velocity);
+	body->SetAngularVelocity(p_angular_velocity);
 }
 
 real_t Box2DBody::get_angular_velocity() const {
-	float box2d_angular_velocity = body->GetAngularVelocity();
-	real_t angular_velocity;
-	box2d_to_godot(box2d_angular_velocity, angular_velocity);
-	return angular_velocity;
+	return body->GetAngularVelocity();
 }
 
 void Box2DBody::set_active(bool p_active) {
