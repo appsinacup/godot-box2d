@@ -36,31 +36,23 @@ protected:
 	};
 
 	Vector<Shape> shapes;
-	Transform2D transform;
 
 	void _update_shapes();
 
 protected:
 	_FORCE_INLINE_ void _set_transform(const Transform2D &p_transform, bool p_update_shapes = true) {
-		transform = p_transform;
-		godot_to_box2d(transform.get_origin(), body_def->position);
-		body_def->angle = transform.get_rotation();
 		if (body) {
-			Vector2 pos = transform.get_origin();
+			Vector2 pos = p_transform.get_origin();
 			b2Vec2 box2d_pos;
 			godot_to_box2d(pos, box2d_pos);
-			body->SetTransform(box2d_pos, transform.get_rotation());
+			body->SetTransform(box2d_pos, p_transform.get_rotation());
+		} else {
+			godot_to_box2d(p_transform.get_origin(), body_def->position);
+			body_def->angle = p_transform.get_rotation();
 		}
 		if (p_update_shapes) {
 			_update_shapes();
 		}
-	}
-	_FORCE_INLINE_ void _set_transform_from_box2d() {
-		ERR_FAIL_COND(!body);
-		b2Vec2 box2d_pos = body->GetPosition();
-		Vector2 pos;
-		box2d_to_godot(box2d_pos, pos);
-		transform = Transform2D(body->GetAngle(), pos);
 	}
 
 	void _set_space(Box2DSpace* p_space);
@@ -96,7 +88,17 @@ public:
 	void remove_shape(Box2DShape *p_shape);
 	void remove_shape(int p_index);
 
-	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
+	_FORCE_INLINE_ const Transform2D get_transform() const {
+		if (body) {
+			Vector2 position;
+			box2d_to_godot(body->GetPosition(), position);
+			return Transform2D(body->GetAngle(), position);
+		} else {
+			Vector2 position;
+			box2d_to_godot(body_def->position, position);
+			return Transform2D(body_def->angle, position);
+		}
+	}
 
 	virtual void set_space(Box2DSpace* p_space) = 0;
 	_FORCE_INLINE_ Box2DSpace *get_space() const { return space; }

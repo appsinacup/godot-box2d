@@ -88,6 +88,10 @@ void Box2DCollisionObject::remove_shape(int p_index) {
 
 void Box2DCollisionObject::_set_space(Box2DSpace* p_space) {
 	if (space) {
+		// NOTE: Remember the transform by copying it from the b2Body to the b2BodyDef.
+		body_def->position = body->GetPosition();
+		body_def->angle = body->GetAngle();
+
 		for (int i = 0; i < shapes.size(); i++) {
 			Shape &shape = shapes.write[i];
 			for (int j = 0; j < shape.fixtures.size(); j++) {

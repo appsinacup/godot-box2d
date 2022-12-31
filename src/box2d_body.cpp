@@ -165,7 +165,6 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 }
 
 void Box2DBody::after_step() {
-	_set_transform_from_box2d();
 	if (body_state_callback.is_valid()) {
 		get_space()->body_add_to_state_query_list(&direct_state_query_list);
 	}
