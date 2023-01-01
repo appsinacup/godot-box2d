@@ -23,6 +23,7 @@ public:
 protected:
 	Type type;
 	RID self;
+	ObjectID instance_id;
 
 	b2Body *body = nullptr;
 	b2BodyDef *body_def = nullptr;
@@ -64,6 +65,9 @@ public:
 
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
 	_FORCE_INLINE_ RID get_self() const { return self; }
+
+	_FORCE_INLINE_ void set_instance_id(const ObjectID &p_instance_id) { instance_id = p_instance_id; }
+	_FORCE_INLINE_ ObjectID get_instance_id() const { return instance_id; }
 
 	b2BodyDef *get_b2BodyDef() { return body_def; }
 	void set_b2BodyDef(b2BodyDef* p_body_def) { body_def = p_body_def; }

@@ -201,6 +201,22 @@ void PhysicsServerBox2D::_area_clear_shapes(const RID &p_area) {
 	}
 }
 
+void PhysicsServerBox2D::_area_attach_object_instance_id(const RID &p_area, int64_t p_id) {
+	// TODO: handle default area
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	area->set_instance_id(ObjectID(p_id));
+}
+
+int64_t PhysicsServerBox2D::_area_get_object_instance_id(const RID &p_area) const {
+	// TODO: handle default area
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND_V(!area, ObjectID());
+
+	return area->get_instance_id();
+}
+
 void PhysicsServerBox2D::_area_set_transform(const RID &p_area, const Transform2D &p_transform) {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND(!area);
@@ -325,6 +341,20 @@ void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
 	while (body->get_shape_count()) {
 		body->remove_shape(0);
 	}
+}
+
+void PhysicsServerBox2D::_body_attach_object_instance_id(const RID &p_body, int64_t p_id) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	body->set_instance_id(ObjectID(p_id));
+}
+
+int64_t PhysicsServerBox2D::_body_get_object_instance_id(const RID &p_body) const {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, ObjectID());
+
+	return body->get_instance_id();
 }
 
 void PhysicsServerBox2D::_body_set_state(const RID &p_body, PhysicsServer2D::BodyState p_state, const Variant &p_value) {

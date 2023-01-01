@@ -73,6 +73,9 @@ public:
 	virtual void _area_remove_shape(const RID &p_area, int64_t p_shape_idx) override;
 	virtual void _area_clear_shapes(const RID &p_area) override;
 
+	virtual void _area_attach_object_instance_id(const RID &p_area, int64_t p_id) override; // should be ObjectID
+	virtual int64_t _area_get_object_instance_id(const RID &p_area) const override;
+
 	virtual void _area_set_transform(const RID &p_area, const Transform2D &p_transform) override;
 
 	virtual RID _body_create() override;
@@ -90,6 +93,9 @@ public:
 	virtual Transform2D _body_get_shape_transform(const RID &body, int64_t shape_idx) const override;
 	virtual void _body_remove_shape(const RID &body, int64_t shape_idx) override;
 	virtual void _body_clear_shapes(const RID &body) override;
+
+	virtual void _body_attach_object_instance_id(const RID &p_body, int64_t p_id) override; // should be ObjectID
+	virtual int64_t _body_get_object_instance_id(const RID &p_body) const override;
 
 	virtual void _body_set_state(const RID &p_body, PhysicsServer2D::BodyState p_state, const Variant &p_value) override;
 	virtual Variant _body_get_state(const RID &p_body, PhysicsServer2D::BodyState p_state) const override;
