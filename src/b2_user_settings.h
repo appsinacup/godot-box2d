@@ -30,16 +30,16 @@ struct B2_API b2BodyUserData
 	Box2DCollisionObject *collision_object;
 };
 
-/// You can define this to inject whatever data you want in b2Fixture
 struct B2_API b2FixtureUserData
 {
 	b2FixtureUserData()
 	{
-		pointer = 0;
+		shape_idx = 0;
+		box2d_fixture_idx = 0;
 	}
 
-	/// For legacy compatibility
-	uintptr_t pointer;
+	int shape_idx;
+	int box2d_fixture_idx;
 };
 
 /// You can define this to inject whatever data you want in b2Joint

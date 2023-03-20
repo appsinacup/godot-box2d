@@ -26,10 +26,11 @@ void Box2DCollisionObject::_update_shapes() {
 				fixture_def.shape = s.shape->get_transformed_b2Shape(j, s.xform);
 				fixture_def.density = 1.0f;
 				fixture_def.isSensor = type == Type::TYPE_AREA;
+				fixture_def.userData.shape_idx = i;
+				fixture_def.userData.box2d_fixture_idx = j;
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
 			}
 		}
-		// TODO: use i?
 
 		//space->get_broadphase()->move(s.bpid, shape_aabb);
 	}
@@ -81,6 +82,7 @@ void Box2DCollisionObject::remove_shape(int p_index) {
 			body->DestroyFixture(shape.fixtures[j]);
 			shape.fixtures.write[j] = nullptr;
 		}
+		shape.fixtures.clear();
 	}
 	shapes.remove_at(p_index);
 
@@ -99,6 +101,7 @@ void Box2DCollisionObject::_set_space(Box2DSpace* p_space) {
 				body->DestroyFixture(shape.fixtures[j]);
 				shape.fixtures.write[j] = nullptr;
 			}
+			shape.fixtures.clear();
 		}
 		space->remove_object(this);
 	}
