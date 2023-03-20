@@ -77,6 +77,7 @@ public:
 	void add_shape(Box2DShape *p_shape, const Transform2D &p_transform = Transform2D(), bool p_disabled = false);
 	void set_shape(int p_index, Box2DShape *p_shape);
 	void set_shape_transform(int p_index, const Transform2D &p_transform);
+	void set_shape_disabled(int p_index, bool p_disabled);
 
 	_FORCE_INLINE_ int get_shape_count() const { return shapes.size(); }
 	_FORCE_INLINE_ Box2DShape *get_shape(int p_index) const {

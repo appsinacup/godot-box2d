@@ -62,6 +62,29 @@ void Box2DCollisionObject::set_shape_transform(int p_index, const Transform2D &p
 	// TODO: (queue) update
 }
 
+void Box2DCollisionObject::set_shape_disabled(int p_index, bool p_disabled) {
+	ERR_FAIL_INDEX(p_index, shapes.size());
+
+	Shape &shape = shapes.write[p_index];
+	if (shape.disabled == p_disabled) {
+		return;
+	}
+
+	shape.disabled = p_disabled;
+
+	if (!space) {
+		return;
+	}
+
+	for (int j = 0; j < shape.fixtures.size(); j++) {
+		body->DestroyFixture(shape.fixtures[j]);
+		shape.fixtures.write[j] = nullptr;
+	}
+	shape.fixtures.clear();
+
+	// TODO: (queue) update
+}
+
 void Box2DCollisionObject::remove_shape(Box2DShape *p_shape) {
 	//remove a shape, all the times it appears
 	for (int i = 0; i < shapes.size(); i++) {

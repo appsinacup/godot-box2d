@@ -201,6 +201,13 @@ void PhysicsServerBox2D::_area_clear_shapes(const RID &p_area) {
 	}
 }
 
+void PhysicsServerBox2D::_area_set_shape_disabled(const RID &p_area, int32_t p_shape_idx, bool p_disabled) {
+	Box2DArea *area = area_owner.get_or_null(p_area);
+	ERR_FAIL_COND(!area);
+
+	area->set_shape_disabled(p_shape_idx, p_disabled);
+}
+
 void PhysicsServerBox2D::_area_attach_object_instance_id(const RID &p_area, uint64_t p_id) {
 	// TODO: handle default area
 	Box2DArea *area = area_owner.get_or_null(p_area);
@@ -343,6 +350,13 @@ void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
 	}
 }
 
+void PhysicsServerBox2D::_body_set_shape_disabled(const RID &p_body, int32_t p_shape_idx, bool p_disabled) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+
+	body->set_shape_disabled(p_shape_idx, p_disabled);
+}
+
 void PhysicsServerBox2D::_body_attach_object_instance_id(const RID &p_body, uint64_t p_id) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
@@ -406,22 +420,19 @@ void PhysicsServerBox2D::_free_rid(const RID &p_rid) {
 
 		shape_owner.free(p_rid);
 		memdelete(shape);
-	}
-	else if (area_owner.owns(p_rid)) {
+	} else if (area_owner.owns(p_rid)) {
 		Box2DArea *area = area_owner.get_or_null(p_rid);
 		area_set_space(p_rid, RID());
 		area_clear_shapes(p_rid);
 		area_owner.free(p_rid);
 		memdelete(area);
-	}
-	else if (body_owner.owns(p_rid)) {
+	} else if (body_owner.owns(p_rid)) {
 		Box2DBody *body = body_owner.get_or_null(p_rid);
 		body_set_space(p_rid, RID());
 		body_clear_shapes(p_rid);
 		body_owner.free(p_rid);
 		memdelete(body);
-	}
-	else if (space_owner.owns(p_rid)) {
+	} else if (space_owner.owns(p_rid)) {
 		Box2DSpace *space = space_owner.get_or_null(p_rid);
 		// TODO: handle objects, area
 		active_spaces.erase(space);
