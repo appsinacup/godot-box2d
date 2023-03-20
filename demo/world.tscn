@@ -19,4 +19,3 @@ position = Vector2(0, -62)
 shape = SubResource("RectangleShape2D_ruwi5")
 
 [node name="Camera2D" type="Camera2D" parent="RigidBody2D"]
-current = true

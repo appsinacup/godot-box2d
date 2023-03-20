@@ -143,7 +143,7 @@ void PhysicsServerBox2D::_area_add_shape(const RID &p_area, const RID &p_shape, 
 	area->add_shape(shape, p_transform, p_disabled);
 }
 
-void PhysicsServerBox2D::_area_set_shape(const RID &p_area, int64_t p_shape_idx, const RID &p_shape) {
+void PhysicsServerBox2D::_area_set_shape(const RID &p_area, int32_t p_shape_idx, const RID &p_shape) {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND(!area);
 
@@ -154,21 +154,21 @@ void PhysicsServerBox2D::_area_set_shape(const RID &p_area, int64_t p_shape_idx,
 	area->set_shape(p_shape_idx, shape);
 }
 
-void PhysicsServerBox2D::_area_set_shape_transform(const RID &p_area, int64_t p_shape_idx, const Transform2D &p_transform) {
+void PhysicsServerBox2D::_area_set_shape_transform(const RID &p_area, int32_t p_shape_idx, const Transform2D &p_transform) {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND(!area);
 
 	area->set_shape_transform(p_shape_idx, p_transform);
 }
 
-int64_t PhysicsServerBox2D::_area_get_shape_count(const RID &p_area) const {
+int32_t PhysicsServerBox2D::_area_get_shape_count(const RID &p_area) const {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND_V(!area, -1);
 
 	return area->get_shape_count();
 }
 
-RID PhysicsServerBox2D::_area_get_shape(const RID &p_area, int64_t p_shape_idx) const {
+RID PhysicsServerBox2D::_area_get_shape(const RID &p_area, int32_t p_shape_idx) const {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND_V(!area, RID());
 
@@ -178,14 +178,14 @@ RID PhysicsServerBox2D::_area_get_shape(const RID &p_area, int64_t p_shape_idx) 
 	return shape->get_self();
 }
 
-Transform2D PhysicsServerBox2D::_area_get_shape_transform(const RID &p_area, int64_t p_shape_idx) const {
+Transform2D PhysicsServerBox2D::_area_get_shape_transform(const RID &p_area, int32_t p_shape_idx) const {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND_V(!area, Transform2D());
 
 	return area->get_shape_transform(p_shape_idx);
 }
 
-void PhysicsServerBox2D::_area_remove_shape(const RID &p_area, int64_t p_shape_idx) {
+void PhysicsServerBox2D::_area_remove_shape(const RID &p_area, int32_t p_shape_idx) {
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND(!area);
 
@@ -201,7 +201,7 @@ void PhysicsServerBox2D::_area_clear_shapes(const RID &p_area) {
 	}
 }
 
-void PhysicsServerBox2D::_area_attach_object_instance_id(const RID &p_area, int64_t p_id) {
+void PhysicsServerBox2D::_area_attach_object_instance_id(const RID &p_area, uint64_t p_id) {
 	// TODO: handle default area
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND(!area);
@@ -209,7 +209,7 @@ void PhysicsServerBox2D::_area_attach_object_instance_id(const RID &p_area, int6
 	area->set_instance_id(ObjectID(p_id));
 }
 
-int64_t PhysicsServerBox2D::_area_get_object_instance_id(const RID &p_area) const {
+uint64_t PhysicsServerBox2D::_area_get_object_instance_id(const RID &p_area) const {
 	// TODO: handle default area
 	Box2DArea *area = area_owner.get_or_null(p_area);
 	ERR_FAIL_COND_V(!area, ObjectID());
@@ -285,7 +285,7 @@ void PhysicsServerBox2D::_body_add_shape(const RID &p_body, const RID &p_shape, 
 	body->add_shape(shape, p_transform, p_disabled);
 }
 
-void PhysicsServerBox2D::_body_set_shape(const RID &p_body, int64_t p_shape_idx, const RID &p_shape) {
+void PhysicsServerBox2D::_body_set_shape(const RID &p_body, int32_t p_shape_idx, const RID &p_shape) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
 
@@ -296,21 +296,21 @@ void PhysicsServerBox2D::_body_set_shape(const RID &p_body, int64_t p_shape_idx,
 	body->set_shape(p_shape_idx, shape);
 }
 
-void PhysicsServerBox2D::_body_set_shape_transform(const RID &p_body, int64_t p_shape_idx, const Transform2D &p_transform) {
+void PhysicsServerBox2D::_body_set_shape_transform(const RID &p_body, int32_t p_shape_idx, const Transform2D &p_transform) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
 
 	body->set_shape_transform(p_shape_idx, p_transform);
 }
 
-int64_t PhysicsServerBox2D::_body_get_shape_count(const RID &p_body) const {
+int32_t PhysicsServerBox2D::_body_get_shape_count(const RID &p_body) const {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND_V(!body, -1);
 
 	return body->get_shape_count();
 }
 
-RID PhysicsServerBox2D::_body_get_shape(const RID &p_body, int64_t p_shape_idx) const {
+RID PhysicsServerBox2D::_body_get_shape(const RID &p_body, int32_t p_shape_idx) const {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND_V(!body, RID());
 
@@ -320,14 +320,14 @@ RID PhysicsServerBox2D::_body_get_shape(const RID &p_body, int64_t p_shape_idx) 
 	return shape->get_self();
 }
 
-Transform2D PhysicsServerBox2D::_body_get_shape_transform(const RID &p_body, int64_t p_shape_idx) const {
+Transform2D PhysicsServerBox2D::_body_get_shape_transform(const RID &p_body, int32_t p_shape_idx) const {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND_V(!body, Transform2D());
 
 	return body->get_shape_transform(p_shape_idx);
 }
 
-void PhysicsServerBox2D::_body_remove_shape(const RID &p_body, int64_t p_shape_idx) {
+void PhysicsServerBox2D::_body_remove_shape(const RID &p_body, int32_t p_shape_idx) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
 
@@ -343,14 +343,14 @@ void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
 	}
 }
 
-void PhysicsServerBox2D::_body_attach_object_instance_id(const RID &p_body, int64_t p_id) {
+void PhysicsServerBox2D::_body_attach_object_instance_id(const RID &p_body, uint64_t p_id) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
 
 	body->set_instance_id(ObjectID(p_id));
 }
 
-int64_t PhysicsServerBox2D::_body_get_object_instance_id(const RID &p_body) const {
+uint64_t PhysicsServerBox2D::_body_get_object_instance_id(const RID &p_body) const {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND_V(!body, ObjectID());
 

@@ -65,16 +65,16 @@ public:
 	virtual RID _area_get_space(const RID &p_area) const override;
 
 	virtual void _area_add_shape(const RID &p_area, const RID &p_shape, const Transform2D &p_transform, bool p_disabled) override;
-	virtual void _area_set_shape(const RID &p_area, int64_t p_shape_idx, const RID &p_shape) override;
-	virtual void _area_set_shape_transform(const RID &p_area, int64_t p_shape_idx, const Transform2D &p_transform) override;
-	virtual int64_t _area_get_shape_count(const RID &p_area) const override;
-	virtual RID _area_get_shape(const RID &p_area, int64_t p_shape_idx) const override;
-	virtual Transform2D _area_get_shape_transform(const RID &p_area, int64_t p_shape_idx) const override;
-	virtual void _area_remove_shape(const RID &p_area, int64_t p_shape_idx) override;
+	virtual void _area_set_shape(const RID &p_area, int32_t p_shape_idx, const RID &p_shape) override;
+	virtual void _area_set_shape_transform(const RID &p_area, int32_t p_shape_idx, const Transform2D &p_transform) override;
+	virtual int32_t _area_get_shape_count(const RID &p_area) const override;
+	virtual RID _area_get_shape(const RID &p_area, int32_t p_shape_idx) const override;
+	virtual Transform2D _area_get_shape_transform(const RID &p_area, int32_t p_shape_idx) const override;
+	virtual void _area_remove_shape(const RID &p_area, int32_t p_shape_idx) override;
 	virtual void _area_clear_shapes(const RID &p_area) override;
 
-	virtual void _area_attach_object_instance_id(const RID &p_area, int64_t p_id) override; // should be ObjectID
-	virtual int64_t _area_get_object_instance_id(const RID &p_area) const override;
+	virtual void _area_attach_object_instance_id(const RID &p_area, uint64_t p_id) override; // should be ObjectID
+	virtual uint64_t _area_get_object_instance_id(const RID &p_area) const override;
 
 	virtual void _area_set_transform(const RID &p_area, const Transform2D &p_transform) override;
 
@@ -86,16 +86,16 @@ public:
 	virtual BodyMode _body_get_mode(const RID &p_body) const override;
 
 	virtual void _body_add_shape(const RID &body, const RID &shape, const Transform2D &transform, bool disabled) override;
-	virtual void _body_set_shape(const RID &body, int64_t shape_idx, const RID &shape) override;
-	virtual void _body_set_shape_transform(const RID &body, int64_t shape_idx, const Transform2D &transform) override;
-	virtual int64_t _body_get_shape_count(const RID &body) const override;
-	virtual RID _body_get_shape(const RID &body, int64_t shape_idx) const override;
-	virtual Transform2D _body_get_shape_transform(const RID &body, int64_t shape_idx) const override;
-	virtual void _body_remove_shape(const RID &body, int64_t shape_idx) override;
+	virtual void _body_set_shape(const RID &body, int32_t shape_idx, const RID &shape) override;
+	virtual void _body_set_shape_transform(const RID &body, int32_t shape_idx, const Transform2D &transform) override;
+	virtual int32_t _body_get_shape_count(const RID &body) const override;
+	virtual RID _body_get_shape(const RID &body, int32_t shape_idx) const override;
+	virtual Transform2D _body_get_shape_transform(const RID &body, int32_t shape_idx) const override;
+	virtual void _body_remove_shape(const RID &body, int32_t shape_idx) override;
 	virtual void _body_clear_shapes(const RID &body) override;
 
-	virtual void _body_attach_object_instance_id(const RID &p_body, int64_t p_id) override; // should be ObjectID
-	virtual int64_t _body_get_object_instance_id(const RID &p_body) const override;
+	virtual void _body_attach_object_instance_id(const RID &p_body, uint64_t p_id) override; // should be ObjectID
+	virtual uint64_t _body_get_object_instance_id(const RID &p_body) const override;
 
 	virtual void _body_set_state(const RID &p_body, PhysicsServer2D::BodyState p_state, const Variant &p_value) override;
 	virtual Variant _body_get_state(const RID &p_body, PhysicsServer2D::BodyState p_state) const override;
