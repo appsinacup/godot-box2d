@@ -25,6 +25,9 @@ public:
 	virtual void _set_transform(const Transform2D &p_transform) override;
 	virtual Transform2D _get_transform() const override;
 
+	virtual void _set_sleep_state(bool p_enable) override;
+	virtual bool _is_sleeping() const override;
+
 	~Box2DDirectBodyState() override = default;
 };
 

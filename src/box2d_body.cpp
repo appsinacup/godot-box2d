@@ -16,7 +16,11 @@ Box2DDirectBodyState *Box2DBody::get_direct_state() {
 void Box2DBody::set_linear_velocity(const Vector2 &p_linear_velocity) {
 	b2Vec2 box2d_linear_velocity;
 	godot_to_box2d(p_linear_velocity, box2d_linear_velocity);
-	body->SetLinearVelocity(box2d_linear_velocity);
+	if (body) {
+		body->SetLinearVelocity(box2d_linear_velocity);
+	} else {
+		body_def->linearVelocity = box2d_linear_velocity;
+	}
 }
 
 Vector2 Box2DBody::get_linear_velocity() const {
@@ -27,7 +31,11 @@ Vector2 Box2DBody::get_linear_velocity() const {
 }
 
 void Box2DBody::set_angular_velocity(real_t p_angular_velocity) {
-	body->SetAngularVelocity(p_angular_velocity);
+	if (body) {
+		body->SetAngularVelocity(p_angular_velocity);
+	} else {
+		body_def->angularVelocity = p_angular_velocity;
+	}
 }
 
 real_t Box2DBody::get_angular_velocity() const {
@@ -46,9 +54,15 @@ void Box2DBody::set_active(bool p_active) {
 			// Static bodies can't be active.
 			active = false;
 		} else if (get_space()) {
+			if (body) {
+				body->SetAwake(true);
+			}
 			get_space()->body_add_to_active_list(&active_list);
 		}
 	} else if (get_space()) {
+		if (body) {
+			body->SetAwake(false);
+		}
 		get_space()->body_remove_from_active_list(&active_list);
 	}
 }
@@ -87,14 +101,11 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
 			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
 				// TODO
-			}
-			else if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
+			} else if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
 				_set_transform(p_variant);
 				//_set_inv_transform(get_transform().affine_inverse());
 				//wakeup_neighbours();
-			}
-			else // rigid body
-			{
+			} else { // rigid body
 				Transform2D t = p_variant;
 				t.orthonormalize();
 				new_transform = get_transform(); // used as old to compute motion
@@ -117,7 +128,27 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 			set_angular_velocity(angular_velocity);
 			wakeup();
 		} break;
-		// TODO: other cases
+		case PhysicsServer2D::BODY_STATE_SLEEPING: {
+			if (mode == PhysicsServer2D::BODY_MODE_STATIC || mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
+				break;
+			}
+			bool do_sleep = p_variant;
+			if (do_sleep) {
+				set_linear_velocity(Vector2());
+				set_angular_velocity(0);
+				set_active(false);
+			} else {
+				if (mode != PhysicsServer2D::BODY_MODE_STATIC) {
+					set_active(true);
+				}
+			}
+		} break;
+		case PhysicsServer2D::BODY_STATE_CAN_SLEEP: {
+			can_sleep = p_variant;
+			if (mode >= PhysicsServer2D::BODY_MODE_RIGID && !active && !can_sleep) {
+				set_active(true);
+			}
+		} break;
 	}
 }
 
@@ -132,7 +163,12 @@ Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
 		case PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY: {
 			return get_angular_velocity();
 		} break;
-		// TODO: other cases
+		case PhysicsServer2D::BODY_STATE_SLEEPING: {
+			return !is_active();
+		}
+		case PhysicsServer2D::BODY_STATE_CAN_SLEEP: {
+			return can_sleep;
+		}
 	}
 	return Variant();
 }
@@ -146,13 +182,15 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 		if (direct_state_query_list.in_list()) {
 			get_space()->body_remove_from_state_query_list(&direct_state_query_list);
 		}
-
 	}
 
 	_set_space(p_space);
 
 	if (get_space()) {
 		// TODO: do more
+		if (body) {
+			body->SetAwake(active);
+		}
 		if (active) {
 			get_space()->body_add_to_active_list(&active_list);
 		}

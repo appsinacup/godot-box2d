@@ -31,3 +31,11 @@ Transform2D Box2DDirectBodyState::_get_transform() const {
 	ERR_FAIL_NULL_V(body, Transform2D());
 	return body->get_transform();
 }
+
+void Box2DDirectBodyState::_set_sleep_state(bool p_enable) {
+	body->set_active(!p_enable);
+}
+
+bool Box2DDirectBodyState::_is_sleeping() const {
+	return !body->is_active();
+}

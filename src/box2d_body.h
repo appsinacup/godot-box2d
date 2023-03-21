@@ -19,6 +19,7 @@ class Box2DBody: public Box2DCollisionObject {
 	SelfList<Box2DBody> direct_state_query_list;
 
 	bool active = true;
+	bool can_sleep = true;
 
 	Transform2D new_transform;
 
