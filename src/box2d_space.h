@@ -2,8 +2,8 @@
 #define BOX2D_SPACE_H
 
 #include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/variant/rid.hpp>
 #include <godot_cpp/templates/self_list.hpp>
+#include <godot_cpp/variant/rid.hpp>
 
 #include <box2d/b2_world.h>
 

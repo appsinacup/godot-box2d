@@ -10,12 +10,11 @@
 
 using namespace godot;
 
-class Box2DArea: public Box2DCollisionObject {
-
+class Box2DArea : public Box2DCollisionObject {
 public:
 	void set_transform(const Transform2D &p_transform);
 
-	void set_space(Box2DSpace* p_space) override;
+	void set_space(Box2DSpace *p_space) override;
 
 	Box2DArea();
 	~Box2DArea();

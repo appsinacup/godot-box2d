@@ -12,7 +12,7 @@ using namespace godot;
 
 class Box2DDirectBodyState;
 
-class Box2DBody: public Box2DCollisionObject {
+class Box2DBody : public Box2DCollisionObject {
 	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
 
 	SelfList<Box2DBody> active_list;
@@ -54,7 +54,7 @@ public:
 	void set_state(PhysicsServer2D::BodyState p_state, const Variant &p_variant);
 	Variant get_state(PhysicsServer2D::BodyState p_state) const;
 
-	void set_space(Box2DSpace* p_space) override;
+	void set_space(Box2DSpace *p_space) override;
 
 	void after_step();
 	void call_queries();

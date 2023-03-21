@@ -112,7 +112,7 @@ void Box2DCollisionObject::remove_shape(int p_index) {
 	// TODO: (queue) update
 }
 
-void Box2DCollisionObject::_set_space(Box2DSpace* p_space) {
+void Box2DCollisionObject::_set_space(Box2DSpace *p_space) {
 	if (space) {
 		// NOTE: Remember the transform by copying it from the b2Body to the b2BodyDef.
 		body_def->position = body->GetPosition();

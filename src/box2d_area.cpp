@@ -7,7 +7,7 @@ void Box2DArea::set_transform(const Transform2D &p_transform) {
 	// _set_inv_transform(p_transform.affine_inverse());
 }
 
-void Box2DArea::set_space(Box2DSpace* p_space) {
+void Box2DArea::set_space(Box2DSpace *p_space) {
 	// TODO: remove from monitor query list, remove from moved list?
 
 	//monitored_bodies.clear();

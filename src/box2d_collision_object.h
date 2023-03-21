@@ -2,8 +2,8 @@
 #define BOX2D_COLLISION_OBJECT_H
 
 #include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/variant/rid.hpp>
 #include <godot_cpp/templates/vector.hpp>
+#include <godot_cpp/variant/rid.hpp>
 
 #include <box2d/b2_body.h>
 
@@ -27,12 +27,12 @@ protected:
 
 	b2Body *body = nullptr;
 	b2BodyDef *body_def = nullptr;
-	Box2DSpace* space = nullptr;
+	Box2DSpace *space = nullptr;
 
 	struct Shape {
 		Transform2D xform;
 		Box2DShape *shape = nullptr;
-		Vector<b2Fixture*> fixtures;
+		Vector<b2Fixture *> fixtures;
 		bool disabled = false;
 	};
 
@@ -56,7 +56,7 @@ protected:
 		}
 	}
 
-	void _set_space(Box2DSpace* p_space);
+	void _set_space(Box2DSpace *p_space);
 
 	Box2DCollisionObject(Type p_type);
 
@@ -70,9 +70,9 @@ public:
 	_FORCE_INLINE_ ObjectID get_instance_id() const { return instance_id; }
 
 	b2BodyDef *get_b2BodyDef() { return body_def; }
-	void set_b2BodyDef(b2BodyDef* p_body_def) { body_def = p_body_def; }
+	void set_b2BodyDef(b2BodyDef *p_body_def) { body_def = p_body_def; }
 	b2Body *get_b2Body() { return body; }
-	void set_b2Body(b2Body* p_body) { body = p_body; }
+	void set_b2Body(b2Body *p_body) { body = p_body; }
 
 	void add_shape(Box2DShape *p_shape, const Transform2D &p_transform = Transform2D(), bool p_disabled = false);
 	void set_shape(int p_index, Box2DShape *p_shape);
@@ -105,7 +105,7 @@ public:
 		}
 	}
 
-	virtual void set_space(Box2DSpace* p_space) = 0;
+	virtual void set_space(Box2DSpace *p_space) = 0;
 	_FORCE_INLINE_ Box2DSpace *get_space() const { return space; }
 
 	Box2DCollisionObject();

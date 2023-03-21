@@ -2,10 +2,10 @@
 #define BOX2D_SHAPE_H
 
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/variant/rid.hpp>
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/vector2.hpp>
-#include <godot_cpp/templates/vector.hpp>
 
 #include <box2d/b2_shape.h>
 
@@ -30,10 +30,10 @@ public:
 	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform) = 0;
 
 	Box2DShape() {}
-	virtual ~Box2DShape() {};
+	virtual ~Box2DShape(){};
 };
 
-class Box2DShapeCircle: public Box2DShape {
+class Box2DShapeCircle : public Box2DShape {
 	real_t radius = 0.0;
 
 public:
@@ -46,7 +46,7 @@ public:
 	~Box2DShapeCircle();
 };
 
-class Box2DShapeRectangle: public Box2DShape {
+class Box2DShapeRectangle : public Box2DShape {
 	Vector2 half_extents;
 
 public:
@@ -59,7 +59,7 @@ public:
 	~Box2DShapeRectangle();
 };
 
-class Box2DShapeCapsule: public Box2DShape {
+class Box2DShapeCapsule : public Box2DShape {
 	real_t height = 0.0;
 	real_t radius = 0.0;
 
@@ -73,7 +73,7 @@ public:
 	~Box2DShapeCapsule();
 };
 
-class Box2DShapeConvexPolygon: public Box2DShape {
+class Box2DShapeConvexPolygon : public Box2DShape {
 	Vector<Vector2> points;
 
 public:
@@ -86,7 +86,7 @@ public:
 	~Box2DShapeConvexPolygon();
 };
 
-class Box2DShapeConcavePolygon: public Box2DShape {
+class Box2DShapeConcavePolygon : public Box2DShape {
 	Vector<Vector2> points;
 
 public:

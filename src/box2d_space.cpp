@@ -4,8 +4,8 @@
 
 #include <box2d/b2_body.h>
 
-#include "box2d_collision_object.h"
 #include "box2d_body.h"
+#include "box2d_collision_object.h"
 
 const SelfList<Box2DBody>::List &Box2DSpace::get_active_body_list() const {
 	return active_list;

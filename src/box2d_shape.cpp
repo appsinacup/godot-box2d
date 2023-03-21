@@ -4,8 +4,8 @@
 #include <godot_cpp/core/memory.hpp>
 
 #include <box2d/b2_circle_shape.h>
-#include <box2d/b2_polygon_shape.h>
 #include <box2d/b2_edge_shape.h>
+#include <box2d/b2_polygon_shape.h>
 
 /* CIRCLE SHAPE */
 
@@ -96,8 +96,7 @@ b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, const Transform
 		real_t circle_height = (height * 0.5 - radius) * (p_index == 0 ? 1.0 : -1.0);
 		godot_to_box2d(p_transform.xform(Vector2(0, circle_height)), shape->m_p);
 		return shape;
-	}
-	else {
+	} else {
 		b2PolygonShape *shape = memnew(b2PolygonShape);
 		Vector2 half_extents(radius, height * 0.5 - radius);
 		b2Vec2 box2d_half_extents;
@@ -185,8 +184,8 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, const Tr
 	ERR_FAIL_INDEX_V(p_index, points.size() / 2, nullptr);
 	b2EdgeShape *shape = memnew(b2EdgeShape);
 	b2Vec2 box2d_endpoints[2];
-	godot_to_box2d(p_transform.xform(points[2*p_index]), box2d_endpoints[0]);
-	godot_to_box2d(p_transform.xform(points[2*p_index + 1]), box2d_endpoints[1]);
+	godot_to_box2d(p_transform.xform(points[2 * p_index]), box2d_endpoints[0]);
+	godot_to_box2d(p_transform.xform(points[2 * p_index + 1]), box2d_endpoints[1]);
 	shape->SetTwoSided(box2d_endpoints[0], box2d_endpoints[1]);
 	return shape;
 }

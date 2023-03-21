@@ -7,9 +7,9 @@
 #include <windows.h>
 #endif
 
+#include <godot_cpp/classes/physics_direct_body_state2d.hpp>
 #include <godot_cpp/classes/physics_server2d.hpp>
 #include <godot_cpp/classes/physics_server2d_extension.hpp>
-#include <godot_cpp/classes/physics_direct_body_state2d.hpp>
 #include <godot_cpp/variant/callable.hpp>
 
 #include <godot_cpp/core/binder_common.hpp>
@@ -17,15 +17,14 @@
 #include <godot_cpp/templates/hash_set.hpp>
 #include <godot_cpp/templates/rid_owner.hpp>
 
-#include "box2d_shape.h"
-#include "box2d_space.h"
 #include "box2d_area.h"
 #include "box2d_body.h"
+#include "box2d_shape.h"
+#include "box2d_space.h"
 
 using namespace godot;
 
-class PhysicsServerBox2D : public PhysicsServer2DExtension
-{
+class PhysicsServerBox2D : public PhysicsServer2DExtension {
 	GDCLASS(PhysicsServerBox2D, PhysicsServer2DExtension);
 
 	bool active = true;
@@ -45,7 +44,7 @@ class PhysicsServerBox2D : public PhysicsServer2DExtension
 	RID _shape_create(ShapeType p_shape);
 
 protected:
-	static void _bind_methods() {};
+	static void _bind_methods(){};
 
 public:
 	virtual RID _circle_shape_create() override;
@@ -124,7 +123,7 @@ public:
 	~PhysicsServerBox2D();
 };
 
-class PhysicsServerBox2DFactory: public Object {
+class PhysicsServerBox2DFactory : public Object {
 	GDCLASS(PhysicsServerBox2DFactory, Object);
 
 protected:
@@ -137,7 +136,6 @@ public:
 		PhysicsServer2D *physics_server_2d = memnew(PhysicsServerBox2D());
 		return physics_server_2d;
 	}
-
 };
 
 #endif // ! PHYSICS_SERVER_BOX2D_H

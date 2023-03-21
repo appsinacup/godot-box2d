@@ -14,26 +14,22 @@
 
 /// The maximum number of vertices on a convex polygon. You cannot increase
 /// this too much because b2BlockAllocator has a maximum object size.
-#define b2_maxPolygonVertices	8
+#define b2_maxPolygonVertices 8
 
 // User data
 
 class Box2DCollisionObject;
 
-struct B2_API b2BodyUserData
-{
-	b2BodyUserData()
-	{
+struct B2_API b2BodyUserData {
+	b2BodyUserData() {
 		collision_object = nullptr;
 	}
 
 	Box2DCollisionObject *collision_object;
 };
 
-struct B2_API b2FixtureUserData
-{
-	b2FixtureUserData()
-	{
+struct B2_API b2FixtureUserData {
+	b2FixtureUserData() {
 		shape_idx = 0;
 		box2d_fixture_idx = 0;
 	}
@@ -43,10 +39,8 @@ struct B2_API b2FixtureUserData
 };
 
 /// You can define this to inject whatever data you want in b2Joint
-struct B2_API b2JointUserData
-{
-	b2JointUserData()
-	{
+struct B2_API b2JointUserData {
+	b2JointUserData() {
 		pointer = 0;
 	}
 
@@ -56,22 +50,19 @@ struct B2_API b2JointUserData
 
 // Memory Allocation using Godot's functions
 
-inline void* b2Alloc(int32 size)
-{
+inline void *b2Alloc(int32 size) {
 	return memalloc(size);
 }
 
-inline void b2Free(void* mem)
-{
+inline void b2Free(void *mem) {
 	memfree(mem);
 }
 
 /// Default logging function
-B2_API void b2Log_Default(const char* string, va_list args);
+B2_API void b2Log_Default(const char *string, va_list args);
 
 /// Implement this to use your own logging.
-inline void b2Log(const char* string, ...)
-{
+inline void b2Log(const char *string, ...) {
 	va_list args;
 	va_start(args, string);
 	b2Log_Default(string, args);
