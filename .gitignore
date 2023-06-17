@@ -7,3 +7,6 @@ demo/.godot/
 
 # Generated directories with binaries
 demo/bin/
+
+.DS_Store
+.vscode
