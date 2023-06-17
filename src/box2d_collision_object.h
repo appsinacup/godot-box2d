@@ -1,6 +1,7 @@
 #ifndef BOX2D_COLLISION_OBJECT_H
 #define BOX2D_COLLISION_OBJECT_H
 
+#include "box2d_type_conversions.h"
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/variant/rid.hpp>
@@ -9,7 +10,6 @@
 
 #include "box2d_shape.h"
 #include "box2d_space.h"
-#include "box2d_type_conversions.h"
 
 using namespace godot;
 
