@@ -16,15 +16,17 @@ Runtime errors of the form `Required virtual method ... must be overridden befor
 
 2. Open a terminal application and change its working directory to the `physics_server_box2d` git repository.
 
-3. Compile `godot-cpp` for the desired `target` (`editor`, `template_debug`, or `template_release`):
+3. Compile `godot-cpp` for the desired `target` (`template_debug` or `template_release`):
 
        cd godot-cpp
-       scons target=editor generate_bindings=yes
+       scons target=template_debug generate_bindings=yes
 
 4. Compile the GDExtension for the same `target` as above:
 
        cd ..
-       scons target=editor
+       scons target=template_debug generate_bindings=no
+
+*Note*: The `template_debug` target can also be loaded in the Godot editor.
 
 ## Demo
 
