@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
+# This is based on Godot's clang-format.sh
 
-# This script runs clang-format and fixes copyright headers on all relevant files in the repo.
+# This script runs clang-format on all relevant files in the repo.
 # This is the primary script responsible for fixing style violations.
 
 set -uo pipefail
 
-if [ $# -eq 0 ]; then
-    # Loop through all code files tracked by Git.
-    files=$(git ls-files -- '*.c' '*.h' '*.cpp' '*.hpp' '*.cc' '*.hh' '*.cxx' '*.m' '*.mm' '*.inc' '*.java' '*.glsl' \
-                ':!:.git/*' ':!:thirdparty/*' ':!:*/thirdparty/*' ':!:platform/android/java/lib/src/com/google/*' \
-                ':!:*-so_wrap.*' ':!:tests/python_build/*')
-else
-    # $1 should be a file listing file paths to process. Used in CI.
-    files=$(cat "$1" | grep -v "thirdparty/" | grep -E "\.(c|h|cpp|hpp|cc|hh|cxx|m|mm|inc|java|glsl)$" | grep -v "platform/android/java/lib/src/com/google/" | grep -v "\-so_wrap\." | grep -v "tests/python_build/")
-fi
+# Loop through all code files tracked by Git.
+files=$(git ls-files -- '*.h' '*.cpp')
+
 
 if [ ! -z "$files" ]; then
     clang-format --Wno-error=unknown -i $files

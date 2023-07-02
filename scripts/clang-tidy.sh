@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# This is based on Godot's clang-tidy.sh
 
 # This script runs clang-tidy on all relevant files in the repo.
 # This is more thorough than clang-format and thus slower; it should only be run manually.
@@ -6,8 +7,8 @@
 set -uo pipefail
 
 # Loops through all code files tracked by Git.
-git ls-files -- '*.c' '*.h' '*.cpp' '*.hpp' '*.cc' '*.hh' '*.cxx' '*.m' '*.mm' '*.inc' '*.java' '*.glsl' \
-                ':!:.git/*' ':!:thirdparty/*' ':!:platform/android/java/lib/src/com/google/*' ':!:*-so_wrap.*' |
+
+git ls-files -- '*.h' '*.cpp' |
 while read -r f; do
     # Run clang-tidy.
     clang-tidy --quiet --fix "$f" &> /dev/null
