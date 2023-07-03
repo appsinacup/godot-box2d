@@ -1,0 +1,29 @@
+name: 🍏 iOS Builds
+on:
+  workflow_call:
+
+# Global Settings
+env:
+  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no
+
+jobs:
+  ios:
+    runs-on: "macos-latest"
+    name: iOS Build ${{ matrix.target }} ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [template_debug, template_release]
+        arch: [arm64]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Build ${{ matrix.target }} ${{ matrix.arch }}
+        uses: ./.github/actions/build
+        with:
+          sconsflags: ${{ env.SCONSFLAGS }}
+          arch: ${{ matrix.arch }}
+          platform: ios
+          target: ${{ matrix.target }}
