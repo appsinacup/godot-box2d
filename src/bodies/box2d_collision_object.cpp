@@ -713,13 +713,18 @@ void Box2DCollisionObject::_update_shapes() {
 
 		//not quite correct, should compute the next matrix..
 		//Transform2D xform = transform * s.xform;
-
+		bool is_static = body->GetType() == b2_staticBody;
 		if (s.fixtures.is_empty()) {
-			int box2d_shape_count = s.shape->get_b2Shape_count();
+			int box2d_shape_count = s.shape->get_b2Shape_count(is_static);
 			s.fixtures.resize(box2d_shape_count);
 			for (int j = 0; j < box2d_shape_count; j++) {
 				b2FixtureDef fixture_def;
-				fixture_def.shape = s.shape->get_transformed_b2Shape(j, s.xform, s.one_way_collision, body->GetType() == b2_staticBody);
+				fixture_def.shape = s.shape->get_transformed_b2Shape(j, s.xform, s.one_way_collision, is_static);
+				if (fixture_def.shape == nullptr) {
+					ERR_PRINT("Shape " + itos(j) + " disabled.");
+					s.disabled = true;
+					break;
+				}
 				fixture_def.density = 1.0f;
 				fixture_def.filter = filter;
 				fixture_def.friction = physics_material.friction;
@@ -730,7 +735,7 @@ void Box2DCollisionObject::_update_shapes() {
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
 			}
 		} else {
-			int box2d_shape_count = s.shape->get_b2Shape_count();
+			int box2d_shape_count = s.shape->get_b2Shape_count(is_static);
 			for (int j = 0; j < box2d_shape_count; j++) {
 				b2Fixture *fixture = s.fixtures[j];
 				fixture->SetFilterData(filter);

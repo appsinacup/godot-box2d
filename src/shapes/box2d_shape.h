@@ -30,7 +30,7 @@ public:
 	virtual void set_data(const Variant &p_data) = 0;
 	virtual Variant get_data() const = 0;
 
-	virtual int get_b2Shape_count() const = 0;
+	virtual int get_b2Shape_count(bool is_static) const = 0;
 	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) = 0;
 
 	Box2DShape() { type = PhysicsServer2D::SHAPE_CUSTOM; }

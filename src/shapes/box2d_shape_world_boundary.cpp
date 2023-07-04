@@ -4,8 +4,9 @@
 #include <godot_cpp/core/memory.hpp>
 
 #include <box2d/b2_body.h>
-#include <box2d/b2_edge_shape.h>
 #include <box2d/b2_polygon_shape.h>
+
+#define WORLD_SHAPE_SIZE 100000
 
 void Box2DShapeWorldBoundary::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::ARRAY);
@@ -26,21 +27,18 @@ Variant Box2DShapeWorldBoundary::get_data() const {
 
 b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
-	b2EdgeShape *shape = memnew(b2EdgeShape);
-	b2Vec2 edge_endpoints[2];
+	b2PolygonShape *shape = memnew(b2PolygonShape);
+	b2Vec2 points[4];
 	Vector2 right(normal.y, -normal.x);
 	Vector2 left(-right);
-	left *= 100000; // Multiply by large number
-	right *= 100000;
+	left *= WORLD_SHAPE_SIZE;
+	right *= WORLD_SHAPE_SIZE;
 	left = left + normal * distance;
 	right = right + normal * distance;
-	godot_to_box2d(p_transform.xform(left), edge_endpoints[0]);
-	godot_to_box2d(p_transform.xform(right), edge_endpoints[1]);
-	if (one_way) {
-		b2Vec2 dirV0 = edge_endpoints[0] - edge_endpoints[1];
-		shape->SetOneSided(edge_endpoints[1] + dirV0, edge_endpoints[0], edge_endpoints[1], edge_endpoints[0] - dirV0);
-	} else {
-		shape->SetTwoSided(edge_endpoints[0], edge_endpoints[1]);
-	}
+	godot_to_box2d(p_transform.xform(left), points[0]);
+	godot_to_box2d(p_transform.xform(right), points[1]);
+	godot_to_box2d(p_transform.xform(right - normal * WORLD_SHAPE_SIZE), points[2]);
+	godot_to_box2d(p_transform.xform(right - normal * WORLD_SHAPE_SIZE), points[3]);
+	shape->Set(points, 4);
 	return shape;
 }

@@ -31,7 +31,7 @@ Variant Box2DShapeCapsule::get_data() const {
 	return Vector2(height, radius);
 }
 
-int Box2DShapeCapsule::get_b2Shape_count() const {
+int Box2DShapeCapsule::get_b2Shape_count(bool is_static) const {
 	// TODO: Better handle the degenerate case when the capsule is a sphere.
 	return 3;
 }
