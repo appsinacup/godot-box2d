@@ -1,5 +1,4 @@
-#ifndef B2_USER_SETTINGS_H
-#define B2_USER_SETTINGS_H
+#pragma once
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -30,7 +29,7 @@ struct B2_API b2BodyUserData {
 
 struct B2_API b2FixtureUserData {
 	b2FixtureUserData() {
-		shape_idx = 0;
+		shape_idx = -1;
 		box2d_fixture_idx = 0;
 	}
 
@@ -68,5 +67,3 @@ inline void b2Log(const char *string, ...) {
 	b2Log_Default(string, args);
 	va_end(args);
 }
-
-#endif // B2_USER_SETTINGS_H
