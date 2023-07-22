@@ -560,7 +560,6 @@ void Box2DCollisionObject::add_shape(Box2DShape *p_shape, const Transform2D &p_t
 	s.xform = p_transform;
 	s.disabled = p_disabled;
 	shapes.push_back(s);
-	p_shape->set_body(this);
 
 	// TODO (queue) update
 }
@@ -569,7 +568,6 @@ void Box2DCollisionObject::set_shape(int p_index, Box2DShape *p_shape) {
 	ERR_FAIL_INDEX(p_index, shapes.size());
 	//shapes[p_index].shape->remove_owner(this);
 	shapes.write[p_index].shape = p_shape;
-	p_shape->set_body(this);
 
 	// TODO: (queue) update
 }

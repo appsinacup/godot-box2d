@@ -24,8 +24,6 @@ protected:
 public:
 	_FORCE_INLINE_ PhysicsServer2D::ShapeType get_type() const { return type; }
 
-	void set_body(Box2DCollisionObject *p_body);
-
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
 	_FORCE_INLINE_ RID get_self() const { return self; }
 

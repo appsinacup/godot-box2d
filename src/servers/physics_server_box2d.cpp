@@ -632,7 +632,6 @@ void PhysicsServerBox2D::_body_remove_shape(const RID &p_body, int32_t p_shape_i
 	Box2DShape *shape = body->get_shape(p_shape_idx);
 	ERR_FAIL_COND(!shape);
 	body->remove_shape(p_shape_idx);
-	shape->set_body(body);
 }
 
 void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
@@ -642,7 +641,6 @@ void PhysicsServerBox2D::_body_clear_shapes(const RID &p_body) {
 	while (body->get_shape_count()) {
 		Box2DShape *shape = body->get_shape(0);
 		ERR_FAIL_COND(!shape);
-		shape->set_body(body);
 		body->remove_shape(0);
 	}
 }
