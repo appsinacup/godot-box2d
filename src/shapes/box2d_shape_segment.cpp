@@ -23,14 +23,14 @@ Variant Box2DShapeSegment::get_data() const {
 	return Rect2(a, b);
 }
 
-b2Shape *Box2DShapeSegment::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeSegment::get_transformed_b2Shape(int p_index, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	// make a line if it's static
 	if (is_static) {
 		b2EdgeShape *shape = memnew(b2EdgeShape);
 		b2Vec2 edge_endpoints[2];
-		godot_to_box2d(p_transform.xform(a), edge_endpoints[0]);
-		godot_to_box2d(p_transform.xform(b), edge_endpoints[1]);
+		godot_to_box2d(transform.xform(a), edge_endpoints[0]);
+		godot_to_box2d(transform.xform(b), edge_endpoints[1]);
 		if (one_way) {
 			b2Vec2 dirV0 = edge_endpoints[0] - edge_endpoints[1];
 			shape->SetOneSided(edge_endpoints[1] + dirV0, edge_endpoints[0], edge_endpoints[1], edge_endpoints[0] - dirV0);
@@ -44,10 +44,10 @@ b2Shape *Box2DShapeSegment::get_transformed_b2Shape(int p_index, const Transform
 	b2Vec2 *box2d_points = new b2Vec2[4];
 	Vector2 dir = (a - b).normalized();
 	Vector2 right(dir.y, -dir.x);
-	godot_to_box2d(p_transform.xform(a - right * 0.1), box2d_points[0]);
-	godot_to_box2d(p_transform.xform(a + right * 0.1), box2d_points[1]);
-	godot_to_box2d(p_transform.xform(b - right * 0.1), box2d_points[2]);
-	godot_to_box2d(p_transform.xform(b + right * 0.1), box2d_points[3]);
+	godot_to_box2d(transform.xform(a - right * 0.1), box2d_points[0]);
+	godot_to_box2d(transform.xform(a + right * 0.1), box2d_points[1]);
+	godot_to_box2d(transform.xform(b - right * 0.1), box2d_points[2]);
+	godot_to_box2d(transform.xform(b + right * 0.1), box2d_points[3]);
 	shape->Set(box2d_points, 4);
 	delete[] box2d_points;
 	return shape;

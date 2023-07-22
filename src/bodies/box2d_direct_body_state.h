@@ -49,6 +49,7 @@ public:
 	virtual Vector2 _get_contact_local_position(int32_t contact_idx) const override;
 	virtual Vector2 _get_contact_local_normal(int32_t contact_idx) const override;
 	virtual int32_t _get_contact_local_shape(int32_t contact_idx) const override;
+	virtual Vector2 _get_contact_local_velocity_at_position(int32_t contact_idx) const override;
 	virtual RID _get_contact_collider(int32_t contact_idx) const override;
 	virtual Vector2 _get_contact_collider_position(int32_t contact_idx) const override;
 	virtual uint64_t _get_contact_collider_id(int32_t contact_idx) const override;

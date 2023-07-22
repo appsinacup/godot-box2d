@@ -18,6 +18,7 @@
 // User data
 
 class Box2DCollisionObject;
+class Box2DShape;
 
 struct B2_API b2BodyUserData {
 	b2BodyUserData() {
@@ -31,10 +32,12 @@ struct B2_API b2FixtureUserData {
 	b2FixtureUserData() {
 		shape_idx = -1;
 		box2d_fixture_idx = 0;
+		shape = nullptr;
 	}
 
 	int shape_idx;
 	int box2d_fixture_idx;
+	Box2DShape *shape;
 };
 
 /// You can define this to inject whatever data you want in b2Joint

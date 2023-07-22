@@ -5,7 +5,6 @@
 bool Box2DBody::is_active() const { return active; }
 
 // Physics Server
-
 void Box2DBody::set_max_contacts_reported(int32 p_max_contacts_reported) {
 	max_contacts_reported = p_max_contacts_reported;
 }

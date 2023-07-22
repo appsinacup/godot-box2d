@@ -36,7 +36,7 @@ int Box2DShapeCapsule::get_b2Shape_count(bool is_static) const {
 	return 3;
 }
 
-b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 3, nullptr);
 	if (p_index == 0 || p_index == 1) {
 		b2CircleShape *shape = memnew(b2CircleShape);
@@ -45,7 +45,7 @@ b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, const Transform
 		if (circle_height < b2_linearSlop) {
 			circle_height = b2_linearSlop;
 		}
-		godot_to_box2d(p_transform.xform(Vector2(0, circle_height)), shape->m_p);
+		godot_to_box2d(transform.xform(Vector2(0, circle_height)), shape->m_p);
 		return shape;
 	}
 	b2PolygonShape *shape = memnew(b2PolygonShape);
@@ -57,7 +57,7 @@ b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, const Transform
 		half_extents.y = GODOT_LINEAR_SLOP;
 	}
 	b2Vec2 box2d_half_extents = godot_to_box2d(half_extents);
-	b2Vec2 box2d_origin = godot_to_box2d(p_transform.get_origin());
-	shape->SetAsBox(box2d_half_extents.x, box2d_half_extents.y, box2d_origin, p_transform.get_rotation());
+	b2Vec2 box2d_origin = godot_to_box2d(transform.get_origin());
+	shape->SetAsBox(box2d_half_extents.x, box2d_half_extents.y, box2d_origin, transform.get_rotation());
 	return shape;
 }

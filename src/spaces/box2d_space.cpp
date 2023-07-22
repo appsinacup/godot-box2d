@@ -7,10 +7,17 @@
 
 #include "../bodies/box2d_body.h"
 #include "../bodies/box2d_collision_object.h"
+#include "../servers/physics_server_box2d.h"
 #include "box2d_direct_space_state.h"
 #include "box2d_space_contact_filter.h"
 #include "box2d_space_contact_listener.h"
 
+PhysicsServerBox2D *Box2DSpace::get_server() {
+	return server;
+}
+void Box2DSpace::set_server(PhysicsServerBox2D *p_server) {
+	server = p_server;
+}
 /* PHYSICS SERVER API */
 
 int Box2DSpace::get_active_body_count() {
@@ -35,6 +42,9 @@ int32_t Box2DSpace::get_contact_count() const {
 
 PackedVector2Array Box2DSpace::get_contacts() const {
 	PackedVector2Array vector_array;
+	if (max_debug_contacts == 0) {
+		return vector_array;
+	}
 	int32 contact_count = world->GetContactCount();
 	int32_t contact_total = 0;
 	b2Contact *contacts = world->GetContactList();
@@ -43,12 +53,16 @@ PackedVector2Array Box2DSpace::get_contacts() const {
 		contacts->GetWorldManifold(&worldManifold);
 		for (int j = 0; j < contacts->GetManifold()->pointCount; j++) {
 			vector_array.append(box2d_to_godot(worldManifold.points[j]));
+			if (vector_array.size() >= max_debug_contacts) {
+				return vector_array;
+			}
 		}
 	}
 	return vector_array;
 }
 
-void Box2DSpace::set_debug_contacts(int32_t max_contacts) {
+void Box2DSpace::set_debug_contacts(int32_t p_max_contacts) {
+	max_debug_contacts = p_max_contacts;
 }
 
 void Box2DSpace::set_solver_iterations(int32 p_iterations) {
@@ -59,7 +73,7 @@ int32 Box2DSpace::get_solver_iterations() const {
 	return solver_iterations;
 }
 
-void Box2DSpace::step(float p_step) {
+void Box2DSpace::step(double p_step) {
 	const int32 velocityIterations = solver_iterations;
 	const int32 positionIterations = solver_iterations;
 
@@ -70,7 +84,6 @@ void Box2DSpace::step(float p_step) {
 		b = b->next();
 	}
 	world->Step(p_step, velocityIterations, positionIterations);
-	step_count++;
 
 	body_list = &get_active_body_list();
 	b = body_list->first();
@@ -152,7 +165,7 @@ void Box2DSpace::remove_joint(Box2DJoint *joint) {
 /* DIRECT BODY STATE API */
 
 double Box2DSpace::get_step() {
-	return world->GetProfile().step;
+	return step_value;
 }
 
 Box2DSpace::Box2DSpace() {

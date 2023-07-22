@@ -20,8 +20,8 @@ void initialize_physics_server_box2d_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SERVERS) {
 		return;
 	}
-	ClassDB::register_class<Box2DDirectSpaceState>(true);
-	ClassDB::register_class<Box2DDirectBodyState>(true);
+	ClassDB::register_class<Box2DDirectSpaceState>();
+	ClassDB::register_class<Box2DDirectBodyState>();
 	ClassDB::register_class<PhysicsServerBox2D>();
 	ClassDB::register_class<PhysicsServerBox2DFactory>();
 
@@ -40,8 +40,8 @@ extern "C" {
 
 // Initialization.
 
-GDExtensionBool GDE_EXPORT physics_server_box2d_library_init(const GDExtensionInterface *p_interface, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
-	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
+GDExtensionBool GDE_EXPORT physics_server_box2d_library_init(const GDExtensionInterfaceGetProcAddress p_get_proc_address, GDExtensionClassLibraryPtr p_library, GDExtensionInitialization *r_initialization) {
+	godot::GDExtensionBinding::InitObject init_obj(p_get_proc_address, p_library, r_initialization);
 
 	init_obj.register_initializer(initialize_physics_server_box2d_module);
 	init_obj.register_terminator(uninitialize_physics_server_box2d_module);

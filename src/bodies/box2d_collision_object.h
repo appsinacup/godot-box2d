@@ -2,6 +2,7 @@
 
 #include <godot_cpp/classes/physics_server2d.hpp>
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/core/object.hpp>
 #include <godot_cpp/templates/hash_set.hpp>
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/variant/rid.hpp>
@@ -58,7 +59,6 @@ protected:
 	Collision collision;
 	struct ConstantForces {
 		b2Vec2 constant_force = b2Vec2_zero;
-		b2Vec2 constant_force_position = b2Vec2_zero;
 		real_t constant_torque = 0;
 	};
 	ConstantForces constant_forces;
@@ -156,6 +156,7 @@ public:
 	virtual Vector2 get_contact_local_position(int32_t contact_idx) const;
 	virtual Vector2 get_contact_local_normal(int32_t contact_idx) const;
 	virtual int32_t get_contact_local_shape(int32_t contact_idx) const;
+	virtual Vector2 get_contact_local_velocity_at_position(int32_t contact_idx) const;
 	virtual RID get_contact_collider(int32_t contact_idx) const;
 	virtual Vector2 get_contact_collider_position(int32_t contact_idx) const;
 	virtual uint64_t get_contact_collider_id(int32_t contact_idx) const;

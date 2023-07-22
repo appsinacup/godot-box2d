@@ -36,14 +36,14 @@ int Box2DShapeConcavePolygon::get_b2Shape_count(bool is_static) const {
 	return points.size();
 }
 
-b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, bool one_way, bool is_static) {
 	// make a chain shape if it's static
 	if (is_static) {
 		ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 		b2ChainShape *shape = memnew(b2ChainShape);
 		b2Vec2 *box2d_points = new b2Vec2[points.size()];
 		for (int i = 0; i < points.size(); i++) {
-			godot_to_box2d(p_transform.xform(points[i]), box2d_points[i]);
+			godot_to_box2d(transform.xform(points[i]), box2d_points[i]);
 		}
 		int points_count = points.size();
 		points_count = Box2DShapeConvexPolygon::remove_bad_points(box2d_points, points_count);
@@ -60,10 +60,10 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, const Tr
 	Vector2 b = points[(p_index + 1) % points.size()];
 	Vector2 dir = (a - b).normalized();
 	Vector2 right(dir.y, -dir.x);
-	godot_to_box2d(p_transform.xform(a - right * 0.1), box2d_points[0]);
-	godot_to_box2d(p_transform.xform(a + right * 0.1), box2d_points[1]);
-	godot_to_box2d(p_transform.xform(b - right * 0.1), box2d_points[2]);
-	godot_to_box2d(p_transform.xform(b + right * 0.1), box2d_points[3]);
+	godot_to_box2d(transform.xform(a - right * 0.1), box2d_points[0]);
+	godot_to_box2d(transform.xform(a + right * 0.1), box2d_points[1]);
+	godot_to_box2d(transform.xform(b - right * 0.1), box2d_points[2]);
+	godot_to_box2d(transform.xform(b + right * 0.1), box2d_points[3]);
 	shape->Set(box2d_points, 4);
 	delete[] box2d_points;
 	return shape;

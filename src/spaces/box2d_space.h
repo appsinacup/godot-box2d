@@ -16,10 +16,12 @@ class Box2DJoint;
 class Box2DSpaceContactFilter;
 class Box2DSpaceContactListener;
 class Box2DArea;
+class PhysicsServerBox2D;
 
 class Box2DSpace {
 private:
 	RID self;
+	PhysicsServerBox2D *server;
 
 	b2World *world = nullptr;
 
@@ -28,6 +30,7 @@ private:
 	struct ProcessInfo {
 		int active_body_count = 0;
 	};
+	int max_debug_contacts = 0;
 	ProcessInfo process_info;
 	bool locked = false;
 	double solver_iterations = 8;
@@ -35,8 +38,10 @@ private:
 	Box2DDirectSpaceState *direct_state = nullptr;
 	Box2DSpaceContactFilter *contact_filter;
 	Box2DSpaceContactListener *contact_listener;
-	int step_count = 0; // used for caching
+	double step_value = 0.016f; // TODO set step value from project settings
 public:
+	PhysicsServerBox2D *get_server();
+	void set_server(PhysicsServerBox2D *p_server);
 	/* PHYSICS SERVER API */
 	int32_t get_active_body_count();
 
@@ -51,7 +56,7 @@ public:
 	void set_solver_iterations(int32 iterations);
 	int32 get_solver_iterations() const;
 
-	void step(float p_step);
+	void step(double p_step);
 
 	void call_queries();
 

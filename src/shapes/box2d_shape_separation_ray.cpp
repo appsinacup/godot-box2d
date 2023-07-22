@@ -13,7 +13,7 @@ void Box2DShapeSeparationRay::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(dict.size() != 2);
 	ERR_FAIL_COND(!dict.has("length"));
 	ERR_FAIL_COND(!dict.has("slide_on_slope"));
-	float length = dict["length"];
+	double length = dict["length"];
 	bool slide_on_slope = dict["slide_on_slope"];
 	a = Vector2();
 	b = Vector2(0, length);
