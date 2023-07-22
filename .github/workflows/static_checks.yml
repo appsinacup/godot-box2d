@@ -13,7 +13,4 @@ jobs:
       - name: Clang Format
         shell: sh
         run: ./scripts/clang-format.sh
-
-      - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
-        uses: ./.github/actions/upload
   
