@@ -37,7 +37,7 @@ jobs:
           APPLE_DEV_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
           APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
           APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
-        run: gci -R ./dist/*.framework | ./scripts/ci_sign_macos.ps1
+        run: gci -R ./dist/*.framework | ./scripts/ci-sign-macos.ps1
 
       - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
         uses: ./.github/actions/upload

@@ -13,4 +13,3 @@ jobs:
       - name: Clang Format
         shell: sh
         run: ./scripts/clang-format.sh
-  
