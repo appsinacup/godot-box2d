@@ -1,6 +1,7 @@
 [submodule "godot-cpp"]
 	path = godot-cpp
 	url = https://github.com/godotengine/godot-cpp
+	branch = 4.1
 [submodule "box2d"]
 	path = box2d
 	url = https://github.com/godot-box2d/box2d

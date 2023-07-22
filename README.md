@@ -1,11 +1,11 @@
 ![Box2D Logo](box2d_icon.svg)
 
-# Build Status
+# Godot Box2D
 [![🔗 Build Status](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml/badge.svg)](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml)
 
-Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d).
-
 A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot) 4.1, implemented as a GDExtension.
+
+Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d).
 
 ## Features
 
@@ -60,9 +60,9 @@ Go to any action workflow on this project: [Actions List](https://github.com/rbu
 
 ## Building from source
 
-1. Clone the git repository https://github.com/rburing/physics_server_box2d, including its `box2d` and `godot-cpp` submodules.
+1. Clone the git repository, including its `box2d` and `godot-cpp` submodules.
 
-2. Open a terminal application and change its working directory to the `physics_server_box2d` git repository.
+2. Open a terminal application and change its working directory to the `godot-box2d` git repository.
 
 3. Compile `godot-cpp` for the desired `target` (`template_debug` or `template_release`):
 

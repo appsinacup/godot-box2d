@@ -77,14 +77,14 @@ sources.extend([box2d_folder + 'src/' + box2d_src_file for box2d_src_file in box
 
 if env["platform"] == "macos":
 	library = env.SharedLibrary(
-		"dist/addons/physics_server_box2d/bin/libphysics_server_box2d.{}.{}.framework/libphysics_server_box2d.{}.{}".format(
+		"dist/addons/godot-box2d/bin/libgodot-box2d.{}.{}.framework/libgodot-box2d.{}.{}".format(
 			env["platform"], env["target"], env["platform"], env["target"]
 		),
 		source=sources,
 	)
 else:
 	library = env.SharedLibrary(
-		"dist/addons/physics_server_box2d/bin/libphysics_server_box2d{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+		"dist/addons/godot-box2d/bin/libgodot-box2d{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
 		source=sources,
 	)
 
