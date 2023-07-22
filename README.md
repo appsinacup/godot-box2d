@@ -45,9 +45,6 @@ Currently it's built automatically for:
 - iOS (arm64)
 - Android (arm64 + x86_64)
 
-NOTE: the builds are not signed right now, so you might get a warning if you download for mac for eg.
-
-
 Go to any action workflow on this project: [Actions List](https://github.com/rburing/physics_server_box2d/actions)
 
 1. [Download latest release](https://github.com/godot-box2d/godot-box2d/releases/latest) from github job
@@ -69,21 +66,7 @@ Go to any action workflow on this project: [Actions List](https://github.com/rbu
        cd godot-cpp
        scons target=template_debug generate_bindings=yes
 
-4. Hack to disable b2Assert. Run:
-
-On linux:
-
-```
-sed -i 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./box2d/include/box2d/b2_common.h
-```
-
-On macos:
-
-```
-sed -i '' 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./box2d/include/box2d/b2_common.h
-```
-
-5. Compile the GDExtension for the same `target` as above:
+4. Compile the GDExtension for the same `target` as above:
 
        cd ..
        scons target=template_debug generate_bindings=no

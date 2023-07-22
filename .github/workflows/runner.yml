@@ -1,5 +1,8 @@
 name: 🔗 Builds
-on: [push, pull_request]
+on: 
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   static-checks:
@@ -25,6 +28,7 @@ jobs:
     name: 🍎 macOS
     needs: static-checks
     uses: ./.github/workflows/macos_builds.yml
+    secrets: inherit
 
   windows-build:
     name: 🏁 Windows
