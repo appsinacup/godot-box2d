@@ -6,15 +6,6 @@ jobs:
     name: 📊 Static checks
     uses: ./.github/workflows/static_checks.yml
 
-  codeql:
-    name: 🔎 CodeQL
-    needs: static-checks
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    uses: ./.github/workflows/codeql.yml
-
   android-build:
     name: 🤖 Android
     needs: static-checks
