@@ -50,7 +50,7 @@ NOTE: the builds are not signed right now, so you might get a warning if you dow
 
 Go to any action workflow on this project: [Actions List](https://github.com/rburing/physics_server_box2d/actions)
 
-1. [Download worflow artifacts](https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts) from github job
+1. [Download latest release](https://github.com/godot-box2d/godot-box2d/releases/latest) from github job
 2. Extract the ZIP archive and move the `addons/` folder it contains into your project folder
 3. Open your project settings
 4. Make sure "Advanced Settings" is enabled
