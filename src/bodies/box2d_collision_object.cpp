@@ -743,8 +743,7 @@ void Box2DCollisionObject::_update_shapes() {
 			s.fixtures.resize(box2d_shape_count);
 			for (int j = 0; j < box2d_shape_count; j++) {
 				b2FixtureDef fixture_def;
-				s.shape->set_transform(s.xform);
-				b2Shape *b2_shape = s.shape->get_transformed_b2Shape(j, s.one_way_collision, is_static);
+				b2Shape *b2_shape = s.shape->get_transformed_b2Shape(j, s.xform, s.one_way_collision, is_static);
 				fixture_def.shape = b2_shape;
 				if (fixture_def.shape == nullptr) {
 					ERR_PRINT("Shape " + itos(j) + " disabled.");

@@ -145,8 +145,9 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	b2AABB aabb;
 	b2AABB aabb_total;
 	bool first_time = true;
+	Transform2D identity;
 	for (int i = 0; i < shape->get_b2Shape_count(false); i++) {
-		b2Shape *b2_shape = (shape->get_transformed_b2Shape(i, false, false));
+		b2Shape *b2_shape = (shape->get_transformed_b2Shape(i, identity, false, false));
 		b2_shape->ComputeAABB(&aabb, shape_transform, 0);
 		if (first_time) {
 			first_time = false;
@@ -247,6 +248,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 	b2Transform shape_A_transform(godot_to_box2d(p_transform.get_origin()), b2Rot(p_transform.get_rotation()));
 	b2Vec2 motion = godot_to_box2d(p_motion);
 	b2Sweep sweepA = create_b2_sweep(shape_A_transform, b2Vec2_zero, motion);
+	Transform2D identity;
 	for (int b = 0; b < p_other_fixtures.size(); b++) {
 		b2Fixture *fixture_B = p_other_fixtures[b];
 		b2Shape *shape_B = fixture_B->GetShape();
@@ -259,7 +261,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
 		for (Box2DShape *box2d_shape_A : p_shapes) {
 			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(false); i++) {
-				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(i, false, false);
+				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(i, identity, false, false);
 				SweepShape sweep_shape_A{ box2d_shape_A, sweepA, nullptr, shape_A_transform };
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
 				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B);

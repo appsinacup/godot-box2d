@@ -1,24 +1,13 @@
-# PhysicsServerBox2D
+![Box2D Logo](box2d_icon.svg)
 
-An unofficial [**Box2D**](https://github.com/erincatto/box2d) physics server for [**Godot Engine**](https://github.com/godotengine/godot) 4.1, implemented as a GDExtension.
+# Build Status
+[![🔗 Build Status](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml/badge.svg)](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml)
 
-The goal of the project is to be a drop-in solution for 2D physics in Godot 4.1. In your Godot project you can load the GDExtension, change the (advanced) project setting `physics/2d/physics_engine` to `Box2D`, and it will work with Godot's original 2D physics nodes such as `RigidBody2D` and `StaticBody2D`.
+Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d).
 
-## Current state
+A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot) 4.1, implemented as a GDExtension.
 
-⚠ This project is a work in progress. ⚠
-
-Missing functionality:
-
-- Pickable not implemented
-- Collision layer and mask don't work same as in godot
-- Torque and rotation doesn't work same as in godot (different values)
-- Skewed/scaled shapes.
-- Separation Ray works as a segment.
-- Pin joint doesn't have softness
-- Some joint properties(max force, etc.)
-
-Things that work:
+## Features
 
 Bodies:
 - [x] Rigid Body
@@ -46,7 +35,7 @@ Direct State:
 - [x] Direct Space State
 
 
-## Install from build binaries
+## Install from binaries
 
 Currently it's built automatically for:
 
@@ -101,6 +90,6 @@ sed -i '' 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./
 
 *Note*: The `template_debug` target can also be loaded in the Godot editor.
 
-## Demo
+## Lint
 
-The Godot project in the `demo` subdirectory is an example of how to load the GDExtension.
+Run `scripts/clang-tidy.sh` in order to lint.

@@ -134,11 +134,12 @@ bool PhysicsServerBox2D::_shape_collide(const RID &p_shape_A, const Transform2D 
 	b2Sweep sweepA = Box2DSweepTest::create_b2_sweep(shape_A_transform, b2Vec2_zero, godot_to_box2d(p_motion_A));
 	b2Sweep sweepB = Box2DSweepTest::create_b2_sweep(shape_B_transform, b2Vec2_zero, godot_to_box2d(p_motion_B));
 	Vector<SweepTestResult> sweep_results;
+	Transform2D identity;
 	for (int i = 0; i < shape_A->get_b2Shape_count(false); i++) {
-		b2Shape *b2_shape_A = (shape_A->get_transformed_b2Shape(i, false, false));
+		b2Shape *b2_shape_A = (shape_A->get_transformed_b2Shape(i, identity, false, false));
 
 		for (int j = 0; j < shape_A->get_b2Shape_count(false); j++) {
-			b2Shape *b2_shape_B = (shape_A->get_transformed_b2Shape(i, false, false));
+			b2Shape *b2_shape_B = (shape_A->get_transformed_b2Shape(i, identity, false, false));
 			SweepShape sweep_shape_A{ shape_A, sweepA, nullptr, shape_A_transform };
 			SweepShape sweep_shape_B{ shape_B, sweepB, nullptr, shape_B_transform };
 			SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, b2_shape_A, sweep_shape_B, b2_shape_B);
@@ -1001,10 +1002,10 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		return false;
 	}
 	current_result.collider = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape->get_self();
-	current_result.collider_id = sweep_test_result.sweep_shape_B.shape->get_body()->get_b2Body()->GetUserData().collision_object->get_object_instance_id();
+	current_result.collider_id = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_b2Body()->GetUserData().collision_object->get_object_instance_id();
 	current_result.collision_point = box2d_to_godot(sweep_test_result.manifold.points[0]);
 	current_result.collision_normal = Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
-	current_result.collider_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.shape->get_body()->get_b2Body()->GetLinearVelocity());
+	current_result.collider_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
 	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction();
 	current_result.travel = p_motion * current_result.collision_safe_fraction;

@@ -3,4 +3,5 @@
 	url = https://github.com/godotengine/godot-cpp
 [submodule "box2d"]
 	path = box2d
-	url = https://github.com/erincatto/box2d
+	url = https://github.com/godot-box2d/box2d
+	branch = common-assert-noop

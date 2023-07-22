@@ -18,10 +18,10 @@ Variant Box2DShapeCircle::get_data() const {
 	return radius;
 }
 
-b2Shape *Box2DShapeCircle::get_transformed_b2Shape(int p_index, bool one_way, bool is_static) {
+b2Shape *Box2DShapeCircle::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	b2CircleShape *shape = memnew(b2CircleShape);
-	Vector2 scale = transform.get_scale();
+	Vector2 scale = p_transform.get_scale();
 	if (scale.x != scale.y) {
 		ERR_PRINT("Circles don't support non uniform scale.");
 	}
@@ -29,6 +29,6 @@ b2Shape *Box2DShapeCircle::get_transformed_b2Shape(int p_index, bool one_way, bo
 	if (shape->m_radius < b2_linearSlop) {
 		shape->m_radius = b2_linearSlop;
 	}
-	godot_to_box2d(transform.get_origin(), shape->m_p);
+	godot_to_box2d(p_transform.get_origin(), shape->m_p);
 	return shape;
 }
