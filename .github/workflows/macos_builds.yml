@@ -8,7 +8,7 @@ env:
   SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no
 
 jobs:
-  ios:
+  macos:
     runs-on: "macos-latest"
     name: macOS Build ${{ matrix.target }} ${{ matrix.arch }}
     strategy:

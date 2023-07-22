@@ -7,33 +7,14 @@ A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d).
 
-## Features
+## Missing/Not implemented
 
-Bodies:
-- [x] Rigid Body
-- [] Kinematic Body
-- [x] Static Body
-- [x] Area
-
-Joints:
-- [x] Pin Joint
-- [x] Damped Spring Joint
-- [x] Groove Joint
-
-Shapes:
-- [x] Capsule Shape
-- [x] Circle Shape
-- [x] Concave Polygon Shape
-- [x] Convex Polygon Shape
-- [x] Rectangle Shape
-- [x] Segment Shape
-- [x] Separation Ray Shape
-- [x] World Boundary Shape
-
-Direct State:
-- [x] Direct Body State
-- [x] Direct Space State
-
+- Skewed shapes
+- Scaled shapes
+- Constant speed on static bodies
+- Collision layers and masks don't work exactly the same (having non symetric layer/mask)
+- Body pickable
+- Torque uses wrong values
 
 ## Install from binaries
 
@@ -44,9 +25,6 @@ Currently it's built automatically for:
 - macOS (x86-64 + Apple Silicon)
 - iOS (arm64)
 - Android (arm64 + x86_64)
-
-NOTE: the builds are not signed right now, so you might get a warning if you download for mac for eg.
-
 
 Go to any action workflow on this project: [Actions List](https://github.com/rburing/physics_server_box2d/actions)
 
@@ -69,21 +47,7 @@ Go to any action workflow on this project: [Actions List](https://github.com/rbu
        cd godot-cpp
        scons target=template_debug generate_bindings=yes
 
-4. Hack to disable b2Assert. Run:
-
-On linux:
-
-```
-sed -i 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./box2d/include/box2d/b2_common.h
-```
-
-On macos:
-
-```
-sed -i '' 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./box2d/include/box2d/b2_common.h
-```
-
-5. Compile the GDExtension for the same `target` as above:
+4. Compile the GDExtension for the same `target` as above:
 
        cd ..
        scons target=template_debug generate_bindings=no

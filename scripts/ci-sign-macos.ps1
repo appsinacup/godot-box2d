@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# Taken from https://github.com/godot-jolt/godot-jolt/blob/master/scripts/ci_sign_macos.ps1
 
 #Requires -PSEdition Core
 #Requires -Version 7.2

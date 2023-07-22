@@ -146,6 +146,7 @@ bool PhysicsServerBox2D::_shape_collide(const RID &p_shape_A, const Transform2D 
 			if (output.collision) {
 				sweep_results.append(output);
 			}
+			memfree(b2_shape_B);
 		}
 	}
 	auto *results = static_cast<Vector2 *>(p_results);
@@ -995,17 +996,17 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	if (!sweep_test_result.collision) {
 		current_result.travel = p_motion;
 		current_result.remainder = Vector2();
-		current_result.collision_safe_fraction = 1;
-		current_result.collision_unsafe_fraction = 1;
+		current_result.collision_safe_fraction = 0;
+		current_result.collision_unsafe_fraction = 0;
 		return false;
 	}
 	current_result.collider = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape->get_self();
-	current_result.collider_id = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_b2Body()->GetUserData().collision_object->get_object_instance_id();
+	current_result.collider_id = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_object_instance_id();
 	current_result.collision_point = box2d_to_godot(sweep_test_result.manifold.points[0]);
-	current_result.collision_normal = Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
+	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
 	current_result.collider_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
-	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction();
+	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction);
 	current_result.travel = p_motion * current_result.collision_safe_fraction;
 	current_result.remainder = p_motion - current_result.travel;
 	int shape_A_index = 0;
