@@ -36,7 +36,7 @@ int Box2DShapeCapsule::get_b2Shape_count(bool is_static) const {
 	return 3;
 }
 
-b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 3, nullptr);
 	if (p_index == 0 || p_index == 1) {
 		b2CircleShape *shape = memnew(b2CircleShape);

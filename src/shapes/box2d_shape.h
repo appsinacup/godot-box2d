@@ -15,6 +15,7 @@ class Box2DCollisionObject;
 
 class Box2DShape {
 	RID self;
+	Box2DCollisionObject *body;
 
 protected:
 	bool configured = false;
@@ -31,7 +32,7 @@ public:
 	virtual Variant get_data() const = 0;
 
 	virtual int get_b2Shape_count(bool is_static) const = 0;
-	virtual b2Shape *get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) = 0;
+	virtual b2Shape *get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) = 0;
 
 	Box2DShape() { type = PhysicsServer2D::SHAPE_CUSTOM; }
 	virtual ~Box2DShape(){};

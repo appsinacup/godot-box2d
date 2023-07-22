@@ -18,7 +18,7 @@ Variant Box2DShapeCircle::get_data() const {
 	return radius;
 }
 
-b2Shape *Box2DShapeCircle::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeCircle::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	b2CircleShape *shape = memnew(b2CircleShape);
 	Vector2 scale = p_transform.get_scale();

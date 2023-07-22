@@ -109,9 +109,9 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 
 	// Find the right most point on the hull
 	int32 i0 = 0;
-	float x0 = ps[0].x;
+	double x0 = ps[0].x;
 	for (int32 i = 1; i < n; ++i) {
-		float x = ps[i].x;
+		double x = ps[i].x;
 		if (x > x0 || (x == x0 && ps[i].y < ps[i0].y)) {
 			i0 = i;
 			x0 = x;
@@ -139,7 +139,7 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 
 			b2Vec2 r = ps[ie] - ps[hull[m]];
 			b2Vec2 v = ps[j] - ps[hull[m]];
-			float c = b2Cross(r, v);
+			double c = b2Cross(r, v);
 			if (c < 0.0f) {
 				ie = j;
 			}
@@ -170,7 +170,7 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 	return m;
 }
 
-b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_COND_V(p_index >= polygons.size(), nullptr);
 	Vector<Vector2> polygon = polygons[p_index];
 	ERR_FAIL_COND_V(polygon.size() > b2_maxPolygonVertices, nullptr);

@@ -7,8 +7,8 @@
 
 using namespace godot;
 
-#define B_TO_G_FACTOR 50.0
-#define G_TO_B_FACTOR 1.0 / 50.0
+#define B_TO_G_FACTOR 100.0
+#define G_TO_B_FACTOR 1.0 / 100.0
 #define GODOT_LINEAR_SLOP b2_linearSlop *B_TO_G_FACTOR
 
 void godot_to_box2d(const float &p_value, float &r_box2d_value);

@@ -1,33 +1,95 @@
-# PhysicsServerBox2D
+![Box2D Logo](box2d_icon.svg)
 
-An unofficial [**Box2D**](https://github.com/erincatto/box2d) physics server for [**Godot Engine**](https://github.com/godotengine/godot) 4.0, implemented as a GDExtension.
+# Godot Box2D
+[![🔗 Build Status](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml/badge.svg)](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml)
 
-The goal of the project is to be a drop-in solution for 2D physics in Godot 4.0. In your Godot project you can load the GDExtension, change the (advanced) project setting `physics/2d/physics_engine` to `Box2D`, and it will work with Godot's original 2D physics nodes such as `RigidBody2D` and `StaticBody2D`.
+A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot) 4.1, implemented as a GDExtension.
 
-## Current state
+Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d).
 
-⚠ This project is a work in progress, still in a very early stage. ⚠
+## Features
 
-Runtime errors of the form `Required virtual method ... must be overridden before calling` reflect this unfinished state, and they hint at which functionality is still missing.
+Bodies:
+- [x] Rigid Body
+- [] Kinematic Body
+- [x] Static Body
+- [x] Area
+
+Joints:
+- [x] Pin Joint
+- [x] Damped Spring Joint
+- [x] Groove Joint
+
+Shapes:
+- [x] Capsule Shape
+- [x] Circle Shape
+- [x] Concave Polygon Shape
+- [x] Convex Polygon Shape
+- [x] Rectangle Shape
+- [x] Segment Shape
+- [x] Separation Ray Shape
+- [x] World Boundary Shape
+
+Direct State:
+- [x] Direct Body State
+- [x] Direct Space State
+
+
+## Install from binaries
+
+Currently it's built automatically for:
+
+- Windows (x86-64, x86)
+- Linux (x86-64)
+- macOS (x86-64 + Apple Silicon)
+- iOS (arm64)
+- Android (arm64 + x86_64)
+
+NOTE: the builds are not signed right now, so you might get a warning if you download for mac for eg.
+
+
+Go to any action workflow on this project: [Actions List](https://github.com/rburing/physics_server_box2d/actions)
+
+1. [Download latest release](https://github.com/godot-box2d/godot-box2d/releases/latest) from github job
+2. Extract the ZIP archive and move the `addons/` folder it contains into your project folder
+3. Open your project settings
+4. Make sure "Advanced Settings" is enabled
+5. Go to "Physics" and then "2D"
+6. Change "Physics Engine" to "Box2D"
+7. Restart Godot
 
 ## Building from source
 
-1. Clone the git repository https://github.com/rburing/physics_server_box2d, including its `box2d` and `godot-cpp` submodules.
+1. Clone the git repository, including its `box2d` and `godot-cpp` submodules.
 
-2. Open a terminal application and change its working directory to the `physics_server_box2d` git repository.
+2. Open a terminal application and change its working directory to the `godot-box2d` git repository.
 
 3. Compile `godot-cpp` for the desired `target` (`template_debug` or `template_release`):
 
        cd godot-cpp
        scons target=template_debug generate_bindings=yes
 
-4. Compile the GDExtension for the same `target` as above:
+4. Hack to disable b2Assert. Run:
+
+On linux:
+
+```
+sed -i 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./box2d/include/box2d/b2_common.h
+```
+
+On macos:
+
+```
+sed -i '' 's/#define b2Assert(A) assert(A)/#define b2Assert(A) ((void)(A))/g' ./box2d/include/box2d/b2_common.h
+```
+
+5. Compile the GDExtension for the same `target` as above:
 
        cd ..
        scons target=template_debug generate_bindings=no
 
 *Note*: The `template_debug` target can also be loaded in the Godot editor.
 
-## Demo
+## Lint
 
-The Godot project in the `demo` subdirectory is an example of how to load the GDExtension.
+Run `scripts/clang-tidy.sh` in order to lint.

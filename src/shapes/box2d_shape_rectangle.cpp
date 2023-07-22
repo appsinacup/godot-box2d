@@ -21,7 +21,7 @@ Variant Box2DShapeRectangle::get_data() const {
 	return half_extents;
 }
 
-b2Shape *Box2DShapeRectangle::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeRectangle::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	b2PolygonShape *shape = memnew(b2PolygonShape);
 	b2Vec2 box2d_half_extents = godot_to_box2d(half_extents);

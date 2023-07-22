@@ -10,15 +10,21 @@
 
 #include <box2d/b2_contact.h>
 #include <box2d/b2_fixture.h>
+#include <box2d/b2_math.h>
 
 // Mass
 
 void Box2DCollisionObject::reset_mass_properties() {
-	mass_data.mass = 1;
-	mass_data.I = 0;
-	mass_data.center = b2Vec2();
 	if (body) {
+		body->ResetMassData();
+		//mass_data = body->GetMassData();
+		mass_data.mass = 1.0f;
 		body->SetMassData(&mass_data);
+		mass_data.I = body->GetMassData().I;
+	} else {
+		mass_data.mass = 1.0f;
+		mass_data.I = 0;
+		mass_data.center = b2Vec2_zero;
 	}
 }
 
@@ -29,22 +35,27 @@ void Box2DCollisionObject::set_mass(real_t p_mass) {
 	mass_data.mass = p_mass;
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.I = body->GetMassData().I;
 	}
 }
 double Box2DCollisionObject::get_mass() const {
-	return mass_data.mass; // no need to convert
+	if (body) {
+		return body->GetMass();
+	}
+	return mass_data.mass;
 }
 void Box2DCollisionObject::set_inertia(real_t p_inertia) {
-	if (mass_data.I == p_inertia) {
+	if (mass_data.I == godot_to_box2d(godot_to_box2d(p_inertia))) {
 		return;
 	}
-	mass_data.I = p_inertia;
+	mass_data.I = godot_to_box2d(godot_to_box2d(p_inertia));
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.I = body->GetMassData().I;
 	}
 }
 double Box2DCollisionObject::get_inertia() const {
-	return mass_data.I; // no need to convert
+	return box2d_to_godot(box2d_to_godot(mass_data.I - mass_data.mass * b2Dot(mass_data.center, mass_data.center)));
 }
 void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	if (godot_to_box2d(p_center_of_mass) == mass_data.center) {
@@ -53,6 +64,7 @@ void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	godot_to_box2d(p_center_of_mass, mass_data.center);
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.I = body->GetMassData().I;
 	}
 }
 Vector2 Box2DCollisionObject::get_center_of_mass() const {
@@ -273,7 +285,7 @@ Vector2 Box2DCollisionObject::get_linear_velocity() const {
 	return Vector2();
 }
 void Box2DCollisionObject::set_angular_velocity(double p_velocity) {
-	float angularVelocity = godot_to_box2d(p_velocity);
+	float angularVelocity = p_velocity;
 	body_def->angularVelocity = angularVelocity;
 	if (body) {
 		body->SetAngularVelocity(angularVelocity);
@@ -281,7 +293,7 @@ void Box2DCollisionObject::set_angular_velocity(double p_velocity) {
 }
 double Box2DCollisionObject::get_angular_velocity() const {
 	if (body) {
-		return box2d_to_godot(body->GetAngularVelocity());
+		return body->GetAngularVelocity();
 	}
 	return 0;
 }
@@ -314,7 +326,7 @@ void Box2DCollisionObject::apply_impulse(const Vector2 &impulse, const Vector2 &
 }
 void Box2DCollisionObject::apply_torque_impulse(double impulse) {
 	if (body) {
-		body->ApplyTorque(body->GetMass() * godot_to_box2d(impulse), true);
+		body->ApplyTorque((1.0f / mass_data.I) * impulse, true);
 	}
 }
 void Box2DCollisionObject::apply_central_force(const Vector2 &force) {
@@ -337,12 +349,10 @@ void Box2DCollisionObject::apply_torque(double torque) {
 
 void Box2DCollisionObject::add_constant_central_force(const Vector2 &force) {
 	constant_forces.constant_force += godot_to_box2d(force);
-	// TODO set position to center
-	//constant_force_position = position;
 }
-void Box2DCollisionObject::add_constant_force(const Vector2 &force, const Vector2 &position) {
-	constant_forces.constant_force += godot_to_box2d(force);
-	constant_forces.constant_force_position = godot_to_box2d(position);
+void Box2DCollisionObject::add_constant_force(const Vector2 &p_force, const Vector2 &p_position) {
+	constant_forces.constant_torque += b2Cross(godot_to_box2d(p_position) - mass_data.center, godot_to_box2d(p_force));
+	constant_forces.constant_force += godot_to_box2d(p_force);
 }
 void Box2DCollisionObject::add_constant_torque(double torque) {
 	constant_forces.constant_torque += godot_to_box2d(torque);
@@ -410,8 +420,10 @@ Vector2 Box2DCollisionObject::get_contact_local_normal(int32_t contact_idx) cons
 	if (!data.edge) {
 		return Vector2();
 	}
-	b2Vec2 normal = data.edge->contact->GetManifold()->localNormal;
-	return Vector2(normal.x, normal.y);
+	b2WorldManifold worldManifold;
+	data.edge->contact->GetWorldManifold(&worldManifold);
+	b2Vec2 normal = worldManifold.normal;
+	return Vector2(normal.x, normal.y).normalized();
 }
 int32_t Box2DCollisionObject::get_contact_local_shape(int32_t contact_idx) const {
 	ContactEdgeData data = _get_contact_edge_data(contact_idx);
@@ -419,6 +431,16 @@ int32_t Box2DCollisionObject::get_contact_local_shape(int32_t contact_idx) const
 		return -1;
 	}
 	return data.edge->contact->GetFixtureA()->GetUserData().shape_idx;
+}
+Vector2 Box2DCollisionObject::get_contact_local_velocity_at_position(int32_t contact_idx) const {
+	ContactEdgeData data = _get_contact_edge_data(contact_idx);
+	if (!data.edge) {
+		return Vector2();
+	}
+	b2WorldManifold worldManifold;
+	data.edge->contact->GetWorldManifold(&worldManifold);
+	b2Vec2 world_point = worldManifold.points[data.point_idx];
+	return box2d_to_godot(body->GetLinearVelocityFromWorldPoint(world_point));
 }
 RID Box2DCollisionObject::get_contact_collider(int32_t contact_idx) const {
 	ContactEdgeData data = _get_contact_edge_data(contact_idx);
@@ -471,6 +493,7 @@ double Box2DCollisionObject::get_step() const {
 	return space->get_step();
 }
 void Box2DCollisionObject::integrate_forces() {
+	// TODO
 }
 
 PhysicsDirectSpaceState2D *Box2DCollisionObject::get_space_state() {
@@ -521,8 +544,7 @@ Object *Box2DCollisionObject::get_object() const {
 	return ObjectDB::get_instance(id);
 }
 Object *Box2DCollisionObject::get_object_unsafe() const {
-	return reinterpret_cast<Object *>(internal::gde_interface->object_get_instance_from_id(object_instance_id));
-	;
+	return reinterpret_cast<Object *>((GodotObject *)(internal::gdextension_interface_object_get_instance_from_id(object_instance_id)));
 }
 
 void Box2DCollisionObject::set_canvas_instance_id(const ObjectID &p_instance_id) {
@@ -719,19 +741,26 @@ void Box2DCollisionObject::_update_shapes() {
 			s.fixtures.resize(box2d_shape_count);
 			for (int j = 0; j < box2d_shape_count; j++) {
 				b2FixtureDef fixture_def;
-				fixture_def.shape = s.shape->get_transformed_b2Shape(j, s.xform, s.one_way_collision, is_static);
+				b2Shape *b2_shape = s.shape->get_transformed_b2Shape(j, s.xform, s.one_way_collision, is_static);
+				fixture_def.shape = b2_shape;
 				if (fixture_def.shape == nullptr) {
 					ERR_PRINT("Shape " + itos(j) + " disabled.");
 					s.disabled = true;
 					break;
 				}
-				fixture_def.density = 1.0f;
 				fixture_def.filter = filter;
 				fixture_def.friction = physics_material.friction;
 				fixture_def.restitution = physics_material.bounce;
 				fixture_def.isSensor = type == Type::TYPE_AREA;
 				fixture_def.userData.shape_idx = i;
 				fixture_def.userData.box2d_fixture_idx = j;
+				fixture_def.userData.shape = s.shape;
+				b2MassData shape_mass;
+				b2_shape->ComputeMass(&shape_mass, 1.0f);
+				// make the desity be 1/mass such that mass is 1.
+				// This way inertia is computed without mass.
+				fixture_def.density = 1.0f / shape_mass.mass;
+				b2_shape->ComputeMass(&shape_mass, fixture_def.density);
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
 			}
 		} else {
@@ -741,9 +770,16 @@ void Box2DCollisionObject::_update_shapes() {
 				fixture->SetFilterData(filter);
 				fixture->SetFriction(physics_material.friction);
 				fixture->SetRestitution(physics_material.bounce);
+				fixture->SetSensor(type == Type::TYPE_AREA);
 			}
 		}
-
+		float old_mass = mass_data.mass;
+		// update inertia and center of mass
+		mass_data = body->GetMassData();
+		body->GetInertia();
+		// revert mass
+		mass_data.mass = old_mass;
+		body->SetMassData(&mass_data);
 		//space->get_broadphase()->move(s.bpid, shape_aabb);
 	}
 }
@@ -753,7 +789,7 @@ void Box2DCollisionObject::before_step() {
 		body->ApplyForceToCenter(body->GetMass() * gravity_scale * total_gravity, false);
 		if (constant_forces.constant_force != b2Vec2_zero) {
 			// constant force
-			body->ApplyForce(body->GetMass() * constant_forces.constant_force, constant_forces.constant_force_position + body->GetPosition(), true);
+			body->ApplyForce(body->GetMass() * constant_forces.constant_force, body->GetPosition(), true);
 		}
 		if (constant_forces.constant_torque != 0) {
 			// constant torque
@@ -823,6 +859,7 @@ void Box2DCollisionObject::set_b2Body(b2Body *p_body) {
 	// set additional properties here
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.I = body->GetMassData().I;
 		body->SetAwake(true);
 		//recreate_shapes();
 	}

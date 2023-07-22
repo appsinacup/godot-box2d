@@ -36,7 +36,7 @@ int Box2DShapeConcavePolygon::get_b2Shape_count(bool is_static) const {
 	return points.size();
 }
 
-b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	// make a chain shape if it's static
 	if (is_static) {
 		ERR_FAIL_INDEX_V(p_index, 1, nullptr);

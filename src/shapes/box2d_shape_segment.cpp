@@ -23,7 +23,7 @@ Variant Box2DShapeSegment::get_data() const {
 	return Rect2(a, b);
 }
 
-b2Shape *Box2DShapeSegment::get_transformed_b2Shape(int p_index, const Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeSegment::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
 	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
 	// make a line if it's static
 	if (is_static) {

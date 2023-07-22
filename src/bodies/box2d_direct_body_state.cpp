@@ -123,7 +123,7 @@ bool Box2DDirectBodyState::_is_sleeping() const {
 }
 int32_t Box2DDirectBodyState::_get_contact_count() const {
 	ERR_FAIL_NULL_V(body, 0);
-	return body->get_contact_count();
+	return MIN(body->get_contact_count(), body->get_max_contacts_reported());
 }
 Vector2 Box2DDirectBodyState::_get_contact_local_position(int32_t contact_idx) const {
 	ERR_FAIL_NULL_V(body, Vector2());
@@ -136,6 +136,10 @@ Vector2 Box2DDirectBodyState::_get_contact_local_normal(int32_t contact_idx) con
 int32_t Box2DDirectBodyState::_get_contact_local_shape(int32_t contact_idx) const {
 	ERR_FAIL_NULL_V(body, 0);
 	return body->get_contact_local_shape(contact_idx);
+}
+Vector2 Box2DDirectBodyState::_get_contact_local_velocity_at_position(int32_t contact_idx) const {
+	ERR_FAIL_NULL_V(body, Vector2());
+	return body->get_contact_local_velocity_at_position(contact_idx);
 }
 RID Box2DDirectBodyState::_get_contact_collider(int32_t contact_idx) const {
 	ERR_FAIL_NULL_V(body, RID());

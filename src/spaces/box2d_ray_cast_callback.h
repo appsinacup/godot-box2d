@@ -5,8 +5,10 @@
 #include "box2d_direct_space_state.h"
 #include <box2d/b2_fixture.h>
 #include <godot_cpp/classes/physics_server2d_extension_ray_result.hpp>
+class Box2DDirectSpaceState;
 
 class Box2DRayCastCallback : public b2RayCastCallback {
+	Box2DDirectSpaceState *space_state;
 	PhysicsServer2DExtensionRayResult *result;
 	uint32_t collision_mask;
 	bool collide_with_bodies;
@@ -15,7 +17,8 @@ class Box2DRayCastCallback : public b2RayCastCallback {
 	bool hit = false;
 
 public:
-	Box2DRayCastCallback(PhysicsServer2DExtensionRayResult *result,
+	Box2DRayCastCallback(Box2DDirectSpaceState *space_state,
+			PhysicsServer2DExtensionRayResult *result,
 			uint32_t collision_mask,
 			bool collide_with_bodies,
 			bool collide_with_areas,

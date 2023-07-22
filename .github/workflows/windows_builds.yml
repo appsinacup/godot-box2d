@@ -30,3 +30,7 @@ jobs:
           arch: ${{ matrix.arch }}
           platform: windows
           target: ${{ matrix.target }}
+
+      - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
+        uses: ./.github/actions/upload
+    

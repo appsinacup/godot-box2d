@@ -1,6 +1,7 @@
 name: 🍎 macOS Builds
 on:
   workflow_call:
+    
 
 # Global Settings
 env:
@@ -28,3 +29,17 @@ jobs:
           arch: ${{ matrix.arch }}
           platform: macos
           target: ${{ matrix.target }}
+
+      - name: Sign frameworks
+        shell: pwsh
+        env:
+          APPLE_CERT_BASE64: ${{ secrets.PROD_MACOS_CERTIFICATE }}
+          APPLE_CERT_PASSWORD: ${{ secrets.PROD_MACOS_CERTIFICATE_PWD }}
+          APPLE_DEV_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
+          APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
+          APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
+        run: gci -R ./dist/addons/*.framework | ./scripts/ci-sign-macos.ps1
+        if: ${{ env.APPLE_DEV_ID }}
+
+      - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
+        uses: ./.github/actions/upload
