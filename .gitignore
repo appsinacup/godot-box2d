@@ -3,7 +3,7 @@
 *.dblite
 
 # Generated directories with binaries
-dist/**
+dist/addons/godot-box2d/bin/**
 
 .DS_Store
 .vscode
