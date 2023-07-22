@@ -6,3 +6,6 @@
 	path = box2d
 	url = https://github.com/godot-box2d/box2d
 	branch = common-assert-noop
+[submodule "Godot-Physics-Tests"]
+	path = Godot-Physics-Tests
+	url = https://github.com/godot-box2d/Godot-Physics-Tests

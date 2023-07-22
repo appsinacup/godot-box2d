@@ -23,7 +23,11 @@ real_t SweepTestResult::safe_fraction() {
 	float unsafe_length = (sweep_shape_A.transform.p - sweep_shape_A.sweep.c0).Length();
 	float separation_distance = (distance_output.pointA - sweep_shape_A.transform.p).Length();
 	float safe_length = unsafe_length - separation_distance;
-	return safe_length / motion_length;
+	float safe_fraction = safe_length / motion_length;
+	if (safe_fraction < 0) {
+		return 0;
+	}
+	return safe_fraction;
 }
 real_t SweepTestResult::unsafe_fraction() {
 	return toi_output.t;
@@ -145,6 +149,10 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	b2AABB aabb;
 	b2AABB aabb_total;
 	bool first_time = true;
+	if (shape->get_b2Shape_count(false) == 0) {
+		ERR_FAIL_V_MSG(aabb_total, "Cannot get aabb of empty shape.");
+	}
+	//Transform2D identity(shape_transform.q.GetAngle(), box2d_to_godot(shape_transform.p));
 	Transform2D identity;
 	for (int i = 0; i < shape->get_b2Shape_count(false); i++) {
 		b2Shape *b2_shape = (shape->get_transformed_b2Shape(i, identity, false, false));
@@ -158,7 +166,7 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 		memdelete(b2_shape);
 	}
 	if (!aabb.IsValid()) {
-		ERR_PRINT("aabb of shape is not valid.");
+		ERR_FAIL_V_MSG(aabb_total, "aabb of shape is not valid.");
 	}
 	return aabb_total;
 }
@@ -189,7 +197,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 			b2Manifold local_manifold = intersection.manifold;
 
 			if (!intersection.intersecting()) {
-				WARN_PRINT("`test_motion_toi` failed intersection! Report this!");
+				//WARN_PRINT("`test_motion_toi` failed intersection! Report this!");
 				break;
 			}
 			manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
@@ -261,6 +269,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
 		for (Box2DShape *box2d_shape_A : p_shapes) {
 			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(false); i++) {
+				//identity = p_transform;
 				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(i, identity, false, false);
 				SweepShape sweep_shape_A{ box2d_shape_A, sweepA, nullptr, shape_A_transform };
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
