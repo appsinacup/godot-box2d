@@ -29,7 +29,7 @@ jobs:
           arch: ${{ matrix.arch }}
           platform: macos
           target: ${{ matrix.target }}
-
+      
       - name: Sign frameworks
         shell: pwsh
         env:
@@ -38,7 +38,8 @@ jobs:
           APPLE_DEV_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
           APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
           APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
-        run: gci -R ./dist/addons/*.framework | ./scripts/ci-sign-macos.ps1
+          APPLE_DEV_APP_ID: ${{ secrets.PROD_MACOS_APPLE_DEV_APP_ID }}
+        run: ./scripts/ci-sign-macos.ps1 dist/addons/godot-box2d/bin/libgodot-box2d.macos.${{ matrix.target }}.framework
         if: ${{ env.APPLE_DEV_ID }}
 
       - name: Upload ${{ matrix.target }} ${{ matrix.arch }}

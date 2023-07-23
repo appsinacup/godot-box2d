@@ -33,4 +33,3 @@ jobs:
 
       - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
         uses: ./.github/actions/upload
-    

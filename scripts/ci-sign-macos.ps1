@@ -32,10 +32,12 @@ begin {
 	$DevId = $env:APPLE_DEV_ID
 	$DevTeamId = $env:APPLE_DEV_TEAM_ID
 	$DevPassword = $env:APPLE_DEV_PASSWORD
+	$DeveloperIdApplication = $env:APPLE_DEV_APP_ID
 
 	if (!$CertificateBase64) { throw "No certificate provided" }
 	if (!$CertificatePassword) { throw "No certificate password provided" }
 	if (!$DevId) { throw "No Apple Developer ID provided" }
+	if (!$DeveloperIdApplication) { throw "No Apple Developer ID Application provided" }
 	if (!$DevTeamId) { throw "No Apple Team ID provided" }
 	if (!$DevPassword) { throw "No Apple Developer password provided" }
 
@@ -73,22 +75,33 @@ process {
 
 		Write-Output "Signing '$Framework'..."
 
-		& $CodesignPath --sign "Developer ID" "$Framework"
+		& $CodesignPath --force --verify --timestamp --verbose --sign $DeveloperIdApplication "$Framework"
 
 		Write-Output "Verifying signing..."
 
-		& $CodesignPath --verify "$Framework"
+		& $CodesignPath --verify --verbose "$Framework"
 
 		Write-Output "Archiving framework to '$Archive'..."
 
-		ditto -ck "$Framework" "$Archive"
+		ditto -ck --sequesterRsrc --keepParent "$Framework" "$Archive"
 
 		Write-Output "Submitting archive for notarization..."
 
-		xcrun notarytool submit "$Archive" `
+		$output = xcrun notarytool submit "$Archive" `
 			--apple-id $DevId `
 			--team-id $DevTeamId `
 			--password $DevPassword `
 			--wait
+		echo $output
+		$matches = $output -match '((\d|[a-z])+-(\d|[a-z])+-(\d|[a-z])+-(\d|[a-z])+-(\d|[a-z])+)'
+		if ($output) {
+			$id_res = $matches[0].Substring(6)
+		}
+		xcrun notarytool log $id_res `
+			--apple-id $DevId `
+			--team-id $DevTeamId `
+			--password $DevPassword `
+			developer_log.json
+		get-content developer_log.json
 	}
 }
