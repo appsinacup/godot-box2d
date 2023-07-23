@@ -125,8 +125,8 @@ bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D
 	if (!sweep_test_result.collision) {
 		return true;
 	}
-	*closest_unsafe = sweep_test_result.unsafe_fraction();
 	*closest_safe = sweep_test_result.safe_fraction();
+	*closest_unsafe = sweep_test_result.unsafe_fraction(*closest_safe);
 	return true;
 }
 bool Box2DDirectSpaceState::_collide_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, void *results, int32_t max_results, int32_t *result_count) {
@@ -162,7 +162,7 @@ bool Box2DDirectSpaceState::_rest_info(const RID &shape_rid, const Transform2D &
 	result_instance.rid = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape->get_self();
 	result_instance.collider_id = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_object_instance_id();
 	result_instance.point = transform.get_origin() + box2d_to_godot(sweep_test_result.manifold.points[0]);
-	result_instance.normal = box2d_to_godot(sweep_test_result.manifold.normal);
+	result_instance.normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
 	result_instance.linear_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetLinearVelocity());
 	return true;
 }

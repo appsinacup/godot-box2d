@@ -109,9 +109,9 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 
 	// Find the right most point on the hull
 	int32 i0 = 0;
-	double x0 = ps[0].x;
+	float x0 = ps[0].x;
 	for (int32 i = 1; i < n; ++i) {
-		double x = ps[i].x;
+		float x = ps[i].x;
 		if (x > x0 || (x == x0 && ps[i].y < ps[i0].y)) {
 			i0 = i;
 			x0 = x;
@@ -139,7 +139,7 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 
 			b2Vec2 r = ps[ie] - ps[hull[m]];
 			b2Vec2 v = ps[j] - ps[hull[m]];
-			double c = b2Cross(r, v);
+			float c = b2Cross(r, v);
 			if (c < 0.0f) {
 				ie = j;
 			}

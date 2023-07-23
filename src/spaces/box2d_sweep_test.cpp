@@ -19,18 +19,27 @@
 #include <box2d/b2_time_of_impact.h>
 
 real_t SweepTestResult::safe_fraction() {
-	float motion_length = (sweep_shape_A.sweep.c - sweep_shape_A.sweep.c0).Length();
-	float unsafe_length = (sweep_shape_A.transform.p - sweep_shape_A.sweep.c0).Length();
-	float separation_distance = (distance_output.pointA - sweep_shape_A.transform.p).Length();
-	float safe_length = unsafe_length - separation_distance;
+	b2Vec2 motion_normal = sweep_shape_A.sweep.c - sweep_shape_A.sweep.c0;
+	float motion_length = motion_normal.Normalize();
+	float unsafe_length = motion_length * toi_output.t;
+	b2Vec2 separation = distance_output.pointA - sweep_shape_A.transform.p;
+	float separation_distance = separation.Length();
+	// Vector projection https://math.stackexchange.com/questions/108980/projecting-a-point-onto-a-vector-2d
+	b2Vec2 projection = (b2Cross(separation, motion_normal)) * motion_normal;
+
+	float safe_length = unsafe_length - projection.Length();
 	float safe_fraction = safe_length / motion_length;
-	if (safe_fraction < 0) {
+	if (safe_fraction <= b2_epsilon) {
 		return 0;
 	}
 	return safe_fraction;
 }
-real_t SweepTestResult::unsafe_fraction() {
-	return toi_output.t;
+real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
+	if (safe_fraction <= b2_epsilon) {
+		return 0;
+	}
+	float unsafe = safe_fraction + b2_linearSlop;
+	return unsafe;
 }
 
 b2Sweep Box2DSweepTest::create_b2_sweep(b2Transform p_transform, b2Vec2 p_center, b2Vec2 p_motion) {
@@ -134,14 +143,18 @@ b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, b2
 	b2DistanceOutput output;
 	b2DistanceInput input;
 	b2SimplexCache cache;
-	input.proxyA.Set(shapeA, 0);
-	input.proxyB.Set(shapeB, 0);
-	// TODO use margin
-	// input.useRadii = true;
-	input.transformA = p_transformA;
-	input.transformA = p_transformB;
 	cache.count = 0;
+	float margin = 0.01f;
+	input.proxyA.Set(shapeA, 0);
+	//input.proxyA.m_radius = margin;
+	input.proxyB.Set(shapeB, 0);
+	//input.proxyB.m_radius = margin;
+	input.transformA = p_transformA;
+	input.transformB = p_transformB;
+	input.useRadii = true;
 	b2Distance(&output, &cache, &input);
+	b2PolygonShape *polyA = (b2PolygonShape *)shapeA;
+	b2PolygonShape *polyB = (b2PolygonShape *)shapeB;
 	return output;
 }
 
@@ -152,7 +165,6 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	if (shape->get_b2Shape_count(false) == 0) {
 		ERR_FAIL_V_MSG(aabb_total, "Cannot get aabb of empty shape.");
 	}
-	//Transform2D identity(shape_transform.q.GetAngle(), box2d_to_godot(shape_transform.p));
 	Transform2D identity;
 	for (int i = 0; i < shape->get_b2Shape_count(false); i++) {
 		b2Shape *b2_shape = (shape->get_transformed_b2Shape(i, identity, false, false));
@@ -193,11 +205,13 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 			sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
 			sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
 			b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, p_sweep_shape_B.transform, shape_B);
+			if (distance_output.distance > b2_epsilon) {
+				break;
+			}
 			IntersectionManifoldResult intersection = _evaluate_intersection_manifold(shape_A, 0, p_sweep_shape_A.transform, shape_B, 0, p_sweep_shape_B.transform);
 			b2Manifold local_manifold = intersection.manifold;
 
 			if (!intersection.intersecting()) {
-				//WARN_PRINT("`test_motion_toi` failed intersection! Report this!");
 				break;
 			}
 			manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
@@ -207,7 +221,6 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 
 			const b2Vec2 normal = manifold.normal;
 			if (b2Dot(normal, motion) <= FLT_EPSILON) {
-				WARN_PRINT("`shape_cast` failed normal! Report this!");
 				break;
 			}
 
@@ -269,7 +282,6 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
 		for (Box2DShape *box2d_shape_A : p_shapes) {
 			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(false); i++) {
-				//identity = p_transform;
 				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(i, identity, false, false);
 				SweepShape sweep_shape_A{ box2d_shape_A, sweepA, nullptr, shape_A_transform };
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };

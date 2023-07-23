@@ -7,33 +7,14 @@ A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d).
 
-## Features
+## Missing/Not implemented
 
-Bodies:
-- [x] Rigid Body
-- [] Kinematic Body
-- [x] Static Body
-- [x] Area
-
-Joints:
-- [x] Pin Joint
-- [x] Damped Spring Joint
-- [x] Groove Joint
-
-Shapes:
-- [x] Capsule Shape
-- [x] Circle Shape
-- [x] Concave Polygon Shape
-- [x] Convex Polygon Shape
-- [x] Rectangle Shape
-- [x] Segment Shape
-- [x] Separation Ray Shape
-- [x] World Boundary Shape
-
-Direct State:
-- [x] Direct Body State
-- [x] Direct Space State
-
+- Skewed shapes
+- Scaled shapes
+- Constant speed on static bodies
+- Collision layers and masks don't work exactly the same (having non symetric layer/mask)
+- Body pickable
+- Torque uses wrong values
 
 ## Install from binaries
 

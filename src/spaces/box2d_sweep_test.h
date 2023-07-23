@@ -35,7 +35,7 @@ struct SweepTestResult {
 	b2WorldManifold manifold;
 	bool collision = false;
 	real_t safe_fraction();
-	real_t unsafe_fraction();
+	real_t unsafe_fraction(float safe_fraction);
 };
 
 class Box2DSweepTest {
