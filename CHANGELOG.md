@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.3](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.3)
+
+- Fix mac binary signing
+- Add basic implementation for force_integration_callback
+
 ## [v0.2](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.2)
 
 - Fix CharacterController2D to correctly work(passing 19/20 tests)

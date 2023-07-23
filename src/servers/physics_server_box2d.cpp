@@ -955,11 +955,19 @@ double PhysicsServerBox2D::_body_get_contacts_reported_depth_threshold(const RID
 	return 0;
 }
 void PhysicsServerBox2D::_body_set_omit_force_integration(const RID &p_body, bool p_enable) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+	body->set_omit_force_integration(p_enable);
 }
 bool PhysicsServerBox2D::_body_is_omitting_force_integration(const RID &p_body) const {
-	return false;
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND_V(!body, false);
+	return body->is_omitting_force_integration();
 }
 void PhysicsServerBox2D::_body_set_force_integration_callback(const RID &p_body, const Callable &p_callable, const Variant &p_userdata) {
+	Box2DBody *body = body_owner.get_or_null(p_body);
+	ERR_FAIL_COND(!body);
+	body->set_force_integration_callback(p_callable, p_userdata);
 }
 bool PhysicsServerBox2D::_body_collide_shape(const RID &p_body, int32_t p_body_shape, const RID &p_shape, const Transform2D &p_shape_xform, const Vector2 &p_motion, void *p_results, int32_t p_result_max, int32_t *p_result_count) {
 	Box2DBody *body = body_owner.get_or_null(p_body);

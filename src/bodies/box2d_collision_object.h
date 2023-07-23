@@ -90,6 +90,7 @@ protected:
 	};
 
 	ContactEdgeData _get_contact_edge_data(int32_t contact_idx) const;
+	bool omit_force_integration = false;
 
 protected:
 	void _set_transform(const Transform2D &p_transform, bool p_update_shapes = true);
@@ -111,6 +112,8 @@ public:
 	void set_inertia(real_t p_inertia);
 	void set_center_of_mass(Vector2 p_center_of_mass);
 
+	void set_omit_force_integration(bool p_enable);
+	bool is_omitting_force_integration();
 	PhysicsServer2D::BodyDampMode get_linear_damp_mode() const;
 	double get_linear_damp() const;
 	PhysicsServer2D::BodyDampMode get_angular_damp_mode() const;

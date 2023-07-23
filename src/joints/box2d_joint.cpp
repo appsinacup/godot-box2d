@@ -111,24 +111,24 @@ real_t Box2DJoint::get_pin_softness() {
 }
 
 void Box2DJoint::set_damped_spring_rest_length(real_t p_damped_spring_rest_length) {
-	if (damped_spring.rest_length == godot_to_box2d(p_damped_spring_rest_length)) {
+	if (damped_spring.rest_length == godot_to_box2d(godot_to_box2d(p_damped_spring_rest_length))) {
 		return;
 	}
-	damped_spring.rest_length = godot_to_box2d(p_damped_spring_rest_length);
+	damped_spring.rest_length = godot_to_box2d(godot_to_box2d(p_damped_spring_rest_length));
 	if (joint && (b2DistanceJoint *)joint) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		distance_joint->SetLength(damped_spring.rest_length);
 	}
 }
 real_t Box2DJoint::get_damped_spring_rest_length() {
-	return box2d_to_godot(damped_spring.rest_length);
+	return box2d_to_godot(box2d_to_godot(damped_spring.rest_length));
 }
 
 void Box2DJoint::set_damped_spring_stiffness(real_t p_damped_spring_stiffness) {
-	if (damped_spring.stiffness == godot_to_box2d(p_damped_spring_stiffness)) {
+	if (damped_spring.stiffness == godot_to_box2d(godot_to_box2d(p_damped_spring_stiffness))) {
 		return;
 	}
-	damped_spring.stiffness = godot_to_box2d(p_damped_spring_stiffness);
+	damped_spring.stiffness = godot_to_box2d(godot_to_box2d(p_damped_spring_stiffness));
 	if (joint && (b2DistanceJoint *)joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		float stiffness = 0;
@@ -138,7 +138,7 @@ void Box2DJoint::set_damped_spring_stiffness(real_t p_damped_spring_stiffness) {
 	}
 }
 real_t Box2DJoint::get_damped_spring_stiffness() {
-	return box2d_to_godot(damped_spring.stiffness);
+	return box2d_to_godot(box2d_to_godot(damped_spring.stiffness));
 }
 
 void Box2DJoint::set_damped_spring_damping(real_t p_damped_spring_damping) {

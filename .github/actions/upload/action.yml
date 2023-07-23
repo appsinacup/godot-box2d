@@ -7,7 +7,7 @@ runs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: Physics Server Box2D
+        name: Godot Box2D
         path: |
           ${{ github.workspace }}/dist/**
         retention-days: 14

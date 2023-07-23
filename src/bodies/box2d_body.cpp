@@ -5,6 +5,13 @@
 bool Box2DBody::is_active() const { return active; }
 
 // Physics Server
+void Box2DBody::set_force_integration_callback(const Callable &p_callable, const Variant &p_userdata) {
+	body_force_integration_callback = p_callable;
+	body_force_integration_userdata = p_userdata;
+}
+void Box2DBody::set_state_sync_callback(const Callable &p_callable) {
+	body_state_sync_callback = p_callable;
+}
 void Box2DBody::set_max_contacts_reported(int32 p_max_contacts_reported) {
 	max_contacts_reported = p_max_contacts_reported;
 }
@@ -18,10 +25,6 @@ void Box2DBody::wakeup() {
 		return;
 	}
 	set_active(true);
-}
-
-void Box2DBody::set_state_sync_callback(const Callable &p_callable) {
-	body_state_callback = p_callable;
 }
 
 Box2DDirectBodyState *Box2DBody::get_direct_state() {
@@ -200,15 +203,18 @@ void Box2DBody::set_space(Box2DSpace *p_space) {
 }
 
 void Box2DBody::after_step() {
-	if (body_state_callback.is_valid()) {
+	if (body_state_sync_callback.is_valid() || body_force_integration_callback.is_valid()) {
 		get_space()->body_add_to_state_query_list(&direct_state_query_list);
 	}
 }
 
 void Box2DBody::call_queries() {
 	Variant direct_state = get_direct_state();
-	if (body_state_callback.is_valid()) {
-		body_state_callback.callv(Array::make(direct_state));
+	if (body_state_sync_callback.is_valid()) {
+		body_state_sync_callback.callv(Array::make(direct_state));
+	}
+	if (body_force_integration_callback.is_valid()) {
+		body_force_integration_callback.callv(Array::make(direct_state, body_force_integration_userdata));
 	}
 }
 

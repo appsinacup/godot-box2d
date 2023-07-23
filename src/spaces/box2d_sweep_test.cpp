@@ -38,8 +38,10 @@ real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
 	if (safe_fraction <= b2_epsilon) {
 		return 0;
 	}
-	float unsafe = safe_fraction + b2_linearSlop;
-	return unsafe;
+	if (safe_fraction >= toi_output.t) {
+		return safe_fraction + b2_linearSlop;
+	}
+	return toi_output.t;
 }
 
 b2Sweep Box2DSweepTest::create_b2_sweep(b2Transform p_transform, b2Vec2 p_center, b2Vec2 p_motion) {

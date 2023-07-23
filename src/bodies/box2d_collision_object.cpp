@@ -106,6 +106,14 @@ void Box2DCollisionObject::set_angular_damp(real_t p_angular_damp) {
 	damping.angular_damp = p_angular_damp;
 	recalculate_total_angular_damp();
 }
+void Box2DCollisionObject::set_omit_force_integration(bool p_enable) {
+	omit_force_integration = p_enable;
+	recalculate_total_linear_damp();
+	recalculate_total_angular_damp();
+}
+bool Box2DCollisionObject::is_omitting_force_integration() {
+	return omit_force_integration;
+}
 PhysicsServer2D::BodyDampMode Box2DCollisionObject::get_linear_damp_mode() const {
 	return damping.linear_damp_mode;
 }
@@ -120,6 +128,13 @@ double Box2DCollisionObject::get_angular_damp() const {
 }
 
 void Box2DCollisionObject::recalculate_total_linear_damp() {
+	if (omit_force_integration) {
+		body_def->linearDamping = 0;
+		if (body) {
+			body->SetLinearDamping(0);
+		}
+		return;
+	}
 	total_linear_damp = damping.linear_damp;
 	if (get_linear_damp_mode() == PhysicsServer2D::BodyDampMode::BODY_DAMP_MODE_REPLACE) {
 		body_def->linearDamping = total_linear_damp;
@@ -161,6 +176,13 @@ void Box2DCollisionObject::recalculate_total_linear_damp() {
 }
 
 void Box2DCollisionObject::recalculate_total_angular_damp() {
+	if (omit_force_integration) {
+		body_def->angularDamping = 0;
+		if (body) {
+			body->SetAngularDamping(0);
+		}
+		return;
+	}
 	total_angular_damp = damping.angular_damp;
 	if (get_angular_damp_mode() == PhysicsServer2D::BodyDampMode::BODY_DAMP_MODE_REPLACE) {
 		body_def->angularDamping = total_angular_damp;
@@ -786,7 +808,9 @@ void Box2DCollisionObject::_update_shapes() {
 void Box2DCollisionObject::before_step() {
 	if (body) {
 		// custom gravity
-		body->ApplyForceToCenter(body->GetMass() * gravity_scale * total_gravity, false);
+		if (!is_omitting_force_integration()) {
+			body->ApplyForceToCenter(body->GetMass() * gravity_scale * total_gravity, false);
+		}
 		if (constant_forces.constant_force != b2Vec2_zero) {
 			// constant force
 			body->ApplyForce(body->GetMass() * constant_forces.constant_force, body->GetPosition(), true);

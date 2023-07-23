@@ -26,7 +26,9 @@ class Box2DBody : public Box2DCollisionObject {
 
 	Transform2D new_transform;
 
-	Callable body_state_callback;
+	Callable body_force_integration_callback;
+	Variant body_force_integration_userdata;
+	Callable body_state_sync_callback;
 
 	Box2DDirectBodyState *direct_state = nullptr;
 	HashSet<Box2DJoint *> joints;
@@ -35,12 +37,12 @@ class Box2DBody : public Box2DCollisionObject {
 public:
 	// Physics Server
 	void set_max_contacts_reported(int32 p_max_contacts_reported);
+	void set_force_integration_callback(const Callable &p_callable, const Variant &p_userdata);
+	void set_state_sync_callback(const Callable &p_callable);
 
 	int32 get_max_contacts_reported();
 
 	void set_space(Box2DSpace *p_space) override;
-
-	void set_state_sync_callback(const Callable &p_callable);
 
 	Box2DDirectBodyState *get_direct_state();
 
