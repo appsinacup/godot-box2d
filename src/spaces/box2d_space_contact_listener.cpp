@@ -32,6 +32,29 @@ void Box2DSpaceContactListener::EndContact(b2Contact *contact) {
 }
 
 void Box2DSpaceContactListener::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
+	b2Body *b2_body_A = contact->GetFixtureA()->GetBody();
+	b2Body *b2_body_B = contact->GetFixtureB()->GetBody();
+	Box2DCollisionObject *bodyA = b2_body_A->GetUserData().collision_object;
+	Box2DCollisionObject *bodyB = b2_body_B->GetUserData().collision_object;
+	int shapeA = contact->GetFixtureA()->GetUserData().shape_idx;
+	int shapeB = contact->GetFixtureA()->GetUserData().shape_idx;
+	b2WorldManifold worldManifold;
+	contact->GetWorldManifold(&worldManifold);
+	int point_count = contact->GetManifold()->pointCount;
+	if (b2_body_A->GetType() != b2BodyType::b2_dynamicBody && b2_body_B->GetType() == b2BodyType::b2_dynamicBody) {
+		if (point_count > 0) {
+			b2_body_B->ApplyLinearImpulse(b2_body_B->GetMass() * bodyA->get_constant_linear_velocity(), worldManifold.points[0], true);
+		}
+		float inertia = b2_body_B->GetInertia() - b2_body_B->GetMass() * b2Dot(b2_body_B->GetLocalCenter(), b2_body_B->GetLocalCenter());
+		b2_body_B->ApplyTorque(inertia * bodyA->get_constant_angular_velocity(), true);
+	}
+	if (b2_body_B->GetType() != b2BodyType::b2_dynamicBody && b2_body_A->GetType() == b2BodyType::b2_dynamicBody) {
+		if (point_count > 0) {
+			b2_body_A->ApplyLinearImpulse(b2_body_A->GetMass() * bodyB->get_constant_linear_velocity(), worldManifold.points[0], true);
+		}
+		float inertia = b2_body_A->GetInertia() - b2_body_A->GetMass() * b2Dot(b2_body_A->GetLocalCenter(), b2_body_A->GetLocalCenter());
+		b2_body_A->ApplyTorque(inertia * bodyB->get_constant_angular_velocity(), true);
+	}
 }
 
 void Box2DSpaceContactListener::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) {

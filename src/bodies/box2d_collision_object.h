@@ -124,6 +124,8 @@ public:
 	double get_mass() const;
 	double get_inertia() const;
 	void reset_mass_properties();
+	b2Vec2 get_constant_linear_velocity();
+	float get_constant_angular_velocity();
 
 	// Direct Body API
 	virtual Vector2 get_total_gravity() const;

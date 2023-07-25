@@ -137,7 +137,20 @@ void Box2DSpace::body_remove_from_state_query_list(SelfList<Box2DBody> *p_body) 
 /* COLLISION OBJECT API */
 void Box2DSpace::add_object(Box2DCollisionObject *p_object) {
 	ERR_FAIL_COND(!p_object);
-	p_object->set_b2Body(world->CreateBody(p_object->get_b2BodyDef()));
+	b2BodyDef *body_def = p_object->get_b2BodyDef();
+	float angularVelocity = body_def->angularVelocity;
+	b2Vec2 linearVelocity = body_def->linearVelocity;
+	// if we create a static object, don't set angular and linear velocity
+	if (body_def->type != b2BodyType::b2_dynamicBody) {
+		body_def->angularVelocity = 0;
+		body_def->linearVelocity = b2Vec2_zero;
+	}
+	p_object->set_b2Body(world->CreateBody(body_def));
+	// revert the old values in case we changed them
+	if (body_def->type != b2BodyType::b2_dynamicBody) {
+		body_def->angularVelocity = angularVelocity;
+		body_def->linearVelocity = linearVelocity;
+	}
 }
 void Box2DSpace::remove_object(Box2DCollisionObject *p_object) {
 	ERR_FAIL_COND(!p_object);

@@ -102,6 +102,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
 			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
+				//_set_transform(p_variant);
 				// TODO
 			} else if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
 				_set_transform(p_variant);
@@ -118,17 +119,14 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 				//_set_inv_transform(get_transform().inverse());
 				//_update_transform_dependent();
 			}
-			wakeup();
 		} break;
 		case PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY: {
 			Vector2 linear_velocity = p_variant;
 			set_linear_velocity(linear_velocity);
-			wakeup();
 		} break;
 		case PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY: {
 			float angular_velocity = godot_to_box2d(variant_to_number(p_variant));
 			set_angular_velocity(angular_velocity);
-			wakeup();
 		} break;
 		case PhysicsServer2D::BODY_STATE_SLEEPING: {
 			if (mode == PhysicsServer2D::BODY_MODE_STATIC || mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {

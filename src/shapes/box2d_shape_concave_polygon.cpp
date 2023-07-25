@@ -11,13 +11,11 @@
 void Box2DShapeConcavePolygon::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::PACKED_VECTOR2_ARRAY);
 	PackedVector2Array points_array = p_data;
-	ERR_FAIL_COND(points_array.size() < 3);
 	points.resize(points_array.size());
 	for (int i = 0; i < points_array.size(); i++) {
 		points.write[i] = points_array[i];
 	}
 	points = Box2DShapeConvexPolygon::remove_points_that_are_too_close(points);
-	ERR_FAIL_COND(points.size() < 3);
 	configured = true;
 }
 
@@ -48,7 +46,7 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, Transfor
 		int points_count = points.size();
 		points_count = Box2DShapeConvexPolygon::remove_bad_points(box2d_points, points_count);
 		ERR_FAIL_COND_V(points_count < 3, nullptr);
-		shape->CreateChain(box2d_points, points_count, box2d_points[points.size() - 1], box2d_points[0]);
+		shape->CreateLoop(box2d_points, points_count);
 		delete[] box2d_points;
 		return shape;
 	}
