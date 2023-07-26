@@ -14,7 +14,7 @@ void Box2DShapeConvexPolygon::set_data(const Variant &p_data) {
 	for (int i = 0; i < points_array.size(); i++) {
 		points.write[i] = points_array[i];
 	}
-
+	points = make_sure_polygon_is_counterclockwise(points);
 	points = remove_points_that_are_too_close(points);
 	ERR_FAIL_COND(points.size() < 3);
 	polygons.clear();
@@ -49,6 +49,24 @@ Variant Box2DShapeConvexPolygon::get_data() const {
 
 int Box2DShapeConvexPolygon::get_b2Shape_count(bool is_static) const {
 	return polygons.size();
+}
+
+float compute_polygon_area(Vector<Vector2> points) {
+	float area = 0.0f;
+	for (int i = 0; i < points.size(); i++) {
+		int j = (i + 1) % points.size();
+		area += points[j][0] * points[i][1] - points[i][0] * points[j][1];
+	}
+	return area / 2.0f;
+}
+
+Vector<Vector2> Box2DShapeConvexPolygon::make_sure_polygon_is_counterclockwise(Vector<Vector2> points) {
+	Vector<Vector2> ccw_points = points;
+	// polygon is clockwise
+	if (compute_polygon_area(ccw_points) > 0) {
+		ccw_points.reverse();
+	}
+	return ccw_points;
 }
 
 Vector<Vector2> Box2DShapeConvexPolygon::remove_points_that_are_too_close(Vector<Vector2> points) {

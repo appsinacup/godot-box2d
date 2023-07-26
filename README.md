@@ -17,13 +17,12 @@ A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
        In godot would result a collision, but would be very weird, as only one of the objects would receive collision restution.
 
+- Shape scaling and skewing:
+  - Circles and capsules only support uniform scaling and don't support skewing
+
 ## Missing/Not implemented
 
-- Skewed shapes
-- Scaled shapes
-- Constant speed on static bodies
 - Body pickable
-- Torque uses wrong values
 
 ## Install
 

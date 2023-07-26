@@ -15,6 +15,7 @@ void Box2DShapeConcavePolygon::set_data(const Variant &p_data) {
 	for (int i = 0; i < points_array.size(); i++) {
 		points.write[i] = points_array[i];
 	}
+	points = Box2DShapeConvexPolygon::make_sure_polygon_is_counterclockwise(points);
 	points = Box2DShapeConvexPolygon::remove_points_that_are_too_close(points);
 	configured = true;
 }
@@ -44,7 +45,6 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, Transfor
 			godot_to_box2d(p_transform.xform(points[i]), box2d_points[i]);
 		}
 		int points_count = points.size();
-		points_count = Box2DShapeConvexPolygon::remove_bad_points(box2d_points, points_count);
 		ERR_FAIL_COND_V(points_count < 3, nullptr);
 		shape->CreateLoop(box2d_points, points_count);
 		delete[] box2d_points;
@@ -58,10 +58,10 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, Transfor
 	Vector2 b = points[(p_index + 1) % points.size()];
 	Vector2 dir = (a - b).normalized();
 	Vector2 right(dir.y, -dir.x);
-	godot_to_box2d(p_transform.xform(a - right * 0.1), box2d_points[0]);
-	godot_to_box2d(p_transform.xform(a + right * 0.1), box2d_points[1]);
-	godot_to_box2d(p_transform.xform(b - right * 0.1), box2d_points[2]);
-	godot_to_box2d(p_transform.xform(b + right * 0.1), box2d_points[3]);
+	godot_to_box2d(p_transform.xform(a - right * 0.5), box2d_points[0]);
+	godot_to_box2d(p_transform.xform(a + right * 0.5), box2d_points[1]);
+	godot_to_box2d(p_transform.xform(b - right * 0.5), box2d_points[2]);
+	godot_to_box2d(p_transform.xform(b + right * 0.5), box2d_points[3]);
 	shape->Set(box2d_points, 4);
 	delete[] box2d_points;
 	return shape;
