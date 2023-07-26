@@ -5,7 +5,7 @@ on:
 
 # Global Settings
 env:
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes debug_symbols=no
+  SCONSFLAGS: verbose=yes warnings=extra werror=yes
 
 jobs:
   macos:
