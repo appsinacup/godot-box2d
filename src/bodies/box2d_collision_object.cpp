@@ -355,7 +355,7 @@ void Box2DCollisionObject::apply_impulse(const Vector2 &impulse, const Vector2 &
 }
 void Box2DCollisionObject::apply_torque_impulse(double impulse) {
 	if (body && body->GetType() == b2BodyType::b2_dynamicBody) {
-		body->ApplyTorque((1.0f / mass_data.I) * impulse, true);
+		body->ApplyAngularImpulse(body->GetInertia() * godot_to_box2d(impulse), true);
 	}
 }
 void Box2DCollisionObject::apply_central_force(const Vector2 &force) {
@@ -370,7 +370,7 @@ void Box2DCollisionObject::apply_force(const Vector2 &force, const Vector2 &posi
 }
 void Box2DCollisionObject::apply_torque(double torque) {
 	if (body && body->GetType() == b2BodyType::b2_dynamicBody) {
-		body->ApplyTorque(body->GetMass() * godot_to_box2d(torque), true);
+		body->ApplyTorque(body->GetInertia() * godot_to_box2d(torque), true);
 	}
 }
 
@@ -805,7 +805,6 @@ void Box2DCollisionObject::_update_shapes() {
 		float old_mass = mass_data.mass;
 		// update inertia and center of mass
 		mass_data = body->GetMassData();
-		body->GetInertia();
 		// revert mass
 		mass_data.mass = old_mass;
 		body->SetMassData(&mass_data);
@@ -824,7 +823,8 @@ void Box2DCollisionObject::before_step() {
 		}
 		if (constant_forces.constant_torque != 0) {
 			// constant torque
-			body->ApplyTorque(body->GetMass() * constant_forces.constant_torque, true);
+
+			body->ApplyTorque(body->GetInertia() * constant_forces.constant_torque, true);
 		}
 	}
 }

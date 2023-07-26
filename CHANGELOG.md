@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.4](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.4)
+
+- Fix torque (almost, there is still a little difference in test, but numbers are much more closer now)
+- Fix concave polygon
+- Add support for conveyer belt
+- Add build for web but not enabled yet (bug in godot-cpp)
+
 ## [v0.3](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.3)
 
 - Fix mac binary signing
