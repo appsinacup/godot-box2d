@@ -6,6 +6,7 @@
 - Fix concave polygon
 - Add support for conveyer belt
 - Add build for web but not enabled yet (bug in godot-cpp)
+- Update/fix support for skewing/scaling for shapes.
 
 ## [v0.3](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.3)
 

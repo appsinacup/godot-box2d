@@ -20,6 +20,7 @@ void Box2DCollisionObject::reset_mass_properties() {
 		//mass_data = body->GetMassData();
 		mass_data.mass = 1.0f;
 		body->SetMassData(&mass_data);
+		mass_data.center = body->GetLocalCenter();
 		mass_data.I = body->GetMassData().I;
 	} else {
 		mass_data.mass = 1.0f;
@@ -35,6 +36,7 @@ void Box2DCollisionObject::set_mass(real_t p_mass) {
 	mass_data.mass = p_mass;
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.center = body->GetLocalCenter();
 		mass_data.I = body->GetMassData().I;
 	}
 }
@@ -51,6 +53,7 @@ void Box2DCollisionObject::set_inertia(real_t p_inertia) {
 	mass_data.I = godot_to_box2d(godot_to_box2d(p_inertia));
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.center = body->GetLocalCenter();
 		mass_data.I = body->GetMassData().I;
 	}
 }
@@ -64,6 +67,7 @@ void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	godot_to_box2d(p_center_of_mass, mass_data.center);
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.center = body->GetLocalCenter();
 		mass_data.I = body->GetMassData().I;
 	}
 }
@@ -807,6 +811,9 @@ void Box2DCollisionObject::_update_shapes() {
 		mass_data = body->GetMassData();
 		// revert mass
 		mass_data.mass = old_mass;
+		// TODO only do this if we need to automatically compute local center.
+		mass_data.center = body->GetLocalCenter();
+		//mass_data.center = b2Vec2_zero;
 		body->SetMassData(&mass_data);
 		//space->get_broadphase()->move(s.bpid, shape_aabb);
 	}
@@ -890,6 +897,7 @@ void Box2DCollisionObject::set_b2Body(b2Body *p_body) {
 	// set additional properties here
 	if (body) {
 		body->SetMassData(&mass_data);
+		mass_data.center = body->GetLocalCenter();
 		mass_data.I = body->GetMassData().I;
 		body->SetAwake(true);
 		//recreate_shapes();
