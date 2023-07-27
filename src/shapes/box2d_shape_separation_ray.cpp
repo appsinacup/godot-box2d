@@ -22,6 +22,8 @@ void Box2DShapeSeparationRay::set_data(const Variant &p_data) {
 		half_extents.x = GODOT_LINEAR_SLOP;
 	}
 	configured = true;
+	// update all existing shapes
+	configure_all_b2Shapes();
 }
 
 Variant Box2DShapeSeparationRay::get_data() const {

@@ -36,6 +36,8 @@ void Box2DShapeConvexPolygon::set_data(const Variant &p_data) {
 		polygons.append(cut_polygon);
 	}
 	configured = true;
+	// update all existing shapes
+	configure_all_b2Shapes();
 }
 
 Variant Box2DShapeConvexPolygon::get_data() const {
@@ -187,19 +189,22 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 	}
 	return m;
 }
-
-b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
-	ERR_FAIL_COND_V(p_index >= polygons.size(), nullptr);
-	Vector<Vector2> polygon = polygons[p_index];
+b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+	b2PolygonShape *shape = memnew(b2PolygonShape);
+	created_shapes.append(shape);
+	if (body) {
+		shape_body_map[shape] = body;
+	}
+	ERR_FAIL_COND_V(shape_info.index >= polygons.size(), nullptr);
+	Vector<Vector2> polygon = polygons[shape_info.index];
 	ERR_FAIL_COND_V(polygon.size() > b2_maxPolygonVertices, nullptr);
 	ERR_FAIL_COND_V(polygon.size() < 3, nullptr);
 	b2Vec2 b2_points[b2_maxPolygonVertices];
-	b2PolygonShape *polygon_shape = memnew(b2PolygonShape);
 	for (int i = 0; i < polygon.size(); i++) {
-		godot_to_box2d(p_transform.xform(polygon[i]), b2_points[i]);
+		godot_to_box2d(shape_info.transform.xform(polygon[i]), b2_points[i]);
 	}
 	int new_size = remove_bad_points(b2_points, polygon.size());
 	ERR_FAIL_COND_V(new_size < 3, nullptr);
-	polygon_shape->Set(b2_points, new_size);
-	return polygon_shape;
+	shape->Set(b2_points, new_size);
+	return shape;
 }

@@ -3,6 +3,7 @@
 #include "../b2_user_settings.h"
 
 #include "../box2d_type_conversions.h"
+#include "../joints/box2d_joint.h"
 #include "../spaces/box2d_direct_space_state.h"
 #include "box2d_area.h"
 
@@ -593,24 +594,23 @@ void Box2DCollisionObject::add_shape(Box2DShape *p_shape, const Transform2D &p_t
 	s.xform = p_transform;
 	s.disabled = p_disabled;
 	shapes.push_back(s);
-
-	// TODO (queue) update
 }
 
 void Box2DCollisionObject::set_shape(int p_index, Box2DShape *p_shape) {
 	ERR_FAIL_INDEX(p_index, shapes.size());
-	//shapes[p_index].shape->remove_owner(this);
+	// if there was previously a shape, clear it
+	clear_shape(p_index);
 	shapes.write[p_index].shape = p_shape;
-
-	// TODO: (queue) update
+	// TODO only update this shape
+	_update_shapes();
 }
 
 void Box2DCollisionObject::set_shape_transform(int p_index, const Transform2D &p_transform) {
 	ERR_FAIL_INDEX(p_index, shapes.size());
 
 	shapes.write[p_index].xform = p_transform;
-
-	// TODO: (queue) update
+	// TODO only update this shape
+	_update_shapes();
 }
 
 void Box2DCollisionObject::set_shape_disabled(int p_index, bool p_disabled) {
@@ -626,16 +626,7 @@ void Box2DCollisionObject::set_shape_disabled(int p_index, bool p_disabled) {
 	if (!space) {
 		return;
 	}
-
-	for (int j = 0; j < shape.fixtures.size(); j++) {
-		if (body) {
-			body->DestroyFixture(shape.fixtures[j]);
-		}
-		shape.fixtures.write[j] = nullptr;
-	}
-	shape.fixtures.clear();
-
-	// TODO: (queue) update
+	clear_shape(shape.shape);
 }
 
 void Box2DCollisionObject::set_shape_as_one_way_collision(int p_index, bool enable) {
@@ -651,51 +642,66 @@ void Box2DCollisionObject::set_shape_as_one_way_collision(int p_index, bool enab
 	_update_shapes();
 }
 
-void Box2DCollisionObject::remove_shape(Box2DShape *p_shape) {
-	//remove a shape, all the times it appears
+void Box2DCollisionObject::clear_shape(Box2DShape *p_shape) {
+	//clear a shape, all the times it appears
 	for (int i = 0; i < shapes.size(); i++) {
 		if (shapes[i].shape == p_shape) {
-			remove_shape(i);
-			i--;
+			clear_shape(i);
 		}
 	}
 }
 
+void Box2DCollisionObject::clear_shape(int p_index) {
+	ERR_FAIL_INDEX(p_index, shapes.size());
+	Shape &shape = shapes.write[p_index];
+	for (int j = 0; j < shape.fixtures.size(); j++) {
+		// should never get here with a null owner
+		if (shape.fixtures[j]) {
+			shape.shape->erase_shape(shape.shapes[j]);
+			body->DestroyFixture(shape.fixtures[j]);
+		}
+		shape.fixtures.write[j] = nullptr;
+		shape.shapes.write[j] = nullptr;
+	}
+	shape.fixtures.clear();
+	shape.shapes.clear();
+}
+
+void Box2DCollisionObject::remove_shape(Box2DShape *p_shape) {
+	//remove a shape, all the times it appears
+	Vector<int> to_remove;
+	for (int i = 0; i < shapes.size(); i++) {
+		if (shapes[i].shape == p_shape) {
+			to_remove.append(i);
+		}
+	}
+	for (int i : to_remove) {
+		remove_shape(i);
+	}
+}
+
 void Box2DCollisionObject::recreate_shapes() {
-	// todo make it work with one shape
-	_clear_fixtures();
+	clear_shapes();
 	_update_shapes();
 }
 
 void Box2DCollisionObject::remove_shape(int p_index) {
 	//remove anything from shape to be erased to end, so subindices don't change
-	ERR_FAIL_INDEX(p_index, shapes.size());
-	for (int i = p_index; i < shapes.size(); i++) {
-		Shape &shape = shapes.write[i];
-		for (int j = 0; j < shape.fixtures.size(); j++) {
-			// should never get here with a null owner
-			if (body) {
-				body->DestroyFixture(shape.fixtures[j]);
-			}
-			shape.fixtures.write[j] = nullptr;
-		}
-		shape.fixtures.clear();
-	}
+	clear_shape(p_index);
 	shapes.remove_at(p_index);
-
-	// TODO: (queue) update
 }
 
-void Box2DCollisionObject::_clear_fixtures() {
+void Box2DCollisionObject::clear_shapes() {
 	for (int i = 0; i < shapes.size(); i++) {
 		Shape &shape = shapes.write[i];
-		for (int j = 0; j < shape.fixtures.size(); j++) {
-			if (body) {
-				body->DestroyFixture(shape.fixtures[j]);
-			}
-			shape.fixtures.write[j] = nullptr;
-		}
-		shape.fixtures.clear();
+		clear_shape(shape.shape);
+	}
+}
+
+void Box2DCollisionObject::remove_shapes() {
+	for (int i = 0; i < shapes.size(); i++) {
+		remove_shape(i);
+		i--;
 	}
 }
 
@@ -707,7 +713,6 @@ void Box2DCollisionObject::_set_space(Box2DSpace *p_space) {
 			body_def->angle = body->GetAngle();
 		}
 
-		_clear_fixtures();
 		space->remove_object(this);
 	}
 	space = p_space;
@@ -719,12 +724,12 @@ void Box2DCollisionObject::_set_space(Box2DSpace *p_space) {
 
 int Box2DCollisionObject::get_shape_count() const { return shapes.size(); }
 Box2DShape *Box2DCollisionObject::get_shape(int p_index) const {
-	CRASH_BAD_INDEX(p_index, shapes.size());
+	ERR_FAIL_INDEX_V(p_index, shapes.size(), nullptr);
 	return shapes[p_index].shape;
 }
 
 const Transform2D &Box2DCollisionObject::get_shape_transform(int p_index) const {
-	CRASH_BAD_INDEX(p_index, shapes.size());
+	ERR_FAIL_INDEX_V(p_index, shapes.size(), Transform2D());
 	return shapes[p_index].xform;
 }
 
@@ -759,7 +764,6 @@ void Box2DCollisionObject::_update_shapes() {
 	if (!space || !body) {
 		return;
 	}
-
 	for (int i = 0; i < shapes.size(); i++) {
 		Shape &s = shapes.write[i];
 		if (s.disabled) {
@@ -772,9 +776,11 @@ void Box2DCollisionObject::_update_shapes() {
 		if (s.fixtures.is_empty()) {
 			int box2d_shape_count = s.shape->get_b2Shape_count(is_static);
 			s.fixtures.resize(box2d_shape_count);
+			s.shapes.resize(box2d_shape_count);
 			for (int j = 0; j < box2d_shape_count; j++) {
 				b2FixtureDef fixture_def;
-				b2Shape *b2_shape = s.shape->get_transformed_b2Shape(j, s.xform, s.one_way_collision, is_static);
+				Box2DShape::ShapeInfo shape_info{ j, s.xform, s.one_way_collision, is_static };
+				b2Shape *b2_shape = s.shape->get_transformed_b2Shape(shape_info, this);
 				fixture_def.shape = b2_shape;
 				if (fixture_def.shape == nullptr) {
 					ERR_PRINT("Shape " + itos(j) + " disabled.");
@@ -795,6 +801,7 @@ void Box2DCollisionObject::_update_shapes() {
 				fixture_def.density = 1.0f / shape_mass.mass;
 				b2_shape->ComputeMass(&shape_mass, fixture_def.density);
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
+				s.shapes.write[j] = b2_shape;
 			}
 		} else {
 			int box2d_shape_count = s.shape->get_b2Shape_count(is_static);
@@ -931,6 +938,9 @@ Box2DCollisionObject::~Box2DCollisionObject() {
 		if (area) {
 			area->remove_body(this);
 		}
+	}
+	if (space) {
+		space->remove_object(this);
 	}
 	memdelete(body_def);
 }

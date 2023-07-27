@@ -9,7 +9,7 @@ public:
 	virtual void set_data(const Variant &p_data) override;
 	virtual Variant get_data() const override;
 	virtual int get_b2Shape_count(bool is_static) const override { return 1; }
-	virtual b2Shape *get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) override;
+	virtual b2Shape *get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) override;
 
 	Box2DShapeRectangle() { type = PhysicsServer2D::SHAPE_RECTANGLE; }
 	~Box2DShapeRectangle() {}
