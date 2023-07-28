@@ -527,7 +527,6 @@ double Box2DCollisionObject::get_step() const {
 	return space->get_step();
 }
 void Box2DCollisionObject::integrate_forces() {
-	// TODO
 }
 
 PhysicsDirectSpaceState2D *Box2DCollisionObject::get_space_state() {
@@ -924,6 +923,7 @@ void Box2DCollisionObject::_set_transform(const Transform2D &p_transform, bool p
 	if (p_update_shapes) {
 		_update_shapes();
 	}
+	set_sleep_state(false);
 }
 
 Box2DCollisionObject::Box2DCollisionObject(Type p_type) {

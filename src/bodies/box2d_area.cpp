@@ -199,6 +199,7 @@ Box2DArea::Box2DArea() :
 	// b2_kinematicBody don't collide with b2_staticBody or b2_kinematicBody
 	// and areas have to be able to intersect with both kinematic and static bodies
 	body_def->type = b2_dynamicBody;
+	body_def->allowSleep = false;
 	//_set_static(true); //areas are not active by default
 }
 
