@@ -96,7 +96,7 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 					flipped = true;
 				} break;
 				default: {
-					ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unandled. TODO");
+					ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unexpected shape type.");
 				} break;
 			}
 		} break;
@@ -112,7 +112,7 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 					b2CollideEdgeAndPolygon(&manifold, static_cast<const b2EdgeShape *>(p_shapeA), p_xfA, static_cast<const b2PolygonShape *>(p_shapeB), p_xfB);
 				} break;
 				default: {
-					ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unandled. TODO");
+					ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unexpected shape type.");
 				} break;
 			}
 		} break;
@@ -129,12 +129,12 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 					b2CollidePolygons(&manifold, static_cast<const b2PolygonShape *>(p_shapeA), p_xfA, static_cast<const b2PolygonShape *>(p_shapeB), p_xfB);
 				} break;
 				default: {
-					ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unandled. TODO");
+					ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unexpected shape type.");
 				} break;
 			}
 		} break;
 		default: {
-			ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unandled. TODO");
+			ERR_FAIL_V_MSG((IntersectionManifoldResult{ manifold, flipped }), "Unexpected shape type.");
 		} break;
 	}
 
@@ -146,7 +146,8 @@ b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, b2
 	b2DistanceInput input;
 	b2SimplexCache cache;
 	cache.count = 0;
-	float margin = 0.01f;
+	// TODO apply margin here
+	float margin = 0.000000001f;
 	input.proxyA.Set(shapeA, 0);
 	//input.proxyA.m_radius = margin;
 	input.proxyB.Set(shapeB, 0);
@@ -164,12 +165,14 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	b2AABB aabb;
 	b2AABB aabb_total;
 	bool first_time = true;
+	ERR_FAIL_COND_V(!shape, b2AABB());
 	if (shape->get_b2Shape_count(false) == 0) {
 		ERR_FAIL_V_MSG(aabb_total, "Cannot get aabb of empty shape.");
 	}
 	Transform2D identity;
 	for (int i = 0; i < shape->get_b2Shape_count(false); i++) {
-		b2Shape *b2_shape = (shape->get_transformed_b2Shape(i, identity, false, false));
+		Box2DShape::ShapeInfo shape_info{ i, identity, false, false };
+		b2Shape *b2_shape = shape->get_transformed_b2Shape(shape_info, nullptr);
 		b2_shape->ComputeAABB(&aabb, shape_transform, 0);
 		if (first_time) {
 			first_time = false;
@@ -177,6 +180,7 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 		} else {
 			aabb_total.Combine(aabb);
 		}
+		shape->erase_shape(b2_shape);
 		memdelete(b2_shape);
 	}
 	if (!aabb.IsValid()) {
@@ -267,7 +271,6 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 	if (p_max_results == 0) {
 		return results;
 	}
-	// TODO take into consideration shape local transform
 	b2Transform shape_A_transform(godot_to_box2d(p_transform.get_origin()), b2Rot(p_transform.get_rotation()));
 	b2Vec2 motion = godot_to_box2d(p_motion);
 	b2Sweep sweepA = create_b2_sweep(shape_A_transform, b2Vec2_zero, motion);
@@ -278,19 +281,21 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 		b2Body *body_B = fixture_B->GetBody();
 		Box2DCollisionObject *collision_object_B = body_B->GetUserData().collision_object;
 		Box2DShape *box2d_shape_B = collision_object_B->get_shape(fixture_B->GetUserData().shape_idx);
-		if (!body_B) {
+		if (!body_B || !box2d_shape_B) {
 			ERR_FAIL_V(results);
 		}
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
 		for (Box2DShape *box2d_shape_A : p_shapes) {
 			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(false); i++) {
-				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(i, identity, false, false);
+				Box2DShape::ShapeInfo shape_info{ i, identity, false, false };
+				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(shape_info, nullptr);
 				SweepShape sweep_shape_A{ box2d_shape_A, sweepA, nullptr, shape_A_transform };
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
 				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B);
 				if (output.collision) {
 					results.append(output);
 				}
+				box2d_shape_A->erase_shape(shape_A);
 				memdelete(shape_A);
 			}
 		}

@@ -18,6 +18,8 @@ void Box2DShapeConcavePolygon::set_data(const Variant &p_data) {
 	points = Box2DShapeConvexPolygon::make_sure_polygon_is_counterclockwise(points);
 	points = Box2DShapeConvexPolygon::remove_points_that_are_too_close(points);
 	configured = true;
+	// update all existing shapes
+	configure_all_b2Shapes();
 }
 
 Variant Box2DShapeConcavePolygon::get_data() const {
@@ -34,15 +36,19 @@ int Box2DShapeConcavePolygon::get_b2Shape_count(bool is_static) const {
 	}
 	return points.size();
 }
-
-b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
+b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	// make a chain shape if it's static
-	if (is_static) {
-		ERR_FAIL_INDEX_V(p_index, 1, nullptr);
+	if (shape_info.is_static) {
+		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 		b2ChainShape *shape = memnew(b2ChainShape);
+		created_shapes.append(shape);
+		if (body) {
+			shape_body_map[shape] = body;
+		}
+		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 		b2Vec2 *box2d_points = new b2Vec2[points.size()];
 		for (int i = 0; i < points.size(); i++) {
-			godot_to_box2d(p_transform.xform(points[i]), box2d_points[i]);
+			godot_to_box2d(shape_info.transform.xform(points[i]), box2d_points[i]);
 		}
 		int points_count = points.size();
 		ERR_FAIL_COND_V(points_count < 3, nullptr);
@@ -50,18 +56,22 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(int p_index, Transfor
 		delete[] box2d_points;
 		return shape;
 	}
-	ERR_FAIL_COND_V(p_index > points.size(), nullptr);
+	ERR_FAIL_COND_V(shape_info.index > points.size(), nullptr);
 	// if not make multiple small squares the size of a line
 	b2PolygonShape *shape = memnew(b2PolygonShape);
+	created_shapes.append(shape);
+	if (body) {
+		shape_body_map[shape] = body;
+	}
 	b2Vec2 *box2d_points = new b2Vec2[4];
-	Vector2 a = points[p_index];
-	Vector2 b = points[(p_index + 1) % points.size()];
+	Vector2 a = points[shape_info.index];
+	Vector2 b = points[(shape_info.index + 1) % points.size()];
 	Vector2 dir = (a - b).normalized();
 	Vector2 right(dir.y, -dir.x);
-	godot_to_box2d(p_transform.xform(a - right * 0.5), box2d_points[0]);
-	godot_to_box2d(p_transform.xform(a + right * 0.5), box2d_points[1]);
-	godot_to_box2d(p_transform.xform(b - right * 0.5), box2d_points[2]);
-	godot_to_box2d(p_transform.xform(b + right * 0.5), box2d_points[3]);
+	godot_to_box2d(shape_info.transform.xform(a - right * 0.5), box2d_points[0]);
+	godot_to_box2d(shape_info.transform.xform(a + right * 0.5), box2d_points[1]);
+	godot_to_box2d(shape_info.transform.xform(b - right * 0.5), box2d_points[2]);
+	godot_to_box2d(shape_info.transform.xform(b + right * 0.5), box2d_points[3]);
 	shape->Set(box2d_points, 4);
 	delete[] box2d_points;
 	return shape;

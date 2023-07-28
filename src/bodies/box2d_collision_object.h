@@ -45,6 +45,7 @@ protected:
 	struct Shape {
 		Transform2D xform;
 		Box2DShape *shape = nullptr;
+		Vector<b2Shape *> shapes;
 		Vector<b2Fixture *> fixtures;
 		bool disabled = false;
 		bool one_way_collision = false;
@@ -78,7 +79,6 @@ protected:
 	real_t total_angular_damp = 1;
 	b2Vec2 total_gravity = b2Vec2(0, -9.8);
 
-	void _clear_fixtures();
 	void _update_shapes();
 	Box2DDirectSpaceState *direct_space = nullptr;
 
@@ -193,8 +193,12 @@ public:
 	virtual int get_shape_count() const;
 	virtual Box2DShape *get_shape(int p_index) const;
 	virtual const Transform2D &get_shape_transform(int p_index) const;
+	virtual void clear_shapes();
+	virtual void remove_shapes();
 	virtual void remove_shape(Box2DShape *p_shape);
 	virtual void remove_shape(int p_index);
+	virtual void clear_shape(Box2DShape *p_shape);
+	virtual void clear_shape(int p_index);
 	void set_gravity_scale(real_t p_gravity_scale);
 	real_t get_gravity_scale();
 	void add_collision_exception(Box2DCollisionObject *excepted_body);

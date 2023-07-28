@@ -107,8 +107,8 @@ int32_t Box2DDirectSpaceState::_intersect_shape(const RID &shape_rid, const Tran
 	PhysicsServer2DExtensionShapeResult &result_instance = result[count++];
 	b2FixtureUserData fixture_B_user_data = sweep_test_result.sweep_shape_B.fixture->GetUserData();
 	result_instance.shape = fixture_B_user_data.shape_idx;
-	result_instance.rid = fixture_B_user_data.shape->get_self();
 	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+	result_instance.rid = body_B->get_self();
 	result_instance.collider_id = body_B->get_object_instance_id();
 	result_instance.collider = body_B->get_object_unsafe();
 	return count;
@@ -159,8 +159,9 @@ bool Box2DDirectSpaceState::_rest_info(const RID &shape_rid, const Transform2D &
 	}
 	PhysicsServer2DExtensionShapeRestInfo &result_instance = *rest_info;
 	result_instance.shape = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape_idx;
-	result_instance.rid = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape->get_self();
-	result_instance.collider_id = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_object_instance_id();
+	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+	result_instance.rid = body_B->get_self();
+	result_instance.collider_id = body_B->get_object_instance_id();
 	result_instance.point = transform.get_origin() + box2d_to_godot(sweep_test_result.manifold.points[0]);
 	result_instance.normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
 	result_instance.linear_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetLinearVelocity());

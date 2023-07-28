@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.5](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5)
+
+- Fix shapes not updating(changing shape geometry)
+- Fix deleting shapes/body/spaces bug
+
 ## [v0.4](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.4)
 
 - Fix torque (almost, there is still a little difference in test, but numbers are much more closer now)

@@ -15,6 +15,8 @@ void Box2DShapeWorldBoundary::set_data(const Variant &p_data) {
 	normal = arr[0];
 	distance = arr[1]; // no need to bring it to box2d here as we will do it later
 	configured = true;
+	// update all existing shapes
+	configure_all_b2Shapes();
 }
 
 Variant Box2DShapeWorldBoundary::get_data() const {
@@ -25,9 +27,14 @@ Variant Box2DShapeWorldBoundary::get_data() const {
 	return data;
 }
 
-b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(int p_index, Transform2D &p_transform, bool one_way, bool is_static) {
-	ERR_FAIL_INDEX_V(p_index, 1, nullptr);
+b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+	ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 	b2PolygonShape *shape = memnew(b2PolygonShape);
+	created_shapes.append(shape);
+	if (body) {
+		shape_body_map[shape] = body;
+	}
+
 	b2Vec2 points[4];
 	Vector2 right(normal.y, -normal.x);
 	Vector2 left(-right);
@@ -35,10 +42,11 @@ b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(int p_index, Transform
 	right *= WORLD_SHAPE_SIZE;
 	left = left + normal * distance;
 	right = right + normal * distance;
-	godot_to_box2d(p_transform.xform(left), points[0]);
-	godot_to_box2d(p_transform.xform(right), points[1]);
-	godot_to_box2d(p_transform.xform(right - normal * WORLD_SHAPE_SIZE), points[2]);
-	godot_to_box2d(p_transform.xform(right - normal * WORLD_SHAPE_SIZE), points[3]);
+	godot_to_box2d(shape_info.transform.xform(left), points[0]);
+	godot_to_box2d(shape_info.transform.xform(right), points[1]);
+	godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE), points[2]);
+	godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE), points[3]);
 	shape->Set(points, 4);
+
 	return shape;
 }
