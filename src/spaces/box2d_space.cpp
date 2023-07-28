@@ -154,11 +154,14 @@ void Box2DSpace::add_object(Box2DCollisionObject *p_object) {
 }
 void Box2DSpace::remove_object(Box2DCollisionObject *p_object) {
 	ERR_FAIL_COND(!p_object);
-	world->DestroyBody(p_object->get_b2Body());
-	p_object->set_b2Body(nullptr);
+	p_object->clear_shapes();
 	for (Box2DJoint *joint : p_object->get_joints()) {
-		joint->set_b2Joint(nullptr); // joint is destroyed when destroying body
+		joint->clear();
 	}
+	if (p_object->get_b2Body()) {
+		world->DestroyBody(p_object->get_b2Body());
+	}
+	p_object->set_b2Body(nullptr);
 }
 /* JOINT API */
 void Box2DSpace::create_joint(Box2DJoint *joint) {
@@ -190,6 +193,9 @@ Box2DSpace::Box2DSpace() {
 }
 
 Box2DSpace::~Box2DSpace() {
+	for (b2Body *body = world->GetBodyList(); body; body = body->GetNext()) {
+		remove_object(body->GetUserData().collision_object);
+	}
 	memdelete(world);
 	memdelete(contact_filter);
 	memdelete(contact_listener);

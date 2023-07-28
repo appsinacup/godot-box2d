@@ -14,6 +14,12 @@
 
 void Box2DJoint::clear() {
 	configured = false;
+	if (common.body_a) {
+		common.body_a->remove_joint(this);
+	}
+	if (common.body_b) {
+		common.body_b->remove_joint(this);
+	}
 	common.body_a = nullptr;
 	common.body_b = nullptr;
 	if (space) {
@@ -178,7 +184,6 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			distance_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a, common.anchor_b);
 
 			distance_joint_def->length = damped_spring.rest_length;
-			distance_joint_def->minLength = 0;
 		} break;
 		case PhysicsServer2D::JointType::JOINT_TYPE_GROOVE: {
 			b2PrismaticJointDef *prismatic_joint_def = (b2PrismaticJointDef *)joint_def;
@@ -188,7 +193,7 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			prismatic_joint_def->enableLimit = true;
 		} break;
 		default: {
-			ERR_PRINT("UNSUPPORTED");
+			ERR_PRINT("Unkown joint type");
 		}
 	}
 	return joint_def;
@@ -209,5 +214,6 @@ Box2DJoint::Box2DJoint() {
 }
 
 Box2DJoint::~Box2DJoint() {
+	clear();
 	memdelete(joint_def);
 }

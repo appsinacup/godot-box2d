@@ -136,18 +136,23 @@ bool PhysicsServerBox2D::_shape_collide(const RID &p_shape_A, const Transform2D 
 	Vector<SweepTestResult> sweep_results;
 	Transform2D identity;
 	for (int i = 0; i < shape_A->get_b2Shape_count(false); i++) {
-		b2Shape *b2_shape_A = (shape_A->get_transformed_b2Shape(i, identity, false, false));
+		Box2DShape::ShapeInfo shape_info_A{ i, identity, false, false };
+		b2Shape *b2_shape_A = shape_A->get_transformed_b2Shape(shape_info_A, nullptr);
 
 		for (int j = 0; j < shape_A->get_b2Shape_count(false); j++) {
-			b2Shape *b2_shape_B = (shape_A->get_transformed_b2Shape(i, identity, false, false));
+			Box2DShape::ShapeInfo shape_info_B{ i, identity, false, false };
+			b2Shape *b2_shape_B = shape_B->get_transformed_b2Shape(shape_info_B, nullptr);
 			SweepShape sweep_shape_A{ shape_A, sweepA, nullptr, shape_A_transform };
 			SweepShape sweep_shape_B{ shape_B, sweepB, nullptr, shape_B_transform };
 			SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, b2_shape_A, sweep_shape_B, b2_shape_B);
 			if (output.collision) {
 				sweep_results.append(output);
 			}
-			memfree(b2_shape_B);
+			shape_B->erase_shape(b2_shape_B);
+			memdelete(b2_shape_B);
 		}
+		shape_A->erase_shape(b2_shape_A);
+		memdelete(b2_shape_A);
 	}
 	auto *results = static_cast<Vector2 *>(p_results);
 	int count = 0;
@@ -193,13 +198,13 @@ bool PhysicsServerBox2D::_space_is_active(const RID &p_space) const {
 void PhysicsServerBox2D::_space_set_param(const RID &p_space, PhysicsServer2D::SpaceParameter p_param, double p_value) {
 	const Box2DSpace *space_const = space_owner.get_or_null(p_space);
 	ERR_FAIL_COND(!space_const);
-	// TODO add rest of params
 	switch (p_param) {
 		case SPACE_PARAM_SOLVER_ITERATIONS: {
 			Box2DSpace *space = const_cast<Box2DSpace *>(space_const);
 			space->set_solver_iterations((int32)p_value);
 		} break;
 		default: {
+			ERR_PRINT("Unsupported space property");
 		}
 	}
 }
@@ -207,11 +212,11 @@ void PhysicsServerBox2D::_space_set_param(const RID &p_space, PhysicsServer2D::S
 double PhysicsServerBox2D::_space_get_param(const RID &p_space, PhysicsServer2D::SpaceParameter p_param) const {
 	const Box2DSpace *space = space_owner.get_or_null(p_space);
 	ERR_FAIL_COND_V(!space, 0);
-	// TODO add rest of params
 	switch (p_param) {
 		case SPACE_PARAM_SOLVER_ITERATIONS:
 			return (double)space->get_solver_iterations();
 		default: {
+			ERR_PRINT("Unsupported space property");
 		}
 	}
 	return 0;
@@ -545,7 +550,6 @@ void PhysicsServerBox2D::_body_set_space(const RID &p_body, const RID &p_space) 
 		return;
 	}
 
-	//body->clear_constraint_list();
 	body->set_space(space);
 }
 
@@ -1008,11 +1012,12 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		current_result.collision_unsafe_fraction = 0;
 		return false;
 	}
-	current_result.collider = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape->get_self();
-	current_result.collider_id = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_object_instance_id();
+	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+	current_result.collider = body_B->get_self();
+	current_result.collider_id = body_B->get_object_instance_id();
 	current_result.collision_point = box2d_to_godot(sweep_test_result.manifold.points[0]);
 	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
-	current_result.collider_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object->get_b2Body()->GetLinearVelocity());
+	current_result.collider_velocity = box2d_to_godot(body_B->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
 	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction);
 	current_result.travel = p_motion * current_result.collision_safe_fraction;
@@ -1187,33 +1192,39 @@ PhysicsServer2D::JointType PhysicsServerBox2D::_joint_get_type(const RID &p_join
 void PhysicsServerBox2D::_free_rid(const RID &p_rid) {
 	if (shape_owner.owns(p_rid)) {
 		Box2DShape *shape = shape_owner.get_or_null(p_rid);
-
-		// TODO: remove from owners?
-
-		shape_owner.free(p_rid);
-		memdelete(shape);
+		if (shape) {
+			shape_owner.free(p_rid);
+			memdelete(shape);
+		}
 	} else if (area_owner.owns(p_rid)) {
 		Box2DArea *area = area_owner.get_or_null(p_rid);
-		area_set_space(p_rid, RID());
-		area_clear_shapes(p_rid);
-		area_owner.free(p_rid);
-		memdelete(area);
+		if (area) {
+			area_set_space(p_rid, RID());
+			area_clear_shapes(p_rid);
+			area_owner.free(p_rid);
+			memdelete(area);
+		}
 	} else if (body_owner.owns(p_rid)) {
 		Box2DBody *body = body_owner.get_or_null(p_rid);
-		body_set_space(p_rid, RID());
-		body_clear_shapes(p_rid);
-		body_owner.free(p_rid);
-		memdelete(body);
+		if (body) {
+			body_set_space(p_rid, RID());
+			body_clear_shapes(p_rid);
+			body_owner.free(p_rid);
+			memdelete(body);
+		}
 	} else if (space_owner.owns(p_rid)) {
 		Box2DSpace *space = space_owner.get_or_null(p_rid);
-		// TODO: handle objects, area
-		active_spaces.erase(space);
-		space_owner.free(p_rid);
-		memdelete(space);
+		if (space) {
+			active_spaces.erase(space);
+			space_owner.free(p_rid);
+			memdelete(space);
+		}
 	} else if (joint_owner.owns(p_rid)) {
 		Box2DJoint *joint = joint_owner.get_or_null(p_rid);
-		joint_owner.free(p_rid);
-		memdelete(joint);
+		if (joint) {
+			joint_owner.free(p_rid);
+			memdelete(joint);
+		}
 	}
 }
 
@@ -1229,7 +1240,6 @@ void PhysicsServerBox2D::_step(double p_step) {
 	if (!active) {
 		return;
 	}
-	// TODO: _update_shapes();
 
 	for (const Box2DSpace *E : active_spaces) {
 		Box2DSpace *space = const_cast<Box2DSpace *>(E);
