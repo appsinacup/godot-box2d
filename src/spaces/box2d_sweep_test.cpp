@@ -63,6 +63,7 @@ struct IntersectionManifoldResult {
 		return manifold.pointCount > 0;
 	}
 };
+// from https://github.com/briansemrau/godot_box2d/blob/5f55923fac81386e5735573e99d908d18efec6a1/scene/2d/box2d_world.cpp#L731
 IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shapeA, const int p_child_index_A, const b2Transform &p_xfA, const b2Shape *p_shapeB, const int p_child_index_B, const b2Transform &p_xfB) {
 	b2Manifold manifold{};
 	bool flipped = false;
@@ -141,17 +142,13 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 	return IntersectionManifoldResult{ manifold, flipped };
 }
 
-b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, b2Transform p_transformB, b2Shape *shapeB) {
+b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B) {
 	b2DistanceOutput output;
 	b2DistanceInput input;
 	b2SimplexCache cache;
 	cache.count = 0;
-	// TODO apply margin here
-	float margin = 0.000000001f;
-	input.proxyA.Set(shapeA, 0);
-	//input.proxyA.m_radius = margin;
-	input.proxyB.Set(shapeB, 0);
-	//input.proxyB.m_radius = margin;
+	input.proxyA.Set(shapeA, child_index_A);
+	input.proxyB.Set(shapeB, child_index_B);
 	input.transformA = p_transformA;
 	input.transformB = p_transformB;
 	input.useRadii = true;
@@ -173,12 +170,14 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	for (int i = 0; i < shape->get_b2Shape_count(false); i++) {
 		Box2DShape::ShapeInfo shape_info{ i, identity, false, false };
 		b2Shape *b2_shape = shape->get_transformed_b2Shape(shape_info, nullptr);
-		b2_shape->ComputeAABB(&aabb, shape_transform, 0);
-		if (first_time) {
-			first_time = false;
-			aabb_total = aabb;
-		} else {
-			aabb_total.Combine(aabb);
+		for (int j = 0; j < b2_shape->GetChildCount(); j++) {
+			b2_shape->ComputeAABB(&aabb, shape_transform, j);
+			if (first_time) {
+				first_time = false;
+				aabb_total = aabb;
+			} else {
+				aabb_total.Combine(aabb);
+			}
 		}
 		shape->erase_shape(b2_shape);
 		memdelete(b2_shape);
@@ -198,42 +197,46 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 	toi_input.tMax = 1;
 	toi_input.sweepA = sweep_A;
 	toi_input.sweepB = sweep_B;
-	toi_input.proxyA.Set(shape_A, 0);
-	toi_input.proxyB.Set(shape_B, 0);
-	b2TimeOfImpact(&toi_output, &toi_input);
 	b2WorldManifold manifold;
-	switch (toi_output.state) {
-		case b2TOIOutput::State::e_failed: // failed still gives a result, it just doesn't guarantee accuracy
-		case b2TOIOutput::State::e_overlapped:
-		case b2TOIOutput::State::e_touching: {
-			double hit_ratio = toi_output.t;
-			// move transform_A and B to end transform;
-			sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
-			sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
-			b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, p_sweep_shape_B.transform, shape_B);
-			if (distance_output.distance > b2_epsilon) {
-				break;
-			}
-			IntersectionManifoldResult intersection = _evaluate_intersection_manifold(shape_A, 0, p_sweep_shape_A.transform, shape_B, 0, p_sweep_shape_B.transform);
-			b2Manifold local_manifold = intersection.manifold;
+	for (int i = 0; i < shape_A->GetChildCount(); i++) {
+		for (int j = 0; j < shape_B->GetChildCount(); j++) {
+			toi_input.proxyA.Set(shape_A, i);
+			toi_input.proxyB.Set(shape_B, j);
+			b2TimeOfImpact(&toi_output, &toi_input);
+			switch (toi_output.state) {
+				case b2TOIOutput::State::e_failed: // failed still gives a result, it just doesn't guarantee accuracy
+				case b2TOIOutput::State::e_overlapped:
+				case b2TOIOutput::State::e_touching: {
+					double hit_ratio = toi_output.t;
+					// move transform_A and B to end transform;
+					sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
+					sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
+					b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j);
+					if (distance_output.distance > b2_epsilon) {
+						break;
+					}
+					IntersectionManifoldResult intersection = _evaluate_intersection_manifold(shape_A, i, p_sweep_shape_A.transform, shape_B, j, p_sweep_shape_B.transform);
+					b2Manifold local_manifold = intersection.manifold;
 
-			if (!intersection.intersecting()) {
-				break;
-			}
-			manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
-			if (intersection.flipped) {
-				manifold.normal = -manifold.normal;
-			}
+					if (!intersection.intersecting()) {
+						break;
+					}
+					manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
+					if (intersection.flipped) {
+						manifold.normal = -manifold.normal;
+					}
 
-			const b2Vec2 normal = manifold.normal;
-			if (b2Dot(normal, motion) <= FLT_EPSILON) {
-				break;
-			}
+					const b2Vec2 normal = manifold.normal;
+					if (b2Dot(normal, motion) <= FLT_EPSILON) {
+						break;
+					}
 
-			return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold.pointCount, manifold, true };
+					return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold.pointCount, manifold, true };
+				}
+				default: {
+				} break;
+			}
 		}
-		default: {
-		} break;
 	}
 	return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, b2DistanceOutput(), toi_output, 0, manifold, false };
 }
