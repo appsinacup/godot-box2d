@@ -12,6 +12,6 @@ bool Box2DSpaceContactFilter::ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixt
 	const b2Filter &filterA = fixtureA->GetFilterData();
 	const b2Filter &filterB = fixtureB->GetFilterData();
 
-	bool collide = (filterA.maskBits & filterB.categoryBits) != 0 && (filterA.categoryBits & filterB.maskBits) != 0;
+	bool collide = (filterA.maskBits & filterB.categoryBits) != 0 || (filterA.categoryBits & filterB.maskBits) != 0;
 	return collide && !bodyA->is_body_collision_excepted(bodyB);
 }
