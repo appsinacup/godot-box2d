@@ -155,8 +155,6 @@ public:
 	virtual Vector2 get_constant_force() const;
 	virtual void set_constant_torque(double torque);
 	virtual double get_constant_torque() const;
-	virtual void set_sleep_state(bool enabled);
-	virtual bool is_sleeping() const;
 	virtual int32_t get_contact_count() const;
 	virtual Vector2 get_contact_local_position(int32_t contact_idx) const;
 	virtual Vector2 get_contact_local_normal(int32_t contact_idx) const;

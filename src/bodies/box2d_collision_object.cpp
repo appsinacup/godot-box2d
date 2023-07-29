@@ -403,14 +403,6 @@ void Box2DCollisionObject::set_constant_torque(double torque) {
 double Box2DCollisionObject::get_constant_torque() const {
 	return box2d_to_godot(constant_forces.constant_torque);
 }
-void Box2DCollisionObject::set_sleep_state(bool enabled) {
-	if (body) {
-		body->SetAwake(!enabled);
-	}
-}
-bool Box2DCollisionObject::is_sleeping() const {
-	return !body->IsAwake();
-}
 Box2DCollisionObject::ContactEdgeData Box2DCollisionObject::_get_contact_edge_data(int32_t contact_idx) const {
 	if (!body) {
 		return ContactEdgeData();
@@ -912,18 +904,15 @@ void Box2DCollisionObject::set_b2Body(b2Body *p_body) {
 
 void Box2DCollisionObject::_set_transform(const Transform2D &p_transform, bool p_update_shapes) {
 	if (body) {
-		Vector2 pos = p_transform.get_origin();
-		b2Vec2 box2d_pos;
-		godot_to_box2d(pos, box2d_pos);
+		b2Vec2 box2d_pos = godot_to_box2d(p_transform.get_origin());
 		body->SetTransform(box2d_pos, p_transform.get_rotation());
 	} else {
-		godot_to_box2d(p_transform.get_origin(), body_def->position);
+		body_def->position = godot_to_box2d(p_transform.get_origin());
 		body_def->angle = p_transform.get_rotation();
 	}
 	if (p_update_shapes) {
 		_update_shapes();
 	}
-	set_sleep_state(false);
 }
 
 Box2DCollisionObject::Box2DCollisionObject(Type p_type) {
