@@ -19,7 +19,7 @@ class Box2DBody : public Box2DCollisionObject {
 
 	SelfList<Box2DBody> active_list;
 	SelfList<Box2DBody> direct_state_query_list;
-
+	bool default_sleep_state = false;
 	bool active = true;
 	bool can_sleep = true;
 	PhysicsServer2D::CCDMode collision_mode = PhysicsServer2D::CCD_MODE_DISABLED;
@@ -45,6 +45,9 @@ public:
 	void set_space(Box2DSpace *p_space) override;
 
 	Box2DDirectBodyState *get_direct_state();
+
+	void set_sleep_state(bool enabled);
+	bool is_sleeping() const;
 
 	void set_active(bool p_active);
 	bool is_active() const;

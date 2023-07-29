@@ -104,13 +104,14 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 				_set_transform(p_variant);
 				//wakeup_neighbours();
 			} else { // rigid body
-				Transform2D t = p_variant;
-				t.orthonormalize();
-				new_transform = get_transform(); // used as old to compute motion
-				if (t == new_transform) {
-					break;
-				}
-				_set_transform(t);
+				//Transform2D t = p_variant;
+				//t.orthonormalize();
+				//new_transform = get_transform(); // used as old to compute motion
+				//if (t == new_transform) {
+				//	break;
+				//}
+				_set_transform(p_variant);
+				set_sleep_state(false);
 				//_set_inv_transform(get_transform().inverse());
 				//_update_transform_dependent();
 			}
@@ -132,6 +133,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 				set_linear_velocity(Vector2());
 				set_angular_velocity(0);
 				set_active(false);
+				set_sleep_state(true);
 			} else {
 				if (mode != PhysicsServer2D::BODY_MODE_STATIC) {
 					set_active(true);
@@ -149,6 +151,17 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 		} break;
 	}
 }
+void Box2DBody::set_sleep_state(bool enabled) {
+	if (body) {
+		body->SetAwake(!enabled);
+	}
+}
+bool Box2DBody::is_sleeping() const {
+	if (body) {
+		return !body->IsAwake();
+	}
+	return default_sleep_state;
+}
 
 Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
 	switch (p_state) {
@@ -162,7 +175,7 @@ Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
 			return get_angular_velocity();
 		} break;
 		case PhysicsServer2D::BODY_STATE_SLEEPING: {
-			return !is_active();
+			return is_sleeping();
 		}
 		case PhysicsServer2D::BODY_STATE_CAN_SLEEP: {
 			return can_sleep;
@@ -174,6 +187,7 @@ Variant Box2DBody::get_state(PhysicsServer2D::BodyState p_state) const {
 void Box2DBody::set_space(Box2DSpace *p_space) {
 	if (get_space()) {
 		// TODO: clean up more
+
 		if (active_list.in_list()) {
 			get_space()->body_remove_from_active_list(&active_list);
 		}

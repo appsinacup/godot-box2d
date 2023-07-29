@@ -52,6 +52,7 @@ double Box2DDirectBodyState::_get_angular_velocity() const {
 void Box2DDirectBodyState::_set_transform(const Transform2D &transform) {
 	ERR_FAIL_NULL(body);
 	body->set_transform(transform);
+	body->set_sleep_state(false);
 }
 Transform2D Box2DDirectBodyState::_get_transform() const {
 	ERR_FAIL_NULL_V(body, Transform2D());
