@@ -73,8 +73,7 @@ void Box2DJoint::make_pin(const Vector2 &p_anchor, Box2DBody *p_body_a, Box2DBod
 	joint_def = revolute_joint_def;
 	common.body_a = p_body_a;
 	common.body_b = p_body_b;
-	// body_a and body_b are set when joint is created
-	configured = true;
+	configured = common.body_a && common.body_b;
 }
 
 void Box2DJoint::make_groove(const Vector2 &p_a_groove1, const Vector2 &p_a_groove2, const Vector2 &p_b_anchor, Box2DBody *p_body_a, Box2DBody *p_body_b) {
@@ -90,8 +89,7 @@ void Box2DJoint::make_groove(const Vector2 &p_a_groove1, const Vector2 &p_a_groo
 	joint_def = prismatic_joint_def;
 	common.body_a = p_body_a;
 	common.body_b = p_body_b;
-	// body_a and body_b are set when joint is created
-	configured = true;
+	configured = common.body_a && common.body_b;
 }
 
 void Box2DJoint::make_damped_spring(const Vector2 &p_anchor_a, const Vector2 &p_anchor_b, Box2DBody *p_body_a, Box2DBody *p_body_b) {
@@ -104,8 +102,7 @@ void Box2DJoint::make_damped_spring(const Vector2 &p_anchor_a, const Vector2 &p_
 	joint_def = distance_joint_def;
 	common.body_a = p_body_a;
 	common.body_b = p_body_b;
-	// body_a and body_b are set when joint is created
-	configured = true;
+	configured = common.body_a && common.body_b;
 }
 
 void Box2DJoint::set_pin_softness(real_t p_softness) {
@@ -121,7 +118,7 @@ void Box2DJoint::set_damped_spring_rest_length(real_t p_damped_spring_rest_lengt
 		return;
 	}
 	damped_spring.rest_length = godot_to_box2d(p_damped_spring_rest_length);
-	if (joint && (b2DistanceJoint *)joint) {
+	if (joint) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		distance_joint->SetLength(damped_spring.rest_length);
 	}
@@ -135,7 +132,7 @@ void Box2DJoint::set_damped_spring_stiffness(real_t p_damped_spring_stiffness) {
 		return;
 	}
 	damped_spring.stiffness = godot_to_box2d(p_damped_spring_stiffness);
-	if (joint && (b2DistanceJoint *)joint && common.body_a && common.body_b) {
+	if (joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		float stiffness = 0;
 		float damping = 0;
@@ -152,7 +149,7 @@ void Box2DJoint::set_damped_spring_damping(real_t p_damped_spring_damping) {
 		return;
 	}
 	damped_spring.damping = godot_to_box2d(p_damped_spring_damping);
-	if (joint && (b2DistanceJoint *)joint && common.body_a && common.body_b) {
+	if (joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		float stiffness = 0;
 		float damping = 0;
@@ -172,6 +169,10 @@ Box2DBody *Box2DJoint::get_body_b() {
 }
 
 b2JointDef *Box2DJoint::get_b2JointDef() {
+	if (!common.body_a || !common.body_b) {
+		WARN_PRINT("Cannot configure joint. Missing one body.");
+		return joint_def;
+	}
 	switch (type) {
 		case PhysicsServer2D::JointType::JOINT_TYPE_PIN: {
 			b2RevoluteJointDef *revolute_joint_def = (b2RevoluteJointDef *)joint_def;
@@ -184,6 +185,7 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			distance_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a, common.anchor_b);
 
 			distance_joint_def->length = damped_spring.rest_length;
+			distance_joint_def->minLength = 0;
 		} break;
 		case PhysicsServer2D::JointType::JOINT_TYPE_GROOVE: {
 			b2PrismaticJointDef *prismatic_joint_def = (b2PrismaticJointDef *)joint_def;

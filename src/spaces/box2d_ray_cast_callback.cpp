@@ -25,16 +25,20 @@ float Box2DRayCastCallback::ReportFixture(b2Fixture *fixture, const b2Vec2 &poin
 	if ((fixture->GetFilterData().categoryBits & collision_mask) != 0 &&
 			((fixture->IsSensor() && collide_with_areas) ||
 					(!fixture->IsSensor() && collide_with_bodies))) {
-		result->normal = box2d_to_godot(normal);
-		result->position = box2d_to_godot(point);
-		result->shape = fixture->GetUserData().shape_idx;
+		if (result != nullptr) {
+			result->normal = box2d_to_godot(normal);
+			result->position = box2d_to_godot(point);
+			result->shape = fixture->GetUserData().shape_idx;
+		}
 		Box2DCollisionObject *collision_object = fixture->GetBody()->GetUserData().collision_object;
 		if (space_state->is_body_excluded_from_query(collision_object->get_self())) {
 			return -1;
 		}
-		result->rid = collision_object->get_self();
-		result->collider_id = collision_object->get_object_instance_id();
-		result->collider = collision_object->get_object_unsafe();
+		if (result != nullptr) {
+			result->rid = collision_object->get_self();
+			result->collider_id = collision_object->get_object_instance_id();
+			result->collider = collision_object->get_object_unsafe();
+		}
 		hit = true;
 		return 0;
 	}

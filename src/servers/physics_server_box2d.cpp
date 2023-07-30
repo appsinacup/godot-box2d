@@ -983,7 +983,7 @@ bool PhysicsServerBox2D::_body_collide_shape(const RID &p_body, int32_t p_body_s
 	}
 	Box2DDirectSpaceState *space_state = (Box2DDirectSpaceState *)body->get_space_state();
 	ERR_FAIL_COND_V(!space_state, false);
-	return space_state->_collide_shape(shape->get_self(), p_shape_xform, p_motion, 0, body->get_collision_mask(), true, true, p_results, p_result_max, p_result_count);
+	return space_state->_collide_shape(shape->get_self(), p_shape_xform, p_motion, 0, body->get_collision_mask(), true, false, p_results, p_result_max, p_result_count);
 }
 void PhysicsServerBox2D::_body_set_pickable(const RID &p_body, bool p_pickable) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
@@ -1001,9 +1001,12 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		shapes.append(shape);
 	}
 
-	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, 0xff, true, true, (Box2DDirectSpaceState *)body->get_space_state());
-	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shapes, p_from, p_motion, p_margin, 0xff, true, true, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
+	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, 0xff, true, false, (Box2DDirectSpaceState *)body->get_space_state());
+	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shapes, p_from, p_motion, p_margin, 0xff, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
 	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
+	if (!p_result) {
+		return sweep_test_result.collision;
+	}
 	PhysicsServer2DExtensionMotionResult &current_result = *p_result;
 	if (!sweep_test_result.collision) {
 		current_result.travel = p_motion;

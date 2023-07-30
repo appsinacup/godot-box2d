@@ -1,9 +1,19 @@
 # Changelog
 
+## [v0.5.2](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5.2)
+
+- Fixes crashes when joints aren't set properly.
+- Fixes other body test functions crashes.
+- Fixes body_test_move to work correctly and not check for area collision.
+
+## [v0.5.1](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5.1)
+
+- Possible fix for [collision between static body and area bug](https://github.com/godot-box2d/godot-box2d/issues/19)
+
 ## [v0.5](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5)
 
-- Fix shapes not updating(changing shape geometry)
-- Fix deleting shapes/body/spaces bug
+- Fix [shapes not updating(changing shape geometry)](https://github.com/godot-box2d/godot-box2d/issues/16)
+- Fix [deleting shapes/body/spaces bug](https://github.com/godot-box2d/godot-box2d/issues/18)
 
 ## [v0.4](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.4)
 

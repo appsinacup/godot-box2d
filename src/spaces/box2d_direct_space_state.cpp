@@ -49,21 +49,23 @@ bool Box2DDirectSpaceState::_intersect_ray(const Vector2 &from, const Vector2 &t
 		aabb.upperBound.Set(pos.x + POINT_SIZE, pos.y + POINT_SIZE);
 		space->get_b2World()->QueryAABB(&callback, aabb);
 		if (callback.get_results().size() != 0) {
-			b2Fixture *fixture = callback.get_results()[0];
-			result->normal = (box2d_to_godot(fixture->GetBody()->GetPosition()) - from).normalized();
-			result->position = box2d_to_godot(fixture->GetBody()->GetPosition());
-			result->shape = fixture->GetUserData().shape_idx;
-			Box2DCollisionObject *collision_object = fixture->GetBody()->GetUserData().collision_object;
-			result->rid = collision_object->get_self();
-			result->collider_id = collision_object->get_object_instance_id();
-			result->collider = collision_object->get_object_unsafe();
+			if (result != nullptr) {
+				b2Fixture *fixture = callback.get_results()[0];
+				result->normal = (box2d_to_godot(fixture->GetBody()->GetPosition()) - from).normalized();
+				result->position = box2d_to_godot(fixture->GetBody()->GetPosition());
+				result->shape = fixture->GetUserData().shape_idx;
+				Box2DCollisionObject *collision_object = fixture->GetBody()->GetUserData().collision_object;
+				result->rid = collision_object->get_self();
+				result->collider_id = collision_object->get_object_instance_id();
+				result->collider = collision_object->get_object_unsafe();
+			}
 			return true;
 		}
 	}
 	return false;
 }
 int32_t Box2DDirectSpaceState::_intersect_point(const Vector2 &position, uint64_t canvas_instance_id, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *results, int32_t max_results) {
-	if (max_results == 0) {
+	if (max_results == 0 || results == nullptr) {
 		return 0;
 	}
 	Box2DQueryPointCallback callback(this,
@@ -104,6 +106,7 @@ int32_t Box2DDirectSpaceState::_intersect_shape(const RID &shape_rid, const Tran
 		return 0;
 	}
 	int count = 0;
+	// TODO return all results
 	PhysicsServer2DExtensionShapeResult &result_instance = result[count++];
 	b2FixtureUserData fixture_B_user_data = sweep_test_result.sweep_shape_B.fixture->GetUserData();
 	result_instance.shape = fixture_B_user_data.shape_idx;
@@ -114,6 +117,9 @@ int32_t Box2DDirectSpaceState::_intersect_shape(const RID &shape_rid, const Tran
 	return count;
 }
 bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, float *closest_safe, float *closest_unsafe) {
+	if (closest_safe == nullptr || closest_unsafe == nullptr) {
+		return false;
+	}
 	*closest_unsafe = 1.0f;
 	*closest_safe = 1.0f;
 	const Box2DShape *const_shape = space->get_server()->shape_owner.get_or_null(shape_rid);
@@ -157,13 +163,15 @@ bool Box2DDirectSpaceState::_rest_info(const RID &shape_rid, const Transform2D &
 	if (!sweep_test_result.collision) {
 		return false;
 	}
-	PhysicsServer2DExtensionShapeRestInfo &result_instance = *rest_info;
-	result_instance.shape = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape_idx;
-	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
-	result_instance.rid = body_B->get_self();
-	result_instance.collider_id = body_B->get_object_instance_id();
-	result_instance.point = transform.get_origin() + box2d_to_godot(sweep_test_result.manifold.points[0]);
-	result_instance.normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
-	result_instance.linear_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetLinearVelocity());
+	if (rest_info != nullptr) {
+		PhysicsServer2DExtensionShapeRestInfo &result_instance = *rest_info;
+		result_instance.shape = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape_idx;
+		Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+		result_instance.rid = body_B->get_self();
+		result_instance.collider_id = body_B->get_object_instance_id();
+		result_instance.point = transform.get_origin() + box2d_to_godot(sweep_test_result.manifold.points[0]);
+		result_instance.normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
+		result_instance.linear_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetLinearVelocity());
+	}
 	return true;
 }

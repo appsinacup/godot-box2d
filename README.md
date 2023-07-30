@@ -6,6 +6,14 @@
 
 A [box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot) 4.1, implemented as a GDExtension.
 
+Currently passes 127/150 of [Godot-Physics-Tests](https://github.com/fabriceci/Godot-Physics-Tests).
+
+## Determinism
+
+Box2D is binary deterministic, but doesn't make any guaratee as for cross platform determinism.
+Godot Box2D should also be binary deterministic, however no such tests were run yet.
+However, when Box2C gets released, that will be one of this repo's goals to make it cross platform deterministic (from what I spoke to Erin, it should be just the cos and sin functions that are not determinstic).
+
 ## Limitations
 
 - Having non symetrical physics mask/layers results in no collision. Eg. if we had the following:
