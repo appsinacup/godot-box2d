@@ -18,15 +18,11 @@ void Box2DShapeCapsule::set_data(const Variant &p_data) {
 		radius = p.x;
 		height = p.y;
 	}
-	if (radius < GODOT_LINEAR_SLOP) {
-		radius = GODOT_LINEAR_SLOP;
-	}
-	if (height < GODOT_LINEAR_SLOP) {
-		height = GODOT_LINEAR_SLOP;
-	}
+	radius = ensure_non_zero(radius);
+	height = ensure_non_zero(height);
 	configured = true;
 	// update all existing shapes
-	configure_all_b2Shapes();
+	reconfigure_all_b2Shapes();
 }
 
 Variant Box2DShapeCapsule::get_data() const {
@@ -42,8 +38,7 @@ b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(ShapeInfo shape_info, Box2DC
 	if (scale.x != scale.y) {
 		ERR_PRINT("Capsules don't support non uniform scale.");
 	}
-	float radius_scaled;
-	godot_to_box2d(radius * scale.x, radius_scaled);
+	float radius_scaled = godot_to_box2d(radius * scale.x);
 	if (shape_info.index == 0 || shape_info.index == 1) {
 		b2CircleShape *shape = memnew(b2CircleShape);
 		created_shapes.append(shape);
@@ -51,11 +46,9 @@ b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(ShapeInfo shape_info, Box2DC
 			shape_body_map[shape] = body;
 		}
 		shape->m_radius = radius_scaled;
-		real_t circle_height = (height * 0.5 - radius) * (shape_info.index == 0 ? 1.0 : -1.0);
-		if (circle_height < b2_linearSlop) {
-			circle_height = b2_linearSlop;
-		}
-		godot_to_box2d(shape_info.transform.xform(Vector2(0, circle_height)), shape->m_p);
+		real_t circle_height = (height * 0.5f - radius) * (shape_info.index == 0 ? 1.0f : -1.0f);
+		circle_height = ensure_non_zero(circle_height);
+		shape->m_p = godot_to_box2d(shape_info.transform.xform(Vector2(0.0f, circle_height)));
 		return shape;
 	}
 	b2PolygonShape *shape = memnew(b2PolygonShape);
@@ -64,19 +57,15 @@ b2Shape *Box2DShapeCapsule::get_transformed_b2Shape(ShapeInfo shape_info, Box2DC
 		shape_body_map[shape] = body;
 	}
 	Vector2 half_extents(radius, height * 0.5 - radius);
-	if (half_extents.x < GODOT_LINEAR_SLOP) {
-		half_extents.x = GODOT_LINEAR_SLOP;
-	}
-	if (half_extents.y < GODOT_LINEAR_SLOP) {
-		half_extents.y = GODOT_LINEAR_SLOP;
-	}
+	half_extents.x = ensure_non_zero(half_extents.x);
+	half_extents.y = ensure_non_zero(half_extents.y);
 
 	b2Vec2 box2d_half_extents = godot_to_box2d(half_extents);
 	b2Vec2 *box2d_points = new b2Vec2[4];
-	godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, -half_extents.y)), box2d_points[0]);
-	godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, half_extents.y)), box2d_points[1]);
-	godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, half_extents.y)), box2d_points[2]);
-	godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, -half_extents.y)), box2d_points[3]);
+	box2d_points[0] = godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, -half_extents.y)));
+	box2d_points[1] = godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, half_extents.y)));
+	box2d_points[2] = godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, half_extents.y)));
+	box2d_points[3] = godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, -half_extents.y)));
 	shape->Set(box2d_points, 4);
 	delete[] box2d_points;
 	return shape;

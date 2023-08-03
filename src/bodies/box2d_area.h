@@ -29,8 +29,6 @@ class Box2DArea : public Box2DCollisionObject {
 	PhysicsServer2D::AreaSpaceOverrideMode angular_damp_override_mode = PhysicsServer2D::AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_DISABLED;
 	Vector<Box2DCollisionObject *> bodies;
 
-	void update_bodies();
-
 public:
 	virtual void set_linear_damp(real_t p_linear_damp) override;
 	virtual void set_angular_damp(real_t p_angular_damp) override;

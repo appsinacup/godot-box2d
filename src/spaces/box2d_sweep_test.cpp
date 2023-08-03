@@ -28,14 +28,14 @@ real_t SweepTestResult::safe_fraction() {
 	b2Vec2 projection = (b2Cross(separation, motion_normal)) * motion_normal;
 
 	float safe_length = unsafe_length - projection.Length();
-	float safe_fraction = safe_length / motion_length;
-	if (safe_fraction <= b2_epsilon) {
+	if (is_zero(safe_length) || is_zero(motion_length)) {
 		return 0;
 	}
+	float safe_fraction = safe_length / motion_length;
 	return safe_fraction;
 }
 real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
-	if (safe_fraction <= b2_epsilon) {
+	if (is_zero(safe_fraction)) {
 		return 0;
 	}
 	if (safe_fraction >= toi_output.t) {

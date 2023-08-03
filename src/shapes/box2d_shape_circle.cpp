@@ -8,12 +8,10 @@
 void Box2DShapeCircle::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::FLOAT && p_data.get_type() != Variant::INT);
 	radius = variant_to_number(p_data);
-	if (radius < GODOT_LINEAR_SLOP) {
-		radius = GODOT_LINEAR_SLOP;
-	}
+	radius = ensure_non_zero(radius);
 	configured = true;
 	// update all existing shapes
-	configure_all_b2Shapes();
+	reconfigure_all_b2Shapes();
 }
 
 Variant Box2DShapeCircle::get_data() const {
@@ -30,10 +28,8 @@ b2Shape *Box2DShapeCircle::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCo
 	if (scale.x != scale.y) {
 		ERR_PRINT("Circles don't support non uniform scale.");
 	}
-	godot_to_box2d(radius * scale.x, shape->m_radius);
-	if (shape->m_radius < b2_linearSlop) {
-		shape->m_radius = b2_linearSlop;
-	}
-	godot_to_box2d(shape_info.transform.get_origin(), shape->m_p);
+	shape->m_radius = godot_to_box2d(radius * scale.x);
+	shape->m_radius = ensure_non_zero(shape->m_radius);
+	shape->m_p = godot_to_box2d(shape_info.transform.get_origin());
 	return shape;
 }

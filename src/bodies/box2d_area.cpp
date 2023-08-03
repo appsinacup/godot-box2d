@@ -192,8 +192,8 @@ void Box2DArea::remove_body(Box2DCollisionObject *p_body) {
 
 Box2DArea::Box2DArea() :
 		Box2DCollisionObject(TYPE_AREA) {
-	damping.linear_damp = 0.1;
-	damping.angular_damp = 1;
+	damping.linear_damp = 0.1f;
+	damping.angular_damp = 1.0f;
 	// areas are sensors and dynamic bodies, but don't move.
 	// b2_staticBody don't collide with b2_staticBody or b2_kinematicBody
 	// b2_kinematicBody don't collide with b2_staticBody or b2_kinematicBody

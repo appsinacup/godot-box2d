@@ -65,7 +65,7 @@ void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	if (godot_to_box2d(p_center_of_mass) == mass_data.center) {
 		return;
 	}
-	godot_to_box2d(p_center_of_mass, mass_data.center);
+	mass_data.center = godot_to_box2d(p_center_of_mass);
 	if (body) {
 		body->SetMassData(&mass_data);
 		mass_data.center = body->GetLocalCenter();
@@ -134,9 +134,9 @@ double Box2DCollisionObject::get_angular_damp() const {
 
 void Box2DCollisionObject::recalculate_total_linear_damp() {
 	if (omit_force_integration) {
-		body_def->linearDamping = 0;
+		body_def->linearDamping = 0.0f;
 		if (body) {
-			body->SetLinearDamping(0);
+			body->SetLinearDamping(body_def->linearDamping);
 		}
 		return;
 	}
@@ -182,9 +182,9 @@ void Box2DCollisionObject::recalculate_total_linear_damp() {
 
 void Box2DCollisionObject::recalculate_total_angular_damp() {
 	if (omit_force_integration) {
-		body_def->angularDamping = 0;
+		body_def->angularDamping = 0.0f;
 		if (body) {
-			body->SetAngularDamping(0);
+			body->SetAngularDamping(body_def->angularDamping);
 		}
 		return;
 	}
@@ -286,16 +286,16 @@ Vector2 Box2DCollisionObject::get_center_of_mass_local() const {
 }
 
 double Box2DCollisionObject::get_inverse_mass() const {
-	if (mass_data.mass <= 0) {
-		return 0;
+	if (mass_data.mass <= b2_epsilon) {
+		return 0.0f;
 	}
-	return 1.0 / mass_data.mass;
+	return 1.0f / mass_data.mass;
 }
 double Box2DCollisionObject::get_inverse_inertia() const {
-	if (mass_data.I <= 0) {
-		return 0;
+	if (mass_data.I <= b2_epsilon) {
+		return 0.0f;
 	}
-	return 1.0 / mass_data.I;
+	return 1.0f / mass_data.I;
 }
 void Box2DCollisionObject::set_linear_velocity(const Vector2 &p_linear_velocity) {
 	b2Vec2 box2d_linear_velocity = godot_to_box2d(p_linear_velocity);
@@ -329,7 +329,7 @@ double Box2DCollisionObject::get_angular_velocity() const {
 	if (body) {
 		return body->GetAngularVelocity();
 	}
-	return 0;
+	return 0.0f;
 }
 void Box2DCollisionObject::set_transform(const Transform2D &transform) {
 	_set_transform(transform);
@@ -789,7 +789,7 @@ void Box2DCollisionObject::_update_shapes() {
 				b2_shape->ComputeMass(&shape_mass, 1.0f);
 				// make the desity be 1/mass such that mass is 1.
 				// This way inertia is computed without mass.
-				fixture_def.density = 1.0f / shape_mass.mass;
+				fixture_def.density = 1.0f / ensure_non_zero(shape_mass.mass);
 				b2_shape->ComputeMass(&shape_mass, fixture_def.density);
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
 				s.shapes.write[j] = b2_shape;

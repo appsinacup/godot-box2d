@@ -37,7 +37,7 @@ void Box2DShapeConvexPolygon::set_data(const Variant &p_data) {
 	}
 	configured = true;
 	// update all existing shapes
-	configure_all_b2Shapes();
+	reconfigure_all_b2Shapes();
 }
 
 Variant Box2DShapeConvexPolygon::get_data() const {
@@ -59,6 +59,7 @@ float compute_polygon_area(Vector<Vector2> points) {
 		int j = (i + 1) % points.size();
 		area += points[j][0] * points[i][1] - points[i][0] * points[j][1];
 	}
+	area = ensure_non_zero(area);
 	return area / 2.0f;
 }
 
@@ -201,7 +202,7 @@ b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(ShapeInfo shape_info, 
 	ERR_FAIL_COND_V(polygon.size() < 3, nullptr);
 	b2Vec2 b2_points[b2_maxPolygonVertices];
 	for (int i = 0; i < polygon.size(); i++) {
-		godot_to_box2d(shape_info.transform.xform(polygon[i]), b2_points[i]);
+		b2_points[i] = godot_to_box2d(shape_info.transform.xform(polygon[i]));
 	}
 	int new_size = remove_bad_points(b2_points, polygon.size());
 	ERR_FAIL_COND_V(new_size < 3, nullptr);

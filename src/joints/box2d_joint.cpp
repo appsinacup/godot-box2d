@@ -134,8 +134,8 @@ void Box2DJoint::set_damped_spring_stiffness(real_t p_damped_spring_stiffness) {
 	damped_spring.stiffness = godot_to_box2d(p_damped_spring_stiffness);
 	if (joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
-		float stiffness = 0;
-		float damping = 0;
+		float stiffness = 0.0f;
+		float damping = 0.0f;
 		b2LinearStiffness(stiffness, damping, damped_spring.stiffness, damped_spring.damping, common.body_a->get_b2Body(), common.body_b->get_b2Body());
 		distance_joint->SetStiffness(stiffness);
 	}
@@ -151,8 +151,8 @@ void Box2DJoint::set_damped_spring_damping(real_t p_damped_spring_damping) {
 	damped_spring.damping = godot_to_box2d(p_damped_spring_damping);
 	if (joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
-		float stiffness = 0;
-		float damping = 0;
+		float stiffness = 0.0f;
+		float damping = 0.0f;
 		b2LinearStiffness(stiffness, damping, damped_spring.stiffness, damped_spring.damping, common.body_a->get_b2Body(), common.body_b->get_b2Body());
 		distance_joint->SetStiffness(damping);
 	}
@@ -185,7 +185,7 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			distance_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a, common.anchor_b);
 
 			distance_joint_def->length = damped_spring.rest_length;
-			distance_joint_def->minLength = 0;
+			distance_joint_def->minLength = b2_epsilon;
 		} break;
 		case PhysicsServer2D::JointType::JOINT_TYPE_GROOVE: {
 			b2PrismaticJointDef *prismatic_joint_def = (b2PrismaticJointDef *)joint_def;

@@ -6,7 +6,7 @@
 #include <box2d/b2_body.h>
 #include <box2d/b2_polygon_shape.h>
 
-#define WORLD_SHAPE_SIZE 100000
+constexpr float WORLD_SHAPE_SIZE = 100000.0f;
 
 void Box2DShapeWorldBoundary::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::ARRAY);
@@ -16,7 +16,7 @@ void Box2DShapeWorldBoundary::set_data(const Variant &p_data) {
 	distance = arr[1]; // no need to bring it to box2d here as we will do it later
 	configured = true;
 	// update all existing shapes
-	configure_all_b2Shapes();
+	reconfigure_all_b2Shapes();
 }
 
 Variant Box2DShapeWorldBoundary::get_data() const {
@@ -42,10 +42,10 @@ b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(ShapeInfo shape_info, 
 	right *= WORLD_SHAPE_SIZE;
 	left = left + normal * distance;
 	right = right + normal * distance;
-	godot_to_box2d(shape_info.transform.xform(left), points[0]);
-	godot_to_box2d(shape_info.transform.xform(right), points[1]);
-	godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE), points[2]);
-	godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE), points[3]);
+	points[0] = godot_to_box2d(shape_info.transform.xform(left));
+	points[1] = godot_to_box2d(shape_info.transform.xform(right));
+	points[2] = godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE));
+	points[3] = godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE));
 	shape->Set(points, 4);
 
 	return shape;

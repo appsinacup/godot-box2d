@@ -9,7 +9,7 @@
 #include <box2d/b2_edge_shape.h>
 #include <box2d/b2_polygon_shape.h>
 
-void Box2DShape::configure_all_b2Shapes() {
+void Box2DShape::reconfigure_all_b2Shapes() {
 	Vector<Box2DCollisionObject *> bodies;
 	for (b2Shape *shape : created_shapes) {
 		auto shape_body_iterator = shape_body_map.find(shape);

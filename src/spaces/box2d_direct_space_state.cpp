@@ -12,6 +12,7 @@
 #include <box2d/b2_collision.h>
 #include <box2d/b2_fixture.h>
 
+// size of the point used for point intersect
 #define POINT_SIZE 0.000000001f
 
 PhysicsDirectSpaceState2D *Box2DDirectSpaceState::get_space_state() {

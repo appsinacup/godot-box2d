@@ -131,7 +131,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 			bool do_sleep = p_variant;
 			if (do_sleep) {
 				set_linear_velocity(Vector2());
-				set_angular_velocity(0);
+				set_angular_velocity(0.0f);
 				set_active(false);
 				set_sleep_state(true);
 			} else {

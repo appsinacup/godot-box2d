@@ -22,18 +22,6 @@ public:
 		bool one_way;
 		bool is_static;
 	};
-
-protected:
-	bool configured = false;
-	PhysicsServer2D::ShapeType type;
-	Vector<b2Shape *> created_shapes;
-	HashMap<b2Shape *, Box2DCollisionObject *> shape_body_map;
-
-private:
-	RID self;
-
-public:
-	void configure_all_b2Shapes();
 	_FORCE_INLINE_ PhysicsServer2D::ShapeType get_type() const { return type; }
 
 	_FORCE_INLINE_ void set_self(const RID &p_self) { self = p_self; }
@@ -45,8 +33,20 @@ public:
 
 	virtual int get_b2Shape_count(bool is_static) const = 0;
 	virtual b2Shape *get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) = 0;
+
+	// Call this after removing a shape from a body
 	void erase_shape(b2Shape *shape);
 
-	Box2DShape() { type = PhysicsServer2D::SHAPE_CUSTOM; }
 	virtual ~Box2DShape();
+
+protected:
+	void reconfigure_all_b2Shapes();
+
+	bool configured = false;
+	PhysicsServer2D::ShapeType type = PhysicsServer2D::ShapeType::SHAPE_CUSTOM;
+	Vector<b2Shape *> created_shapes;
+	HashMap<b2Shape *, Box2DCollisionObject *> shape_body_map;
+
+private:
+	RID self;
 };

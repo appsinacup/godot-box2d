@@ -8,15 +8,11 @@
 void Box2DShapeRectangle::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::VECTOR2);
 	half_extents = p_data;
-	if (half_extents.x < GODOT_LINEAR_SLOP) {
-		half_extents.x = GODOT_LINEAR_SLOP;
-	}
-	if (half_extents.y < GODOT_LINEAR_SLOP) {
-		half_extents.y = GODOT_LINEAR_SLOP;
-	}
+	half_extents.x = ensure_non_zero(half_extents.x);
+	half_extents.y = ensure_non_zero(half_extents.y);
 	configured = true;
 	// update all existing shapes
-	configure_all_b2Shapes();
+	reconfigure_all_b2Shapes();
 }
 
 Variant Box2DShapeRectangle::get_data() const {
@@ -31,10 +27,10 @@ b2Shape *Box2DShapeRectangle::get_transformed_b2Shape(ShapeInfo shape_info, Box2
 	}
 	b2Vec2 box2d_half_extents = godot_to_box2d(half_extents);
 	b2Vec2 *box2d_points = new b2Vec2[4];
-	godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, -half_extents.y)), box2d_points[0]);
-	godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, half_extents.y)), box2d_points[1]);
-	godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, half_extents.y)), box2d_points[2]);
-	godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, -half_extents.y)), box2d_points[3]);
+	box2d_points[0] = godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, -half_extents.y)));
+	box2d_points[1] = godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, half_extents.y)));
+	box2d_points[2] = godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, half_extents.y)));
+	box2d_points[3] = godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, -half_extents.y)));
 	shape->Set(box2d_points, 4);
 	delete[] box2d_points;
 	return shape;
