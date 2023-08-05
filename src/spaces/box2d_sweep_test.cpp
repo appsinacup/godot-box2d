@@ -217,7 +217,6 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 					}
 					IntersectionManifoldResult intersection = _evaluate_intersection_manifold(shape_A, i, p_sweep_shape_A.transform, shape_B, j, p_sweep_shape_B.transform);
 					b2Manifold local_manifold = intersection.manifold;
-
 					if (!intersection.intersecting()) {
 						break;
 					}
@@ -282,9 +281,12 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 		b2Fixture *fixture_B = p_other_fixtures[b];
 		b2Shape *shape_B = fixture_B->GetShape();
 		b2Body *body_B = fixture_B->GetBody();
+		if (!body_B) {
+			ERR_FAIL_V(results);
+		}
 		Box2DCollisionObject *collision_object_B = body_B->GetUserData().collision_object;
 		Box2DShape *box2d_shape_B = collision_object_B->get_shape(fixture_B->GetUserData().shape_idx);
-		if (!body_B || !box2d_shape_B) {
+		if (!box2d_shape_B) {
 			ERR_FAIL_V(results);
 		}
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
