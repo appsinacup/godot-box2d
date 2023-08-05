@@ -174,7 +174,6 @@ RID PhysicsServerBox2D::_space_create() {
 	Box2DSpace *space = memnew(Box2DSpace);
 	RID id = space_owner.make_rid(space);
 	space->set_self(id);
-	space->set_server(this);
 	return id;
 }
 
@@ -227,7 +226,7 @@ PhysicsDirectSpaceState2D *PhysicsServerBox2D::_space_get_direct_state(const RID
 	ERR_FAIL_COND_V(!space, nullptr);
 
 	Box2DSpace *space_cast = const_cast<Box2DSpace *>(space);
-	return space_cast->get_direct_state();
+	return space_cast->get_direct_state(this);
 }
 
 void PhysicsServerBox2D::_space_set_debug_contacts(const RID &p_space, int32_t max_contacts) {
@@ -1022,7 +1021,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
 	current_result.collider_velocity = box2d_to_godot(body_B->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
-	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction);
+	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction, p_margin);
 	current_result.travel = p_motion * current_result.collision_safe_fraction;
 	current_result.remainder = p_motion - current_result.travel;
 	int shape_A_index = 0;

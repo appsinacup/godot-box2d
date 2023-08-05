@@ -190,7 +190,7 @@ public:
 	virtual void set_shape_as_one_way_collision(int p_index, bool enable);
 	virtual int get_shape_count() const;
 	virtual Box2DShape *get_shape(int p_index) const;
-	virtual const Transform2D &get_shape_transform(int p_index) const;
+	virtual const Transform2D get_shape_transform(int p_index) const;
 	virtual void clear_shapes();
 	virtual void remove_shapes();
 	virtual void remove_shape(Box2DShape *p_shape);
