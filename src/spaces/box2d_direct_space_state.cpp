@@ -100,22 +100,28 @@ int32_t Box2DDirectSpaceState::_intersect_point(const Vector2 &position, uint64_
 int32_t Box2DDirectSpaceState::_intersect_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *result, int32_t max_results) {
 	const Box2DShape *const_shape = server->shape_owner.get_or_null(shape_rid);
 	ERR_FAIL_COND_V(!const_shape, 0);
+	if (max_results == 0 || !result) {
+		return 0;
+	}
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, motion, margin, collision_mask, collide_with_bodies, collide_with_areas, this);
 	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shape, transform, motion, margin, collision_mask, collide_with_bodies, collide_with_areas, max_results, query_result, this);
-	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
-	if (!sweep_test_result.collision) {
+	if (sweep_test_results.is_empty()) {
 		return 0;
 	}
 	int count = 0;
-	// TODO return all results
-	PhysicsServer2DExtensionShapeResult &result_instance = result[count++];
-	b2FixtureUserData fixture_B_user_data = sweep_test_result.sweep_shape_B.fixture->GetUserData();
-	result_instance.shape = fixture_B_user_data.shape_idx;
-	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
-	result_instance.rid = body_B->get_self();
-	result_instance.collider_id = body_B->get_object_instance_id();
-	result_instance.collider = body_B->get_object_unsafe();
+	for (SweepTestResult sweep_test_result : sweep_test_results) {
+		PhysicsServer2DExtensionShapeResult &result_instance = result[count++];
+		b2FixtureUserData fixture_B_user_data = sweep_test_result.sweep_shape_B.fixture->GetUserData();
+		result_instance.shape = fixture_B_user_data.shape_idx;
+		Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+		result_instance.rid = body_B->get_self();
+		result_instance.collider_id = body_B->get_object_instance_id();
+		result_instance.collider = body_B->get_object_unsafe();
+		if (count >= max_results) {
+			break;
+		}
+	}
 	return count;
 }
 bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, float *closest_safe, float *closest_unsafe) {
@@ -149,7 +155,6 @@ bool Box2DDirectSpaceState::_collide_shape(const RID &shape_rid, const Transform
 		*result_count = 0;
 		return false;
 	}
-	// TODO is this global or local?
 	*result++ = box2d_to_godot(sweep_test_result.sweep_shape_B.transform.p + sweep_test_result.distance_output.pointB);
 	*result++ = box2d_to_godot(sweep_test_result.sweep_shape_B.transform.p + sweep_test_result.distance_output.pointB);
 	*result_count = 2;
