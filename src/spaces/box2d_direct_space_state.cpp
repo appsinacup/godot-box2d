@@ -2,6 +2,7 @@
 
 #include "../b2_user_settings.h"
 
+#include "../servers/physics_server_box2d.h"
 #include "../bodies/box2d_collision_object.h"
 #include "../box2d_type_conversions.h"
 #include "../servers/physics_server_box2d.h"
@@ -92,7 +93,7 @@ int32_t Box2DDirectSpaceState::_intersect_point(const Vector2 &position, uint64_
 }
 
 int32_t Box2DDirectSpaceState::_intersect_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *result, int32_t max_results) {
-	const Box2DShape *const_shape = space->get_server()->shape_owner.get_or_null(shape_rid);
+	const Box2DShape *const_shape = server->shape_owner.get_or_null(shape_rid);
 	ERR_FAIL_COND_V(!const_shape, 0);
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, motion, margin, collision_mask, collide_with_bodies, collide_with_areas, this);
@@ -118,7 +119,7 @@ bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D
 	}
 	*closest_unsafe = 1.0f;
 	*closest_safe = 1.0f;
-	const Box2DShape *const_shape = space->get_server()->shape_owner.get_or_null(shape_rid);
+	const Box2DShape *const_shape = server->shape_owner.get_or_null(shape_rid);
 	ERR_FAIL_COND_V(!const_shape, 0);
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, motion, margin, collision_mask, collide_with_bodies, collide_with_areas, this);
@@ -132,7 +133,7 @@ bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D
 	return true;
 }
 bool Box2DDirectSpaceState::_collide_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, void *results, int32_t max_results, int32_t *result_count) {
-	const Box2DShape *const_shape = space->get_server()->shape_owner.get_or_null(shape_rid);
+	const Box2DShape *const_shape = server->shape_owner.get_or_null(shape_rid);
 	ERR_FAIL_COND_V(!const_shape, 0);
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, motion, margin, collision_mask, collide_with_bodies, collide_with_areas, this);
@@ -150,7 +151,7 @@ bool Box2DDirectSpaceState::_collide_shape(const RID &shape_rid, const Transform
 	return true;
 }
 bool Box2DDirectSpaceState::_rest_info(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeRestInfo *rest_info) {
-	const Box2DShape *const_shape = space->get_server()->shape_owner.get_or_null(shape_rid);
+	const Box2DShape *const_shape = server->shape_owner.get_or_null(shape_rid);
 	ERR_FAIL_COND_V(!const_shape, 0);
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, Vector2(), margin, collision_mask, collide_with_bodies, collide_with_areas, this);

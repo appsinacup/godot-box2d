@@ -12,12 +12,6 @@
 #include "box2d_space_contact_filter.h"
 #include "box2d_space_contact_listener.h"
 
-PhysicsServerBox2D *Box2DSpace::get_server() {
-	return server;
-}
-void Box2DSpace::set_server(PhysicsServerBox2D *p_server) {
-	server = p_server;
-}
 /* PHYSICS SERVER API */
 
 int Box2DSpace::get_active_body_count() {
@@ -106,10 +100,11 @@ void Box2DSpace::call_queries() {
 	// TODO: areas
 }
 
-Box2DDirectSpaceState *Box2DSpace::get_direct_state() {
+Box2DDirectSpaceState *Box2DSpace::get_direct_state(PhysicsServerBox2D *p_physics_server) {
 	if (!direct_state) {
 		direct_state = memnew(Box2DDirectSpaceState);
 		direct_state->space = this;
+		direct_state->server = p_physics_server;
 	}
 	return direct_state;
 }

@@ -40,8 +40,6 @@ private:
 	Box2DSpaceContactListener *contact_listener;
 	double step_value = 0.016f; // TODO set step value from project settings
 public:
-	PhysicsServerBox2D *get_server();
-	void set_server(PhysicsServerBox2D *p_server);
 	/* PHYSICS SERVER API */
 	int32_t get_active_body_count();
 
@@ -60,7 +58,7 @@ public:
 
 	void call_queries();
 
-	Box2DDirectSpaceState *get_direct_state();
+	Box2DDirectSpaceState *get_direct_state(PhysicsServerBox2D *p_physics_server);
 	/* BODY API */
 	const SelfList<Box2DBody>::List &get_active_body_list() const;
 	void body_add_to_active_list(SelfList<Box2DBody> *p_body);

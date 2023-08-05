@@ -10,7 +10,7 @@
 
 using namespace godot;
 
-class Box2DPhysicsServer2D;
+class PhysicsServerBox2D;
 
 class Box2DDirectSpaceState : public PhysicsDirectSpaceState2DExtension {
 	GDCLASS(Box2DDirectSpaceState, PhysicsDirectSpaceState2DExtension);
@@ -21,7 +21,7 @@ protected:
 public:
 	Box2DSpace *space = nullptr;
 	// Needed to get shape by RID
-	Box2DPhysicsServer2D *physics_server = nullptr;
+	PhysicsServerBox2D *server = nullptr;
 	virtual bool _intersect_ray(const Vector2 &from, const Vector2 &to, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, bool hit_from_inside, PhysicsServer2DExtensionRayResult *result) override;
 	virtual int32_t _intersect_point(const Vector2 &position, uint64_t canvas_instance_id, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *results, int32_t max_results) override;
 	virtual int32_t _intersect_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *result, int32_t max_results) override;

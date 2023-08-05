@@ -174,7 +174,6 @@ RID PhysicsServerBox2D::_space_create() {
 	Box2DSpace *space = memnew(Box2DSpace);
 	RID id = space_owner.make_rid(space);
 	space->set_self(id);
-	space->set_server(this);
 	return id;
 }
 
@@ -227,7 +226,7 @@ PhysicsDirectSpaceState2D *PhysicsServerBox2D::_space_get_direct_state(const RID
 	ERR_FAIL_COND_V(!space, nullptr);
 
 	Box2DSpace *space_cast = const_cast<Box2DSpace *>(space);
-	return space_cast->get_direct_state();
+	return space_cast->get_direct_state(this);
 }
 
 void PhysicsServerBox2D::_space_set_debug_contacts(const RID &p_space, int32_t max_contacts) {
