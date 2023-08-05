@@ -26,7 +26,7 @@ float Box2DRayCastCallback::ReportFixture(b2Fixture *fixture, const b2Vec2 &poin
 			((fixture->IsSensor() && collide_with_areas) ||
 					(!fixture->IsSensor() && collide_with_bodies))) {
 		if (result != nullptr) {
-			result->normal = box2d_to_godot(normal);
+			result->normal = Vector2(normal.x, normal.y);
 			result->position = box2d_to_godot(point);
 			result->shape = fixture->GetUserData().shape_idx;
 		}

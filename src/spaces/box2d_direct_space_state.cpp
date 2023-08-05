@@ -2,7 +2,6 @@
 
 #include "../b2_user_settings.h"
 
-#include "../servers/physics_server_box2d.h"
 #include "../bodies/box2d_collision_object.h"
 #include "../box2d_type_conversions.h"
 #include "../servers/physics_server_box2d.h"
@@ -27,9 +26,14 @@ bool Box2DDirectSpaceState::_intersect_ray(const Vector2 &from, const Vector2 &t
 		// try raycasting from other direction
 		Box2DRayCastCallback callback_other_dir(this, result, collision_mask, collide_with_bodies, collide_with_areas, hit_from_inside);
 		space->get_b2World()->RayCast(&callback_other_dir, godot_to_box2d(to), godot_to_box2d(from));
+		// if hit_from_inside, normal is (0,0)
+		if (result != nullptr) {
+			result->normal = Vector2();
+		}
 		if (callback_other_dir.get_hit()) {
 			return true;
 		}
+		return false;
 		// try only a point in case the ray is completely inside
 		Box2DQueryPointCallback callback(this,
 				collision_mask,
@@ -48,7 +52,8 @@ bool Box2DDirectSpaceState::_intersect_ray(const Vector2 &from, const Vector2 &t
 		if (callback.get_results().size() != 0) {
 			if (result != nullptr) {
 				b2Fixture *fixture = callback.get_results()[0];
-				result->normal = (box2d_to_godot(fixture->GetBody()->GetPosition()) - from).normalized();
+				// if hit_from_inside, normal is (0,0)
+				result->normal = Vector2();
 				result->position = box2d_to_godot(fixture->GetBody()->GetPosition());
 				result->shape = fixture->GetUserData().shape_idx;
 				Box2DCollisionObject *collision_object = fixture->GetBody()->GetUserData().collision_object;
