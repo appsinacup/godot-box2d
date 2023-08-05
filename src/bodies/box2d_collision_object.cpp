@@ -719,7 +719,7 @@ Box2DShape *Box2DCollisionObject::get_shape(int p_index) const {
 	return shapes[p_index].shape;
 }
 
-const Transform2D &Box2DCollisionObject::get_shape_transform(int p_index) const {
+const Transform2D Box2DCollisionObject::get_shape_transform(int p_index) const {
 	ERR_FAIL_INDEX_V(p_index, shapes.size(), Transform2D());
 	return shapes[p_index].xform;
 }
@@ -916,9 +916,8 @@ void Box2DCollisionObject::_set_transform(const Transform2D &p_transform, bool p
 }
 
 Box2DCollisionObject::Box2DCollisionObject(Type p_type) {
-	filter.categoryBits = 0;
-	filter.groupIndex = 0;
-	filter.maskBits = 0;
+	filter.categoryBits = 1;
+	filter.maskBits = 1;
 	type = p_type;
 	body_def = memnew(b2BodyDef);
 	body_def->userData.collision_object = this;
