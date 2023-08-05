@@ -916,6 +916,9 @@ void Box2DCollisionObject::_set_transform(const Transform2D &p_transform, bool p
 }
 
 Box2DCollisionObject::Box2DCollisionObject(Type p_type) {
+	filter.categoryBits = 0;
+	filter.groupIndex = 0;
+	filter.maskBits = 0;
 	type = p_type;
 	body_def = memnew(b2BodyDef);
 	body_def->userData.collision_object = this;
