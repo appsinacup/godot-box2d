@@ -34,14 +34,11 @@ real_t SweepTestResult::safe_fraction() {
 	float safe_fraction = safe_length / motion_length;
 	return safe_fraction;
 }
-real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
-	if (is_zero(safe_fraction)) {
+real_t SweepTestResult::unsafe_fraction(float safe_fraction, float margin) {
+	if (is_zero(safe_fraction) || safe_fraction < 0) {
 		return 0;
 	}
-	if (safe_fraction >= toi_output.t) {
-		return safe_fraction + b2_linearSlop;
-	}
-	return toi_output.t;
+	return safe_fraction * 1.0001f + margin;
 }
 
 b2Sweep Box2DSweepTest::create_b2_sweep(b2Transform p_transform, b2Vec2 p_center, b2Vec2 p_motion) {

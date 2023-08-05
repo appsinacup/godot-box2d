@@ -33,7 +33,6 @@ bool Box2DDirectSpaceState::_intersect_ray(const Vector2 &from, const Vector2 &t
 		if (callback_other_dir.get_hit()) {
 			return true;
 		}
-		return false;
 		// try only a point in case the ray is completely inside
 		Box2DQueryPointCallback callback(this,
 				collision_mask,
@@ -139,7 +138,7 @@ bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D
 		return true;
 	}
 	*closest_safe = sweep_test_result.safe_fraction();
-	*closest_unsafe = sweep_test_result.unsafe_fraction(*closest_safe);
+	*closest_unsafe = sweep_test_result.unsafe_fraction(*closest_safe, margin);
 	return true;
 }
 bool Box2DDirectSpaceState::_collide_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, void *results, int32_t max_results, int32_t *result_count) {
