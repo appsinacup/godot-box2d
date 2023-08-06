@@ -7,6 +7,15 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 [Box2D](https://github.com/erincatto/box2d) is a 2D physics engine for games made by [Erin Catto](https://box2d.org).
 
+## Table of Contents
+
+- [Determinism](#determinism)
+- [Limitations](#limitations)
+- [Install](#install)
+- [Implementation Progress](#implementation-progress)
+- [Building](#building)
+
+
 ## Determinism
 
 Box2D is binary deterministic, but doesn't make any guaratee as for cross platform determinism.
@@ -73,7 +82,7 @@ Rectangle|2560|2080|
 
 NOTE: the simulation for box2d goes slower (eg. 30 fps), while for godot physics it goes completely unstable (eg. when it drops to 30 fps, even much before that).
 
-## Building from source
+## Building
 
 1. Clone the git repository, including its submodules.
 
@@ -91,7 +100,7 @@ NOTE: the simulation for box2d goes slower (eg. 30 fps), while for godot physics
 
 *Note*: The `template_debug` target can also be loaded in the Godot editor.
 
-## Lint
+### Lint
 
 Run `scripts/clang-tidy.sh` in order to lint.
 

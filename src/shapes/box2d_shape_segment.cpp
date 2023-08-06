@@ -38,12 +38,7 @@ b2Shape *Box2DShapeSegment::get_transformed_b2Shape(ShapeInfo shape_info, Box2DC
 		b2Vec2 edge_endpoints[2];
 		edge_endpoints[0] = godot_to_box2d(shape_info.transform.xform(a));
 		edge_endpoints[1] = godot_to_box2d(shape_info.transform.xform(b));
-		if (shape_info.one_way) {
-			b2Vec2 dirV0 = edge_endpoints[0] - edge_endpoints[1];
-			shape->SetOneSided(edge_endpoints[1] + dirV0, edge_endpoints[0], edge_endpoints[1], edge_endpoints[0] - dirV0);
-		} else {
-			shape->SetTwoSided(edge_endpoints[0], edge_endpoints[1]);
-		}
+		shape->SetTwoSided(edge_endpoints[0], edge_endpoints[1]);
 		return shape;
 	}
 	// make a square if not
