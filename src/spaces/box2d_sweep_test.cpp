@@ -28,7 +28,7 @@ real_t SweepTestResult::safe_fraction() {
 	b2Vec2 projection = (b2Cross(separation, motion_normal)) * motion_normal;
 
 	float safe_length = unsafe_length - projection.Length();
-	if (is_zero(safe_length) || is_zero(motion_length)) {
+	if (is_zero(safe_length) || is_zero(motion_length) || safe_length < 0) {
 		return 0;
 	}
 	float safe_fraction = safe_length / motion_length;
@@ -38,7 +38,11 @@ real_t SweepTestResult::unsafe_fraction(float safe_fraction, float margin) {
 	if (is_zero(safe_fraction) || safe_fraction < 0) {
 		return 0;
 	}
-	return safe_fraction * 1.0001f + margin;
+	float unsafe_fraction = safe_fraction + margin;
+	if (unsafe_fraction >= 1) {
+		unsafe_fraction = 1;
+	}
+	return unsafe_fraction;
 }
 
 b2Sweep Box2DSweepTest::create_b2_sweep(b2Transform p_transform, b2Vec2 p_center, b2Vec2 p_motion) {

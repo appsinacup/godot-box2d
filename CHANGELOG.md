@@ -3,6 +3,7 @@
 ## [v0.5.3](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5.2)
 
 - Fix for [godot-box2d/issues/22](https://github.com/godot-box2d/godot-box2d/issues/22)
+- Fix unsafe and safe fraction bounding(between 0 and 1)
 
 ## [v0.5.2](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5.2)
 
