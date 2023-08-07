@@ -36,7 +36,6 @@ class PhysicsServerBox2D : public PhysicsServer2DExtension {
 	bool flushing_queries = false;
 
 	HashSet<const Box2DSpace *> active_spaces;
-	Box2DArea default_area;
 
 	mutable RID_PtrOwner<Box2DShape, true> shape_owner;
 	mutable RID_PtrOwner<Box2DSpace, true> space_owner;

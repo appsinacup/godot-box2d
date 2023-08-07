@@ -785,11 +785,12 @@ void Box2DCollisionObject::_update_shapes() {
 				fixture_def.userData.shape_idx = i;
 				fixture_def.userData.box2d_fixture_idx = j;
 				fixture_def.userData.one_way_collision = shape_info.one_way;
-				b2Vec2 upVector(0, -1);
-				b2Vec2 normal = b2Mul(b2Rot(s.xform.get_rotation()), upVector);
-				// rotate it by s.xform rotation
-				fixture_def.userData.one_way_collision_direction_x = normal.x;
-				fixture_def.userData.one_way_collision_direction_y = normal.y;
+				if (shape_info.one_way) {
+					b2Vec2 upVector(0, -1);
+					b2Vec2 normal = b2Mul(b2Rot(s.xform.get_rotation()), upVector);
+					fixture_def.userData.one_way_collision_direction_x = normal.x;
+					fixture_def.userData.one_way_collision_direction_y = normal.y;
+				}
 				fixture_def.userData.shape = s.shape;
 				b2MassData shape_mass;
 				b2_shape->ComputeMass(&shape_mass, 1.0f);

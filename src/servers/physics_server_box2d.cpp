@@ -364,18 +364,14 @@ void PhysicsServerBox2D::_area_set_shape_disabled(const RID &p_area, int32_t p_s
 
 void PhysicsServerBox2D::_area_attach_object_instance_id(const RID &p_area, uint64_t p_id) {
 	Box2DArea *area = area_owner.get_or_null(p_area);
-	if (!area) {
-		area = &default_area;
-	}
+	ERR_FAIL_COND(!area);
 
 	area->set_object_instance_id(ObjectID(p_id));
 }
 
 uint64_t PhysicsServerBox2D::_area_get_object_instance_id(const RID &p_area) const {
 	const Box2DArea *area = area_owner.get_or_null(p_area);
-	if (!area) {
-		area = &default_area;
-	}
+	ERR_FAIL_COND_V(!area, ObjectID());
 
 	return area->get_object_instance_id();
 }
@@ -396,9 +392,10 @@ uint64_t PhysicsServerBox2D::_area_get_canvas_instance_id(const RID &p_area) con
 
 void PhysicsServerBox2D::_area_set_param(const RID &p_area, AreaParameter p_param, const Variant &p_value) {
 	Box2DArea *area = area_owner.get_or_null(p_area);
-	if (!area) {
-		area = &default_area;
+	if (space_owner.owns(p_area)) {
+		area = space_owner.get_or_null(p_area)->get_default_area();
 	}
+	ERR_FAIL_COND(!area);
 	switch (p_param) {
 		case AREA_PARAM_GRAVITY_OVERRIDE_MODE: {
 			area->set_gravity_override_mode(static_cast<AreaSpaceOverrideMode>((int)p_value));
@@ -441,9 +438,10 @@ void PhysicsServerBox2D::_area_set_transform(const RID &p_area, const Transform2
 
 Variant PhysicsServerBox2D::_area_get_param(const RID &p_area, PhysicsServer2D::AreaParameter p_param) const {
 	const Box2DArea *area = area_owner.get_or_null(p_area);
-	if (!area) {
-		area = &default_area;
+	if (space_owner.owns(p_area)) {
+		area = space_owner.get_or_null(p_area)->get_default_area();
 	}
+	ERR_FAIL_COND_V(!area, Variant());
 	switch (p_param) {
 		case AREA_PARAM_GRAVITY_OVERRIDE_MODE: {
 			return area->get_gravity_override_mode();
@@ -532,7 +530,6 @@ RID PhysicsServerBox2D::_body_create() {
 	Box2DBody *body = memnew(Box2DBody);
 	RID rid = body_owner.make_rid(body);
 	body->set_self(rid);
-	default_area.add_body(body);
 	return rid;
 }
 
@@ -548,7 +545,9 @@ void PhysicsServerBox2D::_body_set_space(const RID &p_body, const RID &p_space) 
 	if (body->get_space() == space) {
 		return;
 	}
-
+	if (space) {
+		space->get_default_area()->add_body(body);
+	}
 	body->set_space(space);
 }
 
@@ -1307,10 +1306,6 @@ int PhysicsServerBox2D::_get_process_info(ProcessInfo process_info) {
 }
 
 PhysicsServerBox2D::PhysicsServerBox2D() {
-	default_area.set_priority(-1);
-	default_area.set_gravity_override_mode(AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_COMBINE);
-	default_area.set_linear_damp_override_mode(AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_COMBINE);
-	default_area.set_angular_damp_override_mode(AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_COMBINE);
 }
 
 PhysicsServerBox2D::~PhysicsServerBox2D() {

@@ -183,6 +183,12 @@ Box2DSpace::Box2DSpace() {
 	world = memnew(b2World(b2Vec2_zero)); // gravity comes from areas
 	contact_filter = memnew(Box2DSpaceContactFilter);
 	contact_listener = memnew(Box2DSpaceContactListener(this));
+	default_area = memnew(Box2DArea);
+	default_area->set_priority(-1);
+	default_area->set_gravity_override_mode(PhysicsServer2D::AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_COMBINE);
+	default_area->set_linear_damp_override_mode(PhysicsServer2D::AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_COMBINE);
+	default_area->set_angular_damp_override_mode(PhysicsServer2D::AreaSpaceOverrideMode::AREA_SPACE_OVERRIDE_COMBINE);
+	default_area->set_space(this);
 	world->SetContactFilter(contact_filter);
 	world->SetContactListener(contact_listener);
 }
@@ -191,6 +197,7 @@ Box2DSpace::~Box2DSpace() {
 	for (b2Body *body = world->GetBodyList(); body; body = body->GetNext()) {
 		remove_object(body->GetUserData().collision_object);
 	}
+	memdelete(default_area);
 	memdelete(world);
 	memdelete(contact_filter);
 	memdelete(contact_listener);

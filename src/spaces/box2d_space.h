@@ -24,6 +24,7 @@ private:
 	PhysicsServerBox2D *server;
 
 	b2World *world = nullptr;
+	Box2DArea *default_area;
 
 	SelfList<Box2DBody>::List active_list;
 	SelfList<Box2DBody>::List state_query_list;
@@ -40,6 +41,7 @@ private:
 	Box2DSpaceContactListener *contact_listener;
 	double step_value = 0.016f; // TODO set step value from project settings
 public:
+	_FORCE_INLINE_ Box2DArea *get_default_area() const { return default_area; }
 	/* PHYSICS SERVER API */
 	int32_t get_active_body_count();
 
