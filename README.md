@@ -1,13 +1,13 @@
-![Box2D Logo](box2d_icon.svg)
+<p align="center">
+	<img width="128px" src="box2d_icon.svg"/> 
+	<h1 align="center">Godot Box2D <img src="https://img.shields.io/badge/Godot-v4.1-%23478cbf?logo=godot-engine&logoColor=white"/></h1> 
+</p>
 
-# Godot Box2D
 [![🔗 Build Status](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml/badge.svg)](https://github.com/godot-box2d/godot-box2d/actions/workflows/runner.yml)
 
-A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot) 4.1, implemented as a GDExtension.
+A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot), implemented as a GDExtension.
 
-[Box2D](https://github.com/erincatto/box2d) is a 2D physics engine for games made by [Erin Catto](https://box2d.org).
-
-## Table of Contents
+# Table of Contents
 
 - [Determinism](#determinism)
 - [Limitations](#limitations)
@@ -16,14 +16,14 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 - [Building](#building)
 
 
-## Determinism
+# Determinism
 
 Box2D is binary deterministic, but doesn't make any guaratee as for cross platform determinism.
 Godot Box2D should also be binary deterministic, however no such tests were run yet.
 
 When Box2C gets released, that will be one of this repo's goals to make it cross platform deterministic (from what I understand, it should be just the cos and sin functions that are not cross determinstic in Box2D).
 
-## Limitations
+# Limitations
 
 - Having non symetrical physics mask/layers results in no collision. Eg. if we had the following:
 
@@ -37,13 +37,13 @@ When Box2C gets released, that will be one of this repo's goals to make it cross
 - Shape scaling and skewing:
   - Circles and capsules only support uniform scaling and don't support skewing
 
-## Install
+# Install
 
-### From Godot Asset Store
+## From Godot Asset Store
 
 [Godot Asset Library](https://godotengine.org/asset-library/asset/2007)
 
-### From Github Releases
+## From Github Releases
 
 1. Download from [Github Releases](https://github.com/godot-box2d/godot-box2d/releases/latest) the file called `godot-box2d.zip`.
 2. Extract the ZIP archive and move the `addons/` folder it contains into your project folder.
@@ -53,7 +53,7 @@ When Box2C gets released, that will be one of this repo's goals to make it cross
 6. Change `Physics Engine` to `Box2D`.
 7. Restart Godot.
 
-## Implementation Progress
+##Implementation Progress
 
 Currently pass rate of [Godot-Physics-Tests](https://github.com/fabriceci/Godot-Physics-Tests):
 
@@ -82,7 +82,7 @@ Rectangle|2560|2080|
 
 NOTE: the simulation for box2d goes slower (eg. 30 fps), while for godot physics it goes completely unstable (eg. when it drops to 30 fps, even much before that).
 
-## Building
+# Building
 
 1. Clone the git repository, including its submodules.
 
@@ -100,10 +100,14 @@ NOTE: the simulation for box2d goes slower (eg. 30 fps), while for godot physics
 
 *Note*: The `template_debug` target can also be loaded in the Godot editor.
 
-### Lint
+## Lint
 
 Run `scripts/clang-tidy.sh` in order to lint.
 
 ## Credits
 
 Based of [rburing/physics_server_box2d](https://github.com/rburing/physics_server_box2d). Many thanks to you for starting implementation on this!
+
+# [Discord](https://discord.gg/56dMud8HYn)
+
+A vibrant community for discussion, user support and showcases.
