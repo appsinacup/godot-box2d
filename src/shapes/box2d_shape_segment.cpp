@@ -26,15 +26,11 @@ Variant Box2DShapeSegment::get_data() const {
 	return Rect2(a, b);
 }
 
-b2Shape *Box2DShapeSegment::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+b2Shape *Box2DShapeSegment::_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 	// make a line if it's static
 	if (shape_info.is_static) {
 		b2EdgeShape *shape = memnew(b2EdgeShape);
-		created_shapes.append(shape);
-		if (body) {
-			shape_body_map[shape] = body;
-		}
 		b2Vec2 edge_endpoints[2];
 		edge_endpoints[0] = godot_to_box2d(shape_info.transform.xform(a));
 		edge_endpoints[1] = godot_to_box2d(shape_info.transform.xform(b));
@@ -43,18 +39,17 @@ b2Shape *Box2DShapeSegment::get_transformed_b2Shape(ShapeInfo shape_info, Box2DC
 	}
 	// make a square if not
 	b2PolygonShape *shape = memnew(b2PolygonShape);
-	created_shapes.append(shape);
-	if (body) {
-		shape_body_map[shape] = body;
-	}
-	b2Vec2 *box2d_points = new b2Vec2[4];
+	b2Vec2 box2d_points[4];
 	Vector2 dir = (a - b).normalized();
 	Vector2 right(dir.y, -dir.x);
 	box2d_points[0] = godot_to_box2d(shape_info.transform.xform(a - right * SEGMENT_SIZE));
 	box2d_points[1] = godot_to_box2d(shape_info.transform.xform(a + right * SEGMENT_SIZE));
 	box2d_points[2] = godot_to_box2d(shape_info.transform.xform(b - right * SEGMENT_SIZE));
 	box2d_points[3] = godot_to_box2d(shape_info.transform.xform(b + right * SEGMENT_SIZE));
-	shape->Set(box2d_points, 4);
-	delete[] box2d_points;
+	bool result = shape->Set(box2d_points, 4);
+	if (!result) {
+		memdelete(shape);
+		ERR_FAIL_COND_V(!result, nullptr);
+	}
 	return shape;
 }

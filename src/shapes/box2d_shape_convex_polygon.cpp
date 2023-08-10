@@ -190,7 +190,7 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 	}
 	return m;
 }
-b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+b2Shape *Box2DShapeConvexPolygon::_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	ERR_FAIL_COND_V(shape_info.index >= polygons.size(), nullptr);
 	Vector<Vector2> polygon = polygons[shape_info.index];
 	ERR_FAIL_COND_V(polygon.size() > b2_maxPolygonVertices, nullptr);
@@ -203,23 +203,20 @@ b2Shape *Box2DShapeConvexPolygon::get_transformed_b2Shape(ShapeInfo shape_info, 
 	if (shape_info.is_static) {
 		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 		b2ChainShape *shape = memnew(b2ChainShape);
-		created_shapes.append(shape);
-		if (body) {
-			shape_body_map[shape] = body;
-		}
-		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 		int points_count = points.size();
-		ERR_FAIL_COND_V(points_count < 3, nullptr);
+		if (points_count < 3) {
+			memdelete(shape);
+			ERR_FAIL_COND_V(points_count < 3, nullptr);
+		}
 		shape->CreateLoop(b2_points, points_count);
 		return shape;
 	}
 	b2PolygonShape *shape = memnew(b2PolygonShape);
-	created_shapes.append(shape);
-	if (body) {
-		shape_body_map[shape] = body;
-	}
 	int new_size = remove_bad_points(b2_points, polygon.size());
-	ERR_FAIL_COND_V(new_size < 3, nullptr);
-	ERR_FAIL_COND_V(shape->Set(b2_points, new_size), nullptr);
+	bool result = shape->Set(b2_points, new_size);
+	if (!result) {
+		memdelete(shape);
+		ERR_FAIL_COND_V(!result, nullptr);
+	}
 	return shape;
 }

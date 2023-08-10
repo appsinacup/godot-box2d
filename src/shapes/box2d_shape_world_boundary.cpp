@@ -27,13 +27,9 @@ Variant Box2DShapeWorldBoundary::get_data() const {
 	return data;
 }
 
-b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+b2Shape *Box2DShapeWorldBoundary::_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 	b2PolygonShape *shape = memnew(b2PolygonShape);
-	created_shapes.append(shape);
-	if (body) {
-		shape_body_map[shape] = body;
-	}
 
 	b2Vec2 points[4];
 	Vector2 right(normal.y, -normal.x);
@@ -46,7 +42,11 @@ b2Shape *Box2DShapeWorldBoundary::get_transformed_b2Shape(ShapeInfo shape_info, 
 	points[1] = godot_to_box2d(shape_info.transform.xform(right));
 	points[2] = godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE));
 	points[3] = godot_to_box2d(shape_info.transform.xform(right - normal * WORLD_SHAPE_SIZE));
-	shape->Set(points, 4);
+	bool result = shape->Set(points, 4);
 
+	if (!result) {
+		memdelete(shape);
+		ERR_FAIL_COND_V(!result, nullptr);
+	}
 	return shape;
 }

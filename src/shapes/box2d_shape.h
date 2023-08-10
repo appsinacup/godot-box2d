@@ -32,7 +32,7 @@ public:
 	virtual Variant get_data() const = 0;
 
 	virtual int get_b2Shape_count(bool is_static) const = 0;
-	virtual b2Shape *get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) = 0;
+	b2Shape *get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body);
 
 	// Call this after removing a shape from a body
 	void erase_shape(b2Shape *shape);
@@ -41,6 +41,7 @@ public:
 
 protected:
 	void reconfigure_all_b2Shapes();
+	virtual b2Shape *_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) = 0;
 
 	bool configured = false;
 	PhysicsServer2D::ShapeType type = PhysicsServer2D::ShapeType::SHAPE_CUSTOM;

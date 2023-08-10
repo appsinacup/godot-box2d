@@ -18,20 +18,19 @@ void Box2DShapeRectangle::set_data(const Variant &p_data) {
 Variant Box2DShapeRectangle::get_data() const {
 	return half_extents;
 }
-b2Shape *Box2DShapeRectangle::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+b2Shape *Box2DShapeRectangle::_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 	b2PolygonShape *shape = memnew(b2PolygonShape);
-	created_shapes.append(shape);
-	if (body) {
-		shape_body_map[shape] = body;
-	}
 	b2Vec2 box2d_half_extents = godot_to_box2d(half_extents);
-	b2Vec2 *box2d_points = new b2Vec2[4];
+	b2Vec2 box2d_points[4];
 	box2d_points[0] = godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, -half_extents.y)));
 	box2d_points[1] = godot_to_box2d(shape_info.transform.xform(Vector2(-half_extents.x, half_extents.y)));
 	box2d_points[2] = godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, half_extents.y)));
 	box2d_points[3] = godot_to_box2d(shape_info.transform.xform(Vector2(half_extents.x, -half_extents.y)));
-	shape->Set(box2d_points, 4);
-	delete[] box2d_points;
+	bool result = shape->Set(box2d_points, 4);
+	if (!result) {
+		memdelete(shape);
+		ERR_FAIL_COND_V(!result, nullptr);
+	}
 	return shape;
 }

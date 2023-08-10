@@ -9,6 +9,15 @@
 #include <box2d/b2_edge_shape.h>
 #include <box2d/b2_polygon_shape.h>
 
+b2Shape *Box2DShape::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+	b2Shape* shape = _get_transformed_b2Shape(shape_info, body);
+	created_shapes.append(shape);
+	if (body) {
+		shape_body_map[shape] = body;
+	}
+	return shape;
+}
+
 void Box2DShape::reconfigure_all_b2Shapes() {
 	Vector<Box2DCollisionObject *> bodies;
 	for (b2Shape *shape : created_shapes) {
