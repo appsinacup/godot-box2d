@@ -18,11 +18,7 @@
 void Box2DCollisionObject::reset_mass_properties() {
 	if (body) {
 		body->ResetMassData();
-		//mass_data = body->GetMassData();
-		mass_data.mass = 1.0f;
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		mass_data = body->GetMassData();
 	} else {
 		mass_data.mass = 1.0f;
 		mass_data.I = 0;
@@ -36,9 +32,7 @@ void Box2DCollisionObject::set_mass(real_t p_mass) {
 	}
 	mass_data.mass = p_mass;
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		_update_shapes();
 	}
 }
 double Box2DCollisionObject::get_mass() const {
@@ -53,13 +47,17 @@ void Box2DCollisionObject::set_inertia(real_t p_inertia) {
 	}
 	mass_data.I = godot_to_box2d(godot_to_box2d(p_inertia));
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		b2MassData old_mass_data = body->GetMassData();
+		old_mass_data.I = mass_data.I;
+		body->SetMassData(&old_mass_data);
 	}
 }
 double Box2DCollisionObject::get_inertia() const {
-	return box2d_to_godot(box2d_to_godot(mass_data.I - mass_data.mass * b2Dot(mass_data.center, mass_data.center)));
+	if (body) {
+		return box2d_to_godot(body->GetInertia());
+	} else {
+		return mass_data.I;
+	}
 }
 void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	if (godot_to_box2d(p_center_of_mass) == mass_data.center) {
@@ -67,17 +65,16 @@ void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	}
 	mass_data.center = godot_to_box2d(p_center_of_mass);
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		b2MassData old_mass_data = body->GetMassData();
+		old_mass_data.center = mass_data.center;
+		body->SetMassData(&old_mass_data);
 	}
 }
 Vector2 Box2DCollisionObject::get_center_of_mass() const {
 	if (body) {
-		return box2d_to_godot(mass_data.center + body->GetPosition());
-	} else {
-		return box2d_to_godot(mass_data.center + body_def->position);
+		return get_center_of_mass_local() + box2d_to_godot(body->GetPosition());
 	}
+	return get_center_of_mass_local();
 }
 
 // Damping
@@ -282,20 +279,24 @@ double Box2DCollisionObject::get_total_angular_damp() const {
 }
 
 Vector2 Box2DCollisionObject::get_center_of_mass_local() const {
-	return box2d_to_godot(mass_data.center);
+	if (body) {
+		return box2d_to_godot(body->GetLocalCenter());
+	} else {
+		return box2d_to_godot(mass_data.center);
+	}
 }
 
 double Box2DCollisionObject::get_inverse_mass() const {
-	if (mass_data.mass <= b2_epsilon) {
+	if (get_mass() <= b2_epsilon) {
 		return 0.0f;
 	}
-	return 1.0f / mass_data.mass;
+	return 1.0f / get_mass();
 }
 double Box2DCollisionObject::get_inverse_inertia() const {
-	if (mass_data.I <= b2_epsilon) {
+	if (get_inertia() <= b2_epsilon) {
 		return 0.0f;
 	}
-	return 1.0f / mass_data.I;
+	return 1.0f / get_inertia();
 }
 void Box2DCollisionObject::set_linear_velocity(const Vector2 &p_linear_velocity) {
 	b2Vec2 box2d_linear_velocity = godot_to_box2d(p_linear_velocity);
@@ -385,7 +386,11 @@ void Box2DCollisionObject::add_constant_central_force(const Vector2 &force) {
 	constant_forces.constant_force += godot_to_box2d(force);
 }
 void Box2DCollisionObject::add_constant_force(const Vector2 &p_force, const Vector2 &p_position) {
-	constant_forces.constant_torque += b2Cross(godot_to_box2d(p_position) - mass_data.center, godot_to_box2d(p_force));
+	b2Vec2 constant_force_center = mass_data.center;
+	if (body) {
+		constant_force_center = body->GetMassData().center;
+	}
+	constant_forces.constant_torque += b2Cross(godot_to_box2d(p_position) - constant_force_center, godot_to_box2d(p_force));
 	constant_forces.constant_force += godot_to_box2d(p_force);
 }
 void Box2DCollisionObject::add_constant_torque(double torque) {
@@ -585,6 +590,7 @@ void Box2DCollisionObject::add_shape(Box2DShape *p_shape, const Transform2D &p_t
 	s.xform = p_transform;
 	s.disabled = p_disabled;
 	shapes.push_back(s);
+	_update_shapes();
 }
 
 void Box2DCollisionObject::set_shape(int p_index, Box2DShape *p_shape) {
@@ -792,12 +798,14 @@ void Box2DCollisionObject::_update_shapes() {
 					fixture_def.userData.one_way_collision_direction_y = normal.y;
 				}
 				fixture_def.userData.shape = s.shape;
-				b2MassData shape_mass;
-				b2_shape->ComputeMass(&shape_mass, 1.0f);
+				// use mass as density
+				fixture_def.density = mass_data.mass;
+				//b2MassData shape_mass;
+				//b2_shape->ComputeMass(&shape_mass, 1.0f);
 				// make the desity be 1/mass such that mass is 1.
 				// This way inertia is computed without mass.
-				fixture_def.density = 1.0f / ensure_non_zero(shape_mass.mass);
-				b2_shape->ComputeMass(&shape_mass, fixture_def.density);
+				//fixture_def.density = 1.0f / ensure_non_zero(shape_mass.mass);
+				//b2_shape->ComputeMass(&shape_mass, fixture_def.density);
 				s.fixtures.write[j] = body->CreateFixture(&fixture_def);
 				s.shapes.write[j] = b2_shape;
 			}
@@ -811,15 +819,15 @@ void Box2DCollisionObject::_update_shapes() {
 				fixture->SetSensor(type == Type::TYPE_AREA);
 			}
 		}
-		float old_mass = mass_data.mass;
+		//float old_mass = mass_data.mass;
 		// update inertia and center of mass
-		mass_data = body->GetMassData();
+		//mass_data = body->GetMassData();
 		// revert mass
-		mass_data.mass = old_mass;
+		//mass_data.mass = old_mass;
 		// TODO only do this if we need to automatically compute local center.
-		mass_data.center = body->GetLocalCenter();
+		//mass_data.center = body->GetLocalCenter();
 		//mass_data.center = b2Vec2_zero;
-		body->SetMassData(&mass_data);
+		//body->SetMassData(&mass_data);
 		//space->get_broadphase()->move(s.bpid, shape_aabb);
 	}
 }
@@ -899,13 +907,8 @@ void Box2DCollisionObject::set_b2BodyDef(b2BodyDef *p_body_def) { body_def = p_b
 b2Body *Box2DCollisionObject::get_b2Body() { return body; }
 void Box2DCollisionObject::set_b2Body(b2Body *p_body) {
 	body = p_body;
-	// set additional properties here
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
 		body->SetAwake(true);
-		//recreate_shapes();
 	}
 }
 
