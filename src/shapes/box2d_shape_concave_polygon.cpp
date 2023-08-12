@@ -43,7 +43,7 @@ b2Shape *Box2DShapeConcavePolygon::_get_transformed_b2Shape(ShapeInfo shape_info
 	if (shape_info.is_static) {
 		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 		b2ChainShape *shape = memnew(b2ChainShape);
-		b2Vec2 box2d_points[points.size()];
+		b2Vec2 box2d_points[b2_maxPolygonVertices];
 		for (int i = 0; i < points.size(); i++) {
 			box2d_points[i] = godot_to_box2d(shape_info.transform.xform(points[i]));
 		}
