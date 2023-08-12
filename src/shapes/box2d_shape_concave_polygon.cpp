@@ -38,34 +38,27 @@ int Box2DShapeConcavePolygon::get_b2Shape_count(bool is_static) const {
 	}
 	return points.size();
 }
-b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
+b2Shape *Box2DShapeConcavePolygon::_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	// make a chain shape if it's static
 	if (shape_info.is_static) {
 		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
 		b2ChainShape *shape = memnew(b2ChainShape);
-		created_shapes.append(shape);
-		if (body) {
-			shape_body_map[shape] = body;
-		}
-		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
-		b2Vec2 *box2d_points = new b2Vec2[points.size()];
+		b2Vec2 box2d_points[b2_maxPolygonVertices];
 		for (int i = 0; i < points.size(); i++) {
 			box2d_points[i] = godot_to_box2d(shape_info.transform.xform(points[i]));
 		}
 		int points_count = points.size();
-		ERR_FAIL_COND_V(points_count < 3, nullptr);
+		if (points_count < 3) {
+			memdelete(shape);
+			ERR_FAIL_COND_V(points_count < 3, nullptr);
+		}
 		shape->CreateLoop(box2d_points, points_count);
-		delete[] box2d_points;
 		return shape;
 	}
 	ERR_FAIL_COND_V(shape_info.index > points.size(), nullptr);
 	// if not make multiple small squares the size of a line
 	b2PolygonShape *shape = memnew(b2PolygonShape);
-	created_shapes.append(shape);
-	if (body) {
-		shape_body_map[shape] = body;
-	}
-	b2Vec2 *box2d_points = new b2Vec2[4];
+	b2Vec2 box2d_points[4];
 	Vector2 a = points[shape_info.index];
 	Vector2 b = points[(shape_info.index + 1) % points.size()];
 	Vector2 dir = (a - b).normalized();
@@ -74,7 +67,10 @@ b2Shape *Box2DShapeConcavePolygon::get_transformed_b2Shape(ShapeInfo shape_info,
 	box2d_points[1] = godot_to_box2d(shape_info.transform.xform(a + right * CHAIN_SEGMENT_SQUARE_SIZE));
 	box2d_points[2] = godot_to_box2d(shape_info.transform.xform(b - right * CHAIN_SEGMENT_SQUARE_SIZE));
 	box2d_points[3] = godot_to_box2d(shape_info.transform.xform(b + right * CHAIN_SEGMENT_SQUARE_SIZE));
-	shape->Set(box2d_points, 4);
-	delete[] box2d_points;
+	bool result = shape->Set(box2d_points, 4);
+	if (!result) {
+		memdelete(shape);
+		ERR_FAIL_COND_V(!result, nullptr);
+	}
 	return shape;
 }

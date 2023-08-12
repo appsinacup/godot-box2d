@@ -79,7 +79,7 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 	b2EdgeShape shapeB_as_edge;
 	if (p_shapeB->GetType() == b2Shape::Type::e_chain) {
 		static_cast<const b2ChainShape *>(p_shapeB)->GetChildEdge(&shapeB_as_edge, p_child_index_B);
-		p_shapeA = &shapeB_as_edge;
+		p_shapeB = &shapeB_as_edge;
 	}
 
 	// This is, as far as I know, the cleanest way to implement this.
