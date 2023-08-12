@@ -17,6 +17,10 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 After installing, go to `Advanced Settings` -> `Physics` -> `2D`. Change `Physics Engine` to `Box2D`.
 
+# Video Tutorial
+
+[![Tutorial](https://img.youtube.com/vi/T_vFVh5qZiY/0.jpg)](https://www.youtube.com/watch?v=T_vFVh5qZiY)
+
 # Features
 
 - Improved physics stability in some cases with high number of rigidbodies.
