@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../servers/box2d_project_settings.h"
+
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/templates/self_list.hpp>
 #include <godot_cpp/variant/packed_vector2_array.hpp>
@@ -34,7 +36,6 @@ private:
 	int max_debug_contacts = 0;
 	ProcessInfo process_info;
 	bool locked = false;
-	double solver_iterations = 8;
 
 	Box2DDirectSpaceState *direct_state = nullptr;
 	Box2DSpaceContactFilter *contact_filter;
