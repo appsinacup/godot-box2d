@@ -59,14 +59,6 @@ void Box2DSpace::set_debug_contacts(int32_t p_max_contacts) {
 	max_debug_contacts = p_max_contacts;
 }
 
-void Box2DSpace::set_solver_iterations(int32 p_iterations) {
-	// UNUSED
-}
-
-int32 Box2DSpace::get_solver_iterations() const {
-	// UNUSED
-}
-
 void Box2DSpace::step(double p_step) {
 	const int32 velocityIterations = Box2DProjectSettings::get_velocity_iterations();
 	const int32 positionIterations = Box2DProjectSettings::get_position_iterations();

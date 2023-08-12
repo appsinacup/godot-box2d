@@ -195,29 +195,11 @@ bool PhysicsServerBox2D::_space_is_active(const RID &p_space) const {
 }
 
 void PhysicsServerBox2D::_space_set_param(const RID &p_space, PhysicsServer2D::SpaceParameter p_param, double p_value) {
-	const Box2DSpace *space_const = space_owner.get_or_null(p_space);
-	ERR_FAIL_COND(!space_const);
-	switch (p_param) {
-		case SPACE_PARAM_SOLVER_ITERATIONS: {
-			Box2DSpace *space = const_cast<Box2DSpace *>(space_const);
-			space->set_solver_iterations((int32)p_value);
-		} break;
-		default: {
-			ERR_PRINT("Unsupported space property");
-		}
-	}
+	// UNUSED
 }
 
 double PhysicsServerBox2D::_space_get_param(const RID &p_space, PhysicsServer2D::SpaceParameter p_param) const {
-	const Box2DSpace *space = space_owner.get_or_null(p_space);
-	ERR_FAIL_COND_V(!space, 0);
-	switch (p_param) {
-		case SPACE_PARAM_SOLVER_ITERATIONS:
-			return (double)space->get_solver_iterations();
-		default: {
-			ERR_PRINT("Unsupported space property");
-		}
-	}
+	// UNUSED
 	return 0;
 }
 

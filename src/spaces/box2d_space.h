@@ -54,9 +54,6 @@ public:
 
 	void set_debug_contacts(int32_t max_contacts);
 
-	void set_solver_iterations(int32 iterations);
-	int32 get_solver_iterations() const;
-
 	void step(double p_step);
 
 	void call_queries();
