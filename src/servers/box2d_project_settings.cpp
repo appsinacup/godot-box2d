@@ -9,15 +9,13 @@ constexpr char MAX_THREADS[] = "threading/worker_pool/max_threads";
 constexpr char POSITION_ITERATIONS[] = "physics/box_2d/solver/position_iterations";
 constexpr char VELOCITY_ITERATIONS[] = "physics/box_2d/solver/velocity_iterations";
 
-
 void register_setting(
-	const String& p_name,
-	const Variant& p_value,
-	bool p_needs_restart,
-	PropertyHint p_hint,
-	const String& p_hint_string
-) {
-	ProjectSettings* project_settings = ProjectSettings::get_singleton();
+		const String &p_name,
+		const Variant &p_value,
+		bool p_needs_restart,
+		PropertyHint p_hint,
+		const String &p_hint_string) {
+	ProjectSettings *project_settings = ProjectSettings::get_singleton();
 
 	if (!project_settings->has_setting(p_name)) {
 		project_settings->set(p_name, p_value);
@@ -43,28 +41,25 @@ void register_setting(
 }
 
 void register_setting_plain(
-	const String& p_name,
-	const Variant& p_value,
-	bool p_needs_restart = false
-) {
+		const String &p_name,
+		const Variant &p_value,
+		bool p_needs_restart = false) {
 	register_setting(p_name, p_value, p_needs_restart, PROPERTY_HINT_NONE, {});
 }
 
 void register_setting_hinted(
-	const String& p_name,
-	const Variant& p_value,
-	const String& p_hint_string,
-	bool p_needs_restart = false
-) {
+		const String &p_name,
+		const Variant &p_value,
+		const String &p_hint_string,
+		bool p_needs_restart = false) {
 	register_setting(p_name, p_value, p_needs_restart, PROPERTY_HINT_NONE, p_hint_string);
 }
 
 void register_setting_ranged(
-	const String& p_name,
-	const Variant& p_value,
-	const String& p_hint_string,
-	bool p_needs_restart = false
-) {
+		const String &p_name,
+		const Variant &p_value,
+		const String &p_hint_string,
+		bool p_needs_restart = false) {
 	register_setting(p_name, p_value, p_needs_restart, PROPERTY_HINT_RANGE, p_hint_string);
 }
 
@@ -73,14 +68,14 @@ void Box2DProjectSettings::register_settings() {
 	register_setting_ranged(POSITION_ITERATIONS, 3, U"1,16,or_greater");
 }
 
-template<typename TType>
-TType get_setting(const char* p_setting) {
-	const ProjectSettings* project_settings = ProjectSettings::get_singleton();
+template <typename TType>
+TType get_setting(const char *p_setting) {
+	const ProjectSettings *project_settings = ProjectSettings::get_singleton();
 	const Variant setting_value = project_settings->get_setting_with_override(p_setting);
 	const Variant::Type setting_type = setting_value.get_type();
 	const Variant::Type expected_type = Variant(TType()).get_type();
 
-	ERR_FAIL_COND_V(setting_type != expected_type,Variant());
+	ERR_FAIL_COND_V(setting_type != expected_type, Variant());
 
 	return setting_value;
 }
