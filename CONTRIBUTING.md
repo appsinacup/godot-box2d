@@ -46,6 +46,12 @@ NOTE: the simulation for box2d goes slower (eg. 30 fps), while for godot physics
 
 *Note*: The `template_debug` target can also be loaded in the Godot editor.
 
+## How to update submodule
+
+```
+git submodule foreach git pull
+```
+
 ## Lint
 
 Run `scripts/clang-tidy.sh` in order to lint.

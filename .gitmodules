@@ -4,7 +4,7 @@
 	branch = 4.1
 [submodule "box2d"]
 	path = box2d
-	url = https://github.com/godot-box2d/box2d
+	url = https://github.com/appsinacup/box2d
 	branch = common-assert-noop
 [submodule "Godot-Physics-Tests"]
 	path = Godot-Physics-Tests

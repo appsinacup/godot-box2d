@@ -35,7 +35,7 @@ int Box2DShapeCapsule::get_b2Shape_count(bool is_static) const {
 b2Shape *Box2DShapeCapsule::_get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	ERR_FAIL_INDEX_V(shape_info.index, 3, nullptr);
 	Vector2 scale = shape_info.transform.get_scale();
-	if (scale.x != scale.y) {
+		if (fabs(scale.x - scale.y) > b2_epsilon) {
 		ERR_PRINT("Capsules don't support non uniform scale.");
 	}
 	float radius_scaled = godot_to_box2d(radius * scale.x);
