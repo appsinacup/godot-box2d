@@ -17,16 +17,22 @@ using namespace godot;
 static PhysicsServerBox2DFactory *box2d_factory = nullptr;
 
 void initialize_physics_server_box2d_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SERVERS) {
-		return;
-	}
-	ClassDB::register_class<Box2DDirectSpaceState>();
-	ClassDB::register_class<Box2DDirectBodyState>();
-	ClassDB::register_class<PhysicsServerBox2D>();
-	ClassDB::register_class<PhysicsServerBox2DFactory>();
+	switch (p_level) {
+		case MODULE_INITIALIZATION_LEVEL_SERVERS: {
+			ClassDB::register_class<Box2DDirectSpaceState>();
+			ClassDB::register_class<Box2DDirectBodyState>();
+			ClassDB::register_class<PhysicsServerBox2D>();
+			ClassDB::register_class<PhysicsServerBox2DFactory>();
 
-	box2d_factory = memnew(PhysicsServerBox2DFactory());
-	PhysicsServer2DManager::get_singleton()->register_server("Box2D", Callable(box2d_factory, "create_box2d_callback"));
+			box2d_factory = memnew(PhysicsServerBox2DFactory());
+			PhysicsServer2DManager::get_singleton()->register_server("Box2D", Callable(box2d_factory, "create_box2d_callback"));
+		} break;
+		case MODULE_INITIALIZATION_LEVEL_SCENE: {
+			Box2DProjectSettings::register_settings();
+		} break;
+		default: {
+		} break;
+	}
 }
 
 void uninitialize_physics_server_box2d_module(ModuleInitializationLevel p_level) {
