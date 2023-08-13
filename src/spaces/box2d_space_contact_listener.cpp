@@ -48,16 +48,13 @@ void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b
 
 void Box2DSpaceContactListener::handle_one_way_direction(b2Vec2 one_way_collision_direction_A, b2Body *b2_body_A, b2Body *b2_body_B, b2Contact *contact) {
 	//if (!world_manifold_computed) {
-		//contact->GetWorldManifold(&worldManifold);
-		//world_manifold_computed = true;
+	//contact->GetWorldManifold(&worldManifold);
+	//world_manifold_computed = true;
 	//}
 	b2Vec2 normal = b2Mul(b2_body_A->GetTransform().q, one_way_collision_direction_A);
 	b2Vec2 body_A_velocity = b2_body_A->GetLinearVelocity();
 	b2Vec2 body_B_velocity = b2_body_B->GetLinearVelocity();
-	b2Vec2 body_A_position = b2_body_A->GetPosition();
-	b2Vec2 body_B_position = b2_body_B->GetPosition();
-	b2Vec2 relative_position = body_B_position - body_A_position;
-	b2Vec2 local_normal = contact->GetManifold()->localNormal;
+	//b2Vec2 local_normal = contact->GetManifold()->localNormal;
 	// relative velocity
 	body_B_velocity -= body_A_velocity;
 	body_B_velocity.Normalize();
@@ -88,11 +85,9 @@ void Box2DSpaceContactListener::PreSolve(b2Contact *contact, const b2Manifold *o
 	b2Vec2 b2_body_B_position = b2_body_B->GetPosition();
 	if (one_way_collision_A) {
 		handle_one_way_direction(one_way_collision_direction_A, b2_body_A, b2_body_B, contact);
-		return;
 	}
 	if (one_way_collision_B) {
 		handle_one_way_direction(one_way_collision_direction_B, b2_body_B, b2_body_A, contact);
-		return;
 	}
 }
 
