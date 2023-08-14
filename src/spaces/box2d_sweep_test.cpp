@@ -266,11 +266,13 @@ Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_sha
 }
 
 Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
-	Vector<Box2DShape *> shapes;
-	shapes.append(p_shape);
+	Vector<Box2DCollisionObject::Shape> shapes;
+	Box2DCollisionObject::Shape shape;
+	shape.shape = p_shape;
+	shapes.append(shape);
 	return multiple_shapes_cast(shapes, p_transform, p_motion, p_margin, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, p_max_results, p_other_fixtures, space_state);
 }
-Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
+Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisionObject::Shape> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
 	Vector<SweepTestResult> results;
 	if (p_max_results == 0) {
 		return results;
@@ -292,18 +294,29 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DShape *
 			ERR_FAIL_V(results);
 		}
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
-		for (Box2DShape *box2d_shape_A : p_shapes) {
+		for (Box2DCollisionObject::Shape body_shape_A : p_shapes) {
+			Box2DShape *box2d_shape_A = body_shape_A.shape;
 			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(false); i++) {
 				Box2DShape::ShapeInfo shape_info{ i, identity, false, false };
-				b2Shape *shape_A = box2d_shape_A->get_transformed_b2Shape(shape_info, nullptr);
+				b2Shape *shape_A;
+				if (!body_shape_A.fixtures.is_empty()) {
+					shape_A = body_shape_A.fixtures[i]->GetShape();
+				} else {
+					shape_A = box2d_shape_A->get_transformed_b2Shape(shape_info, nullptr);
+				}
 				SweepShape sweep_shape_A{ box2d_shape_A, sweepA, nullptr, shape_A_transform };
+				if (!body_shape_A.fixtures.is_empty()) {
+					sweep_shape_A.fixture = body_shape_A.fixtures[i];
+				}
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
 				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B);
 				if (output.collision) {
 					results.append(output);
 				}
-				box2d_shape_A->erase_shape(shape_A);
-				memdelete(shape_A);
+				if (body_shape_A.fixtures.is_empty()) {
+					box2d_shape_A->erase_shape(shape_A);
+					memdelete(shape_A);
+				}
 			}
 		}
 	}

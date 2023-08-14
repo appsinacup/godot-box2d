@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../bodies/box2d_collision_object.h"
+
 #include <box2d/b2_body.h>
 #include <box2d/b2_distance.h>
 #include <box2d/b2_fixture.h>
@@ -44,7 +46,7 @@ public:
 	static SweepTestResult shape_cast(SweepShape p_sweep_shape_A, b2Shape *shape_A, SweepShape p_sweep_shape_B, b2Shape *shape_B);
 	static Vector<b2Fixture *> query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state);
 	static Vector<b2Fixture *> query_aabb_motion(Vector<Box2DShape *> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state);
-	static Vector<SweepTestResult> multiple_shapes_cast(Vector<Box2DShape *> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state);
+	static Vector<SweepTestResult> multiple_shapes_cast(Vector<Box2DCollisionObject::Shape> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state);
 	static Vector<SweepTestResult> multiple_shapes_cast(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state);
 	static SweepTestResult closest_result_in_cast(Vector<SweepTestResult> p_results);
 };

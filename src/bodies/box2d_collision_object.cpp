@@ -718,6 +718,9 @@ void Box2DCollisionObject::_set_space(Box2DSpace *p_space) {
 		_update_shapes();
 	}
 }
+Vector<Box2DCollisionObject::Shape> Box2DCollisionObject::get_shapes() {
+	return shapes;
+}
 
 int Box2DCollisionObject::get_shape_count() const { return shapes.size(); }
 Box2DShape *Box2DCollisionObject::get_shape(int p_index) const {

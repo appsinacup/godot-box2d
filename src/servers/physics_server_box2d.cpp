@@ -2,6 +2,7 @@
 
 #include "../b2_user_settings.h"
 
+#include "../spaces/box2d_space_contact_listener.h"
 #include "../spaces/box2d_sweep_test.h"
 
 #include "../bodies/box2d_direct_body_state.h"
@@ -982,13 +983,36 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	}
 
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, 0xff, true, false, (Box2DDirectSpaceState *)body->get_space_state());
-	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shapes, p_from, p_motion, p_margin, 0xff, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
-	// Exclude bodies that are excluded
+	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(body->get_shapes(), p_from, p_motion, p_margin, 0xff, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
+
 	for (int i = 0; i < sweep_test_results.size(); i++) {
 		Box2DCollisionObject *body_B = sweep_test_results[i].sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+		// collision exception
 		if (!body_B || body->is_body_collision_excepted(body_B) || body_B->is_body_collision_excepted(body)) {
 			sweep_test_results.remove_at(i);
 			i--;
+			continue;
+		}
+		if (body_B != nullptr) {
+			ERR_FAIL_COND_V(!sweep_test_results[i].sweep_shape_A.fixture, false);
+			ERR_FAIL_COND_V(!sweep_test_results[i].sweep_shape_B.fixture, false);
+			b2FixtureUserData fixtureA_user_data = sweep_test_results[i].sweep_shape_A.fixture->GetUserData();
+			b2FixtureUserData fixtureB_user_data = sweep_test_results[i].sweep_shape_B.fixture->GetUserData();
+			b2Vec2 one_way_collision_direction_A(fixtureA_user_data.one_way_collision_direction_x, fixtureA_user_data.one_way_collision_direction_y);
+			b2Vec2 one_way_collision_direction_B(fixtureB_user_data.one_way_collision_direction_x, fixtureB_user_data.one_way_collision_direction_y);
+			bool one_way_collision_A = fixtureA_user_data.one_way_collision;
+			bool one_way_collision_B = fixtureB_user_data.one_way_collision;
+			bool should_disable_collision = false;
+			if (one_way_collision_A) {
+				should_disable_collision = Box2DSpaceContactListener::should_disable_collision_one_way_direction(one_way_collision_direction_A, body->get_b2Body(), body_B->get_b2Body(), body_B->get_b2Body()->GetLinearVelocity());
+			}
+			if (one_way_collision_B && !should_disable_collision) {
+				should_disable_collision = Box2DSpaceContactListener::should_disable_collision_one_way_direction(one_way_collision_direction_B, body_B->get_b2Body(), body->get_b2Body(), godot_to_box2d(p_motion));
+			}
+			if (should_disable_collision) {
+				sweep_test_results.remove_at(i);
+				i--;
+			}
 		}
 	}
 	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
