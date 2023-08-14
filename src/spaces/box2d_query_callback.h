@@ -14,6 +14,7 @@ class Box2DDirectSpaceState;
 class Box2DQueryCallback : public b2QueryCallback {
 	Box2DDirectSpaceState *space_state;
 	Vector<b2Fixture *> results;
+	uint32_t collision_layer;
 	uint32_t collision_mask;
 	bool collide_with_bodies;
 	bool collide_with_areas;
@@ -21,6 +22,7 @@ class Box2DQueryCallback : public b2QueryCallback {
 
 public:
 	Box2DQueryCallback(Box2DDirectSpaceState *space_state,
+			uint32_t collision_layer,
 			uint32_t collision_mask,
 			bool collide_with_bodies,
 			bool collide_with_areas);

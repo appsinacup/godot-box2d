@@ -241,15 +241,16 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 	}
 	return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, b2DistanceOutput(), toi_output, 0, manifold, false };
 }
-Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
+Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
 	Vector<Box2DShape *> shapes;
 	shapes.append(p_shape);
-	return query_aabb_motion(shapes, p_transform, p_motion, p_margin, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, space_state);
+	return query_aabb_motion(shapes, p_transform, p_motion, p_margin, p_collision_layer, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, space_state);
 }
 
-Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
+Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
 	b2Vec2 motion = godot_to_box2d(p_motion);
 	Box2DQueryCallback callback(space_state,
+			p_collision_layer,
 			p_collision_mask,
 			p_collide_with_bodies,
 			p_collide_with_areas);
@@ -265,14 +266,14 @@ Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_sha
 	return shapes_result;
 }
 
-Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
+Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
 	Vector<Box2DCollisionObject::Shape> shapes;
 	Box2DCollisionObject::Shape shape;
 	shape.shape = p_shape;
 	shapes.append(shape);
-	return multiple_shapes_cast(shapes, p_transform, p_motion, p_margin, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, p_max_results, p_other_fixtures, space_state);
+	return multiple_shapes_cast(shapes, p_transform, p_motion, p_margin, p_collide_with_bodies, p_collide_with_areas, p_max_results, p_other_fixtures, space_state);
 }
-Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisionObject::Shape> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
+Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisionObject::Shape> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, bool p_collide_with_bodies, bool p_collide_with_areas, int32_t p_max_results, Vector<b2Fixture *> p_other_fixtures, Box2DDirectSpaceState *space_state) {
 	Vector<SweepTestResult> results;
 	if (p_max_results == 0) {
 		return results;

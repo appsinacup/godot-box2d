@@ -982,9 +982,8 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		shapes.append(shape);
 	}
 
-	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, 0xff, true, false, (Box2DDirectSpaceState *)body->get_space_state());
-	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(body->get_shapes(), p_from, p_motion, p_margin, 0xff, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
-
+	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, body->get_collision_layer(), body->get_collision_mask(), true, false, (Box2DDirectSpaceState *)body->get_space_state());
+	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(body->get_shapes(), p_from, p_motion, p_margin, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
 	for (int i = 0; i < sweep_test_results.size(); i++) {
 		Box2DCollisionObject *body_B = sweep_test_results[i].sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
 		// collision exception
