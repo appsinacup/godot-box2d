@@ -175,7 +175,7 @@ bool Box2DDirectSpaceState::_rest_info(const RID &shape_rid, const Transform2D &
 		Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
 		ERR_FAIL_COND_V(!body_B, false);
 		result_instance.point = transform.get_origin() + box2d_to_godot(sweep_test_result.manifold.points[0]);
-		result_instance.normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
+		result_instance.normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y).normalized();
 		result_instance.linear_velocity = box2d_to_godot(sweep_test_result.sweep_shape_B.fixture->GetBody()->GetLinearVelocity());
 		if (body_B) {
 			result_instance.rid = body_B->get_self();

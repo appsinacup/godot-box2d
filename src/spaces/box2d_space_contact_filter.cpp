@@ -7,11 +7,11 @@
 
 bool Box2DSpaceContactFilter::ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB) {
 	Box2DCollisionObject *bodyA = fixtureA->GetBody()->GetUserData().collision_object;
-	Box2DCollisionObject *bodyB = fixtureA->GetBody()->GetUserData().collision_object;
+	Box2DCollisionObject *bodyB = fixtureB->GetBody()->GetUserData().collision_object;
 
 	const b2Filter &filterA = fixtureA->GetFilterData();
 	const b2Filter &filterB = fixtureB->GetFilterData();
 
 	bool collide = (filterA.maskBits & filterB.categoryBits) != 0 || (filterA.categoryBits & filterB.maskBits) != 0;
-	return collide && !bodyA->is_body_collision_excepted(bodyB);
+	return collide && !bodyA->is_body_collision_excepted(bodyB) && !bodyB->is_body_collision_excepted(bodyA);
 }

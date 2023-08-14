@@ -908,14 +908,14 @@ void PhysicsServerBox2D::_body_add_collision_exception(const RID &p_body, const 
 	Box2DBody *excepted_body = body_owner.get_or_null(p_excepted_body);
 	ERR_FAIL_COND(!body);
 	ERR_FAIL_COND(!excepted_body);
-	body->add_collision_exception(body);
+	body->add_collision_exception(excepted_body);
 }
 void PhysicsServerBox2D::_body_remove_collision_exception(const RID &p_body, const RID &p_excepted_body) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	Box2DBody *excepted_body = body_owner.get_or_null(p_excepted_body);
 	ERR_FAIL_COND(!body);
 	ERR_FAIL_COND(!excepted_body);
-	body->remove_collision_exception(body);
+	body->remove_collision_exception(excepted_body);
 }
 TypedArray<RID> PhysicsServerBox2D::_body_get_collision_exceptions(const RID &p_body) const {
 	Box2DBody *body = body_owner.get_or_null(p_body);
@@ -983,6 +983,14 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, 0xff, true, false, (Box2DDirectSpaceState *)body->get_space_state());
 	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shapes, p_from, p_motion, p_margin, 0xff, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
+	// Exclude bodies that are excluded
+	for (int i = 0; i < sweep_test_results.size(); i++) {
+		Box2DCollisionObject *body_B = sweep_test_results[i].sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+		if (!body_B || body->is_body_collision_excepted(body_B) || body_B->is_body_collision_excepted(body)) {
+			sweep_test_results.remove_at(i);
+			i--;
+		}
+	}
 	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
 	if (!p_result) {
 		return sweep_test_result.collision;
@@ -999,7 +1007,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	current_result.collider = body_B->get_self();
 	current_result.collider_id = body_B->get_object_instance_id();
 	current_result.collision_point = box2d_to_godot(sweep_test_result.manifold.points[0]);
-	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y);
+	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y).normalized();
 	current_result.collider_velocity = box2d_to_godot(body_B->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
 	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction, p_margin);
