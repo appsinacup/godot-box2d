@@ -32,13 +32,16 @@ real_t SweepTestResult::safe_fraction() {
 		return 0;
 	}
 	float safe_fraction = safe_length / motion_length;
+	if (safe_fraction < 0) {
+		safe_fraction = 0;
+	}
 	return safe_fraction;
 }
-real_t SweepTestResult::unsafe_fraction(float safe_fraction, float margin) {
+real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
 	if (is_zero(safe_fraction) || safe_fraction < 0) {
 		return 0;
 	}
-	float unsafe_fraction = safe_fraction + margin;
+	float unsafe_fraction = safe_fraction;
 	if (unsafe_fraction >= 1) {
 		unsafe_fraction = 1;
 	}
@@ -143,17 +146,22 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 	return IntersectionManifoldResult{ manifold, flipped };
 }
 
-b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B) {
+b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B, float extra_margin) {
 	b2DistanceOutput output;
 	b2DistanceInput input;
 	b2SimplexCache cache;
 	cache.count = 0;
+	extra_margin = godot_to_box2d(extra_margin);
+	shapeA->m_radius += extra_margin;
+	shapeB->m_radius += extra_margin;
 	input.proxyA.Set(shapeA, child_index_A);
 	input.proxyB.Set(shapeB, child_index_B);
 	input.transformA = p_transformA;
 	input.transformB = p_transformB;
 	input.useRadii = true;
 	b2Distance(&output, &cache, &input);
+	shapeA->m_radius -= extra_margin;
+	shapeB->m_radius -= extra_margin;
 	b2PolygonShape *polyA = (b2PolygonShape *)shapeA;
 	b2PolygonShape *polyB = (b2PolygonShape *)shapeB;
 	return output;
@@ -189,7 +197,7 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	return aabb_total;
 }
 
-SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *shape_A, SweepShape p_sweep_shape_B, b2Shape *shape_B) {
+SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *shape_A, SweepShape p_sweep_shape_B, b2Shape *shape_B, float extra_margin) {
 	b2TOIInput toi_input;
 	b2TOIOutput toi_output;
 	b2Sweep sweep_A = p_sweep_shape_A.sweep;
@@ -212,7 +220,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 					// move transform_A and B to end transform;
 					sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
 					sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
-					b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j);
+					b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j, extra_margin);
 					if (distance_output.distance > b2_epsilon) {
 						break;
 					}
@@ -302,6 +310,10 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 				b2Shape *shape_A;
 				if (!body_shape_A.fixtures.is_empty()) {
 					shape_A = body_shape_A.fixtures[i]->GetShape();
+					// check if shape body is same as one we are checking
+					if (body_shape_A.fixtures[i]->GetBody() == body_B) {
+						continue;
+					}
 				} else {
 					shape_A = box2d_shape_A->get_transformed_b2Shape(shape_info, nullptr);
 				}
@@ -310,7 +322,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 					sweep_shape_A.fixture = body_shape_A.fixtures[i];
 				}
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
-				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B);
+				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B, p_margin);
 				if (output.collision) {
 					results.append(output);
 				}

@@ -135,7 +135,7 @@ bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D
 	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
 	if (sweep_test_result.collision && closest_safe != nullptr && closest_unsafe != nullptr) {
 		*closest_safe = sweep_test_result.safe_fraction();
-		*closest_unsafe = sweep_test_result.unsafe_fraction(*closest_safe, margin);
+		*closest_unsafe = sweep_test_result.unsafe_fraction(*closest_safe);
 	}
 	return true;
 }

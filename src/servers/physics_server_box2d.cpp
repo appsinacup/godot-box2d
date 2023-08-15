@@ -145,7 +145,7 @@ bool PhysicsServerBox2D::_shape_collide(const RID &p_shape_A, const Transform2D 
 			b2Shape *b2_shape_B = shape_B->get_transformed_b2Shape(shape_info_B, nullptr);
 			SweepShape sweep_shape_A{ shape_A, sweepA, nullptr, shape_A_transform };
 			SweepShape sweep_shape_B{ shape_B, sweepB, nullptr, shape_B_transform };
-			SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, b2_shape_A, sweep_shape_B, b2_shape_B);
+			SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, b2_shape_A, sweep_shape_B, b2_shape_B, 0);
 			if (output.collision) {
 				sweep_results.append(output);
 			}
@@ -1033,7 +1033,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y).normalized();
 	current_result.collider_velocity = box2d_to_godot(body_B->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
-	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction, p_margin);
+	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction);
 	current_result.travel = p_motion * current_result.collision_safe_fraction;
 	current_result.remainder = p_motion - current_result.travel;
 	int shape_A_index = 0;

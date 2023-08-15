@@ -11,6 +11,9 @@
 
 b2Shape *Box2DShape::get_transformed_b2Shape(ShapeInfo shape_info, Box2DCollisionObject *body) {
 	b2Shape *shape = _get_transformed_b2Shape(shape_info, body);
+	if (!shape) {
+		return nullptr;
+	}
 	created_shapes.append(shape);
 	if (body) {
 		shape_body_map[shape] = body;
