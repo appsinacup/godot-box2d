@@ -5,16 +5,15 @@ Currently pass rate of [Godot-Physics-Tests](https://github.com/fabriceci/Godot-
 
 Test Count|Pass Status|Category|Notes|Test Names|
 --|--|--|--|--|
-132|PASS|All|
+134|PASS|All|
 4|VERY CLOSE|RigidBody2D CCD|There is one line that causes it to fail for another reason. https://github.com/godot-box2d/godot-box2d/issues/29.|testing Continuous Collision Detection (CCD)
 1|VERY CLOSE|RigidBody2D Collision Stability|If I increase the collision boundary to 3 pixels, test passes. Could be chance that godot physics test passes.| testing if 450 rectangles can be handled before instablity
 2|VERY CLOSE|RigidBody2D Sleep|* All bodies are asleep after 3.5 seconds, while in Godot after 2s. Sleep time is not configurable in box2d|*testing [contact_monitor] > The body sleep and *testing the stability with a pyramid [tolerance (2.50, 0.00)] > All body are sleep
 3|VERY CLOSE|RigidBody2D Torque|Final values are very close to  Godot Physics. https://github.com/godot-box2d/godot-box2d/issues/28|* Constant torque is applied, *The impulse torque is applied to the angular velocity and *The impulse torque makes the body rotate correctly
 1|FAIL|CharacterBody2D|Fail for snapping to floor. https://github.com/godot-box2d/godot-box2d/issues/11
 5|FAIL|Sync to Physics|https://github.com/godot-box2d/godot-box2d/issues/7|*Sync to Physics
-2|FAIL|CollisionShape One Way| https://github.com/godot-box2d/godot-box2d/issues/27|*Only collide if the platform rotation > 180°
-142|PASS + VERY CLOSE|All|
-8|FAIL|All|
+144|PASS + VERY CLOSE|All|
+6|FAIL|All|
 
 Performance Tests, before simulation goes below 30fps:
 

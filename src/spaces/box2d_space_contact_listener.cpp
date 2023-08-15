@@ -31,14 +31,9 @@ void Box2DSpaceContactListener::EndContact(b2Contact *contact) {
 	handle_contact(contact, PhysicsServer2D::AreaBodyStatus::AREA_BODY_REMOVED);
 }
 
-void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB, b2Contact *contact) {
+void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB, b2WorldManifold worldManifold, int points_count) {
 	if (b2_body_A->GetType() != b2BodyType::b2_dynamicBody && b2_body_B->GetType() == b2BodyType::b2_dynamicBody) {
-		if (!world_manifold_computed) {
-			contact->GetWorldManifold(&worldManifold);
-			world_manifold_computed = true;
-		}
-		int point_count = contact->GetManifold()->pointCount;
-		if (point_count > 0) {
+		if (points_count > 0) {
 			b2_body_B->ApplyLinearImpulse(b2_body_B->GetMass() * bodyA->get_constant_linear_velocity(), worldManifold.points[0], true);
 		}
 		float inertia = b2_body_B->GetInertia() - b2_body_B->GetMass() * b2Dot(b2_body_B->GetLocalCenter(), b2_body_B->GetLocalCenter());
@@ -46,24 +41,20 @@ void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b
 	}
 }
 
-void Box2DSpaceContactListener::handle_one_way_direction(b2Vec2 one_way_collision_direction_A, b2Body *b2_body_A, b2Body *b2_body_B, b2Contact *contact) {
-	//if (!world_manifold_computed) {
-	//contact->GetWorldManifold(&worldManifold);
-	//world_manifold_computed = true;
-	//}
+bool Box2DSpaceContactListener::should_disable_collision_one_way_direction(b2Vec2 one_way_collision_direction_A, b2Body *b2_body_A, b2Body *b2_body_B, b2Vec2 body_B_velocity) {
+	ERR_FAIL_COND_V(!b2_body_A, false);
+	ERR_FAIL_COND_V(!b2_body_B, false);
 	b2Vec2 normal = b2Mul(b2_body_A->GetTransform().q, one_way_collision_direction_A);
 	b2Vec2 body_A_velocity = b2_body_A->GetLinearVelocity();
-	b2Vec2 body_B_velocity = b2_body_B->GetLinearVelocity();
-	//b2Vec2 local_normal = contact->GetManifold()->localNormal;
-	// relative velocity
+
 	body_B_velocity -= body_A_velocity;
 	body_B_velocity.Normalize();
 	float dot_product = b2Dot(body_B_velocity, normal);
 	float passThroughThreshold = -b2_epsilon * 10;
 	if (dot_product >= passThroughThreshold) {
-		contact->SetEnabled(false);
-		return;
+		return true;
 	}
+	return false;
 }
 
 void Box2DSpaceContactListener::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
@@ -79,15 +70,21 @@ void Box2DSpaceContactListener::PreSolve(b2Contact *contact, const b2Manifold *o
 	bool one_way_collision_B = fixtureB_user_data.one_way_collision;
 	b2Vec2 one_way_collision_direction_A(fixtureA_user_data.one_way_collision_direction_x, fixtureA_user_data.one_way_collision_direction_y);
 	b2Vec2 one_way_collision_direction_B(fixtureB_user_data.one_way_collision_direction_x, fixtureB_user_data.one_way_collision_direction_y);
-	handle_static_constant_linear_velocity(b2_body_A, bodyA, b2_body_B, bodyB, contact);
-	handle_static_constant_linear_velocity(b2_body_B, bodyB, b2_body_A, bodyA, contact);
+	contact->GetWorldManifold(&world_manifold);
+	handle_static_constant_linear_velocity(b2_body_A, bodyA, b2_body_B, bodyB, world_manifold, contact->GetManifold()->pointCount);
+	handle_static_constant_linear_velocity(b2_body_B, bodyB, b2_body_A, bodyA, world_manifold, contact->GetManifold()->pointCount);
 	b2Vec2 b2_body_A_position = b2_body_A->GetPosition();
 	b2Vec2 b2_body_B_position = b2_body_B->GetPosition();
 	if (one_way_collision_A) {
-		handle_one_way_direction(one_way_collision_direction_A, b2_body_A, b2_body_B, contact);
+		if (should_disable_collision_one_way_direction(one_way_collision_direction_A, b2_body_A, b2_body_B, b2_body_B->GetLinearVelocity())) {
+			contact->SetEnabled(false);
+			return;
+		}
 	}
 	if (one_way_collision_B) {
-		handle_one_way_direction(one_way_collision_direction_B, b2_body_B, b2_body_A, contact);
+		if (should_disable_collision_one_way_direction(one_way_collision_direction_B, b2_body_B, b2_body_A, b2_body_A->GetLinearVelocity())) {
+			contact->SetEnabled(false);
+		}
 	}
 }
 

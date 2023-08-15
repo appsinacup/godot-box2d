@@ -97,7 +97,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
 			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
-				//_set_transform(p_variant);
+				_set_transform(p_variant);
 				// TODO
 			} else if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
 				_set_transform(p_variant);

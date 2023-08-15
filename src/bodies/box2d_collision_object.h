@@ -29,6 +29,14 @@ public:
 	bool operator<(const Box2DCollisionObject &other) const {
 		return collision.priority < other.collision.priority;
 	}
+	struct Shape {
+		Transform2D xform;
+		Box2DShape *shape = nullptr;
+		Vector<b2Shape *> shapes;
+		Vector<b2Fixture *> fixtures;
+		bool disabled = false;
+		bool one_way_collision = false;
+	};
 
 protected:
 	Type type;
@@ -42,14 +50,6 @@ protected:
 	HashSet<Box2DCollisionObject *> collision_exception;
 	Vector<Box2DArea *> areas;
 
-	struct Shape {
-		Transform2D xform;
-		Box2DShape *shape = nullptr;
-		Vector<b2Shape *> shapes;
-		Vector<b2Fixture *> fixtures;
-		bool disabled = false;
-		bool one_way_collision = false;
-	};
 	Vector<Shape> shapes;
 
 	struct Collision {
@@ -199,6 +199,7 @@ public:
 	virtual void clear_shape(int p_index);
 	void set_gravity_scale(real_t p_gravity_scale);
 	real_t get_gravity_scale();
+	Vector<Shape> get_shapes();
 	void add_collision_exception(Box2DCollisionObject *excepted_body);
 	void remove_collision_exception(Box2DCollisionObject *excepted_body);
 	bool is_body_collision_excepted(Box2DCollisionObject *excepted_body);

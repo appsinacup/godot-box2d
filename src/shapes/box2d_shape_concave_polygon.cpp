@@ -13,9 +13,9 @@ constexpr float CHAIN_SEGMENT_SQUARE_SIZE = 0.5f;
 void Box2DShapeConcavePolygon::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::PACKED_VECTOR2_ARRAY);
 	PackedVector2Array points_array = p_data;
-	points.resize(points_array.size());
-	for (int i = 0; i < points_array.size(); i++) {
-		points.write[i] = points_array[i];
+	points.resize(points_array.size() / 2);
+	for (int i = 0; i < points_array.size(); i += 2) {
+		points.write[i / 2] = points_array[i];
 	}
 	points = Box2DShapeConvexPolygon::make_sure_polygon_is_counterclockwise(points);
 	points = Box2DShapeConvexPolygon::remove_points_that_are_too_close(points);
@@ -26,9 +26,14 @@ void Box2DShapeConcavePolygon::set_data(const Variant &p_data) {
 
 Variant Box2DShapeConcavePolygon::get_data() const {
 	Array points_array;
-	points_array.resize(points.size());
-	for (int i = 0; i < points.size(); i++) {
+	points_array.resize(points.size() * 2);
+	for (int i = 1; i < points.size(); i++) {
 		points_array[i] = points[i];
+		points_array[i + 1] = points[i];
+	}
+	if (points.size() > 0) {
+		points_array[0] = points[0];
+		points_array[points_array.size() - 1] = points[0];
 	}
 	return points_array;
 }
@@ -42,17 +47,17 @@ b2Shape *Box2DShapeConcavePolygon::_get_transformed_b2Shape(ShapeInfo shape_info
 	// make a chain shape if it's static
 	if (shape_info.is_static) {
 		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
+		int points_count = points.size();
+		if (points_count < 3) {
+			ERR_FAIL_COND_V(points_count < 3, nullptr);
+		}
 		b2ChainShape *shape = memnew(b2ChainShape);
-		b2Vec2 box2d_points[b2_maxPolygonVertices];
+		b2Vec2 *box2d_points = new b2Vec2[points_count];
 		for (int i = 0; i < points.size(); i++) {
 			box2d_points[i] = godot_to_box2d(shape_info.transform.xform(points[i]));
 		}
-		int points_count = points.size();
-		if (points_count < 3) {
-			memdelete(shape);
-			ERR_FAIL_COND_V(points_count < 3, nullptr);
-		}
 		shape->CreateLoop(box2d_points, points_count);
+		delete[] box2d_points;
 		return shape;
 	}
 	ERR_FAIL_COND_V(shape_info.index > points.size(), nullptr);
