@@ -206,29 +206,12 @@ b2Shape *Box2DShapeConvexPolygon::_get_transformed_b2Shape(ShapeInfo shape_info,
 	ERR_FAIL_COND_V(shape_info.index >= polygons.size(), nullptr);
 	Vector<Vector2> polygon = polygons[shape_info.index];
 	ERR_FAIL_COND_V(polygon.size() < 3, nullptr);
-	// make a chain shape if it's static
-	if (shape_info.is_static) {
-		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
-		int points_count = polygon.size();
-		if (points_count < 3) {
-			ERR_FAIL_COND_V(points_count < 3, nullptr);
-		}
-		b2ChainShape *shape = memnew(b2ChainShape);
-		b2Vec2 *b2_points = new b2Vec2[points_count];
-		for (int i = 0; i < polygon.size(); i++) {
-			b2_points[i] = godot_to_box2d(shape_info.transform.xform(polygon[i]));
-			ERR_PRINT(rtos(b2_points[i].x) + " " + rtos(b2_points[i].y));
-		}
-		shape->CreateLoop(b2_points, points_count);
-		delete[] b2_points;
-		return shape;
-	}
 	polygon = remove_polygon_skin(polygon);
 	ERR_FAIL_COND_V(polygon.size() > b2_maxPolygonVertices, nullptr);
 	b2Vec2 b2_points[b2_maxPolygonVertices];
 	for (int i = 0; i < polygon.size(); i++) {
 		b2_points[i] = godot_to_box2d(shape_info.transform.xform(polygon[i]));
-		ERR_PRINT(rtos(b2_points[i].x) + " " + rtos(b2_points[i].y));
+			ERR_PRINT(rtos(b2_points[i].x) + " " + rtos(b2_points[i].y));
 	}
 	b2PolygonShape *shape = memnew(b2PolygonShape);
 	int new_size = remove_bad_points(b2_points, polygon.size());
