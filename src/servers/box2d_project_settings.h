@@ -8,4 +8,5 @@ public:
 	static int get_max_threads();
 	static int get_position_iterations();
 	static int get_velocity_iterations();
+	static float get_scaling_factor();
 };

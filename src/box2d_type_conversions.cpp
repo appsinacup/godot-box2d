@@ -14,19 +14,19 @@ float ensure_non_zero(const float &p_value) {
 	return p_value;
 }
 
-float godot_to_box2d(const float &p_value, float scale_factor) {
-	return p_value * scale_factor;
+float godot_to_box2d(const float &p_value) {
+	return p_value * (1.0f/Box2DProjectSettings::get_scaling_factor());
 }
 
-b2Vec2 godot_to_box2d(const Vector2 &p_vector, float scale_factor) {
-	return b2Vec2(godot_to_box2d(p_vector.x, scale_factor), godot_to_box2d(p_vector.y, scale_factor));
+b2Vec2 godot_to_box2d(const Vector2 &p_vector) {
+	return b2Vec2(godot_to_box2d(p_vector.x), godot_to_box2d(p_vector.y));
 }
 
-float box2d_to_godot(const float &p_box2d_value, float scale_factor) {
-	return scale_factor * p_box2d_value;
+float box2d_to_godot(const float &p_box2d_value) {
+	return Box2DProjectSettings::get_scaling_factor() * p_box2d_value;
 }
-Vector2 box2d_to_godot(const b2Vec2 &p_box2d_vector, float scale_factor) {
-	return Vector2(box2d_to_godot(p_box2d_vector.x, scale_factor), box2d_to_godot(p_box2d_vector.y, scale_factor));
+Vector2 box2d_to_godot(const b2Vec2 &p_box2d_vector) {
+	return Vector2(box2d_to_godot(p_box2d_vector.x), box2d_to_godot(p_box2d_vector.y));
 }
 
 float variant_to_number(Variant p_variant) {

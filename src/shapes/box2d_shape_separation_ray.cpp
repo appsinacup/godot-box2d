@@ -20,7 +20,7 @@ void Box2DShapeSeparationRay::set_data(const Variant &p_data) {
 	bool slide_on_slope = dict[SEPARATION_RAY_SLIDE_ON_SLOPE];
 	a = Vector2();
 	b = Vector2(0, length);
-	half_extents = Vector2((a - b).length(), GODOT_LINEAR_SLOP);
+	half_extents = Vector2((a - b).length(), b2_linearSlop * Box2DProjectSettings::get_scaling_factor());
 	half_extents.x = ensure_non_zero(half_extents.x);
 	half_extents.y = ensure_non_zero(half_extents.y);
 	configured = true;
