@@ -2,6 +2,7 @@
 
 ## [v0.6](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.6)
 
+- Fix Polygon Skin not letting objects fall through small gaps. Also fix inside out polygons bug.
 - Fix [Fix One way Collision for CharacterBody](https://github.com/appsinacup/godot-box2d/issues/33)
 
 ## [v0.5.4](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.5.4)

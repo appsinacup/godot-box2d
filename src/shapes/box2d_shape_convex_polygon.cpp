@@ -56,6 +56,15 @@ int Box2DShapeConvexPolygon::get_b2Shape_count(bool is_static) const {
 	return polygons.size();
 }
 
+Vector<Vector2> Box2DShapeConvexPolygon::remove_polygon_skin(Vector<Vector2> points) {
+	Vector<Vector2> scaled_points;
+	for (int i = 0; i < points.size(); i++) {
+		float scale_factor = (points[i].length() - box2d_to_godot(b2_polygonRadius / 2)) / points[i].length();
+		scaled_points.append(points[i] * scale_factor);
+	}
+	return scaled_points;
+}
+
 float compute_polygon_area(Vector<Vector2> points) {
 	float area = 0.0f;
 	for (int i = 0; i < points.size(); i++) {
@@ -84,7 +93,7 @@ Vector<Vector2> Box2DShapeConvexPolygon::remove_points_that_are_too_close(Vector
 
 		bool unique = true;
 		for (int32 j = 0; j < tempCount; ++j) {
-			if (v.distance_squared_to(new_points[j]) < ((0.5f * GODOT_LINEAR_SLOP) * (0.5f * GODOT_LINEAR_SLOP))) {
+			if (v.distance_squared_to(new_points[j]) < ((0.5f * b2_linearSlop * Box2DProjectSettings::get_scaling_factor()) * (0.5f * b2_linearSlop * Box2DProjectSettings::get_scaling_factor()))) {
 				unique = false;
 				break;
 			}
@@ -197,22 +206,7 @@ b2Shape *Box2DShapeConvexPolygon::_get_transformed_b2Shape(ShapeInfo shape_info,
 	ERR_FAIL_COND_V(shape_info.index >= polygons.size(), nullptr);
 	Vector<Vector2> polygon = polygons[shape_info.index];
 	ERR_FAIL_COND_V(polygon.size() < 3, nullptr);
-	// make a chain shape if it's static
-	if (shape_info.is_static) {
-		ERR_FAIL_INDEX_V(shape_info.index, 1, nullptr);
-		int points_count = points.size();
-		if (points_count < 3) {
-			ERR_FAIL_COND_V(points_count < 3, nullptr);
-		}
-		b2ChainShape *shape = memnew(b2ChainShape);
-		b2Vec2 *b2_points = new b2Vec2[points_count];
-		for (int i = 0; i < polygon.size(); i++) {
-			b2_points[i] = godot_to_box2d(shape_info.transform.xform(polygon[i]));
-		}
-		shape->CreateLoop(b2_points, points_count);
-		delete[] b2_points;
-		return shape;
-	}
+	polygon = remove_polygon_skin(polygon);
 	ERR_FAIL_COND_V(polygon.size() > b2_maxPolygonVertices, nullptr);
 	b2Vec2 b2_points[b2_maxPolygonVertices];
 	for (int i = 0; i < polygon.size(); i++) {

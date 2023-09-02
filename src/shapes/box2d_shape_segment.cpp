@@ -14,7 +14,7 @@ void Box2DShapeSegment::set_data(const Variant &p_data) {
 	Rect2 rect = p_data;
 	a = rect.get_position();
 	b = rect.get_size();
-	half_extents = Vector2((a - b).length(), GODOT_LINEAR_SLOP);
+	half_extents = Vector2((a - b).length(), b2_linearSlop * Box2DProjectSettings::get_scaling_factor());
 	half_extents.x = ensure_non_zero(half_extents.x);
 	half_extents.y = ensure_non_zero(half_extents.y);
 	configured = true;
