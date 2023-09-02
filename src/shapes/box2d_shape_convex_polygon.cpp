@@ -211,7 +211,7 @@ b2Shape *Box2DShapeConvexPolygon::_get_transformed_b2Shape(ShapeInfo shape_info,
 	b2Vec2 b2_points[b2_maxPolygonVertices];
 	for (int i = 0; i < polygon.size(); i++) {
 		b2_points[i] = godot_to_box2d(shape_info.transform.xform(polygon[i]));
-			ERR_PRINT(rtos(b2_points[i].x) + " " + rtos(b2_points[i].y));
+		ERR_PRINT(rtos(b2_points[i].x) + " " + rtos(b2_points[i].y));
 	}
 	b2PolygonShape *shape = memnew(b2PolygonShape);
 	int new_size = remove_bad_points(b2_points, polygon.size());

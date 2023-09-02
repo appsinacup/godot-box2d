@@ -15,7 +15,7 @@ float ensure_non_zero(const float &p_value) {
 }
 
 float godot_to_box2d(const float &p_value) {
-	return p_value * (1.0f/Box2DProjectSettings::get_scaling_factor());
+	return p_value * (1.0f / Box2DProjectSettings::get_scaling_factor());
 }
 
 b2Vec2 godot_to_box2d(const Vector2 &p_vector) {

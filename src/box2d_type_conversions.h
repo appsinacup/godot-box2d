@@ -3,8 +3,8 @@
 #include <godot_cpp/variant/variant.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 
-#include <box2d/b2_math.h>
 #include "servers/box2d_project_settings.h"
+#include <box2d/b2_math.h>
 
 using namespace godot;
 
