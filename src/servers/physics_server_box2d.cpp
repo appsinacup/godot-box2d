@@ -1091,14 +1091,17 @@ void PhysicsServerBox2D::_joint_set_param(const RID &p_joint, PhysicsServer2D::J
 	ERR_FAIL_COND(!joint);
 	switch (p_param) {
 		case JOINT_PARAM_BIAS:
-			joint->set_bias(p_value);
+			WARN_PRINT_ONCE("JOINT_PARAM_BIAS is UNUSED");
 			break;
 		case JOINT_PARAM_MAX_BIAS:
-			joint->set_max_bias(p_value);
+			WARN_PRINT_ONCE("JOINT_PARAM_MAX_BIAS is UNUSED");
 			break;
 		case JOINT_PARAM_MAX_FORCE:
 			joint->set_max_force(p_value);
 			break;
+		default: {
+			break;
+		}
 	}
 }
 double PhysicsServerBox2D::_joint_get_param(const RID &p_joint, PhysicsServer2D::JointParam p_param) const {
@@ -1106,11 +1109,16 @@ double PhysicsServerBox2D::_joint_get_param(const RID &p_joint, PhysicsServer2D:
 	ERR_FAIL_COND_V(!joint, 0);
 	switch (p_param) {
 		case JOINT_PARAM_BIAS:
-			return joint->get_bias();
+			WARN_PRINT_ONCE("JOINT_PARAM_BIAS is UNUSED");
+			break;
 		case JOINT_PARAM_MAX_BIAS:
-			return joint->get_max_bias();
+			WARN_PRINT_ONCE("JOINT_PARAM_MAX_BIAS is UNUSED");
+			break;
 		case JOINT_PARAM_MAX_FORCE:
 			return joint->get_max_force();
+		default: {
+			break;
+		}
 	}
 	return 0;
 }
@@ -1177,6 +1185,15 @@ void PhysicsServerBox2D::_pin_joint_set_param(const RID &p_joint, PhysicsServer2
 		case PIN_JOINT_SOFTNESS: {
 			joint->set_pin_softness(p_value);
 		} break;
+		case PIN_JOINT_LIMIT_UPPER: {
+			joint->set_pin_upper_angle(p_value);
+		} break;
+		case PIN_JOINT_LIMIT_LOWER: {
+			joint->set_pin_lower_angle(p_value);
+		} break;
+		case PIN_JOINT_MOTOR_TARGET_VELOCITY: {
+			joint->set_pin_motor(p_value);
+		} break;
 	}
 }
 double PhysicsServerBox2D::_pin_joint_get_param(const RID &p_joint, PhysicsServer2D::PinJointParam p_param) const {
@@ -1186,8 +1203,42 @@ double PhysicsServerBox2D::_pin_joint_get_param(const RID &p_joint, PhysicsServe
 		case PIN_JOINT_SOFTNESS: {
 			return joint->get_pin_softness();
 		} break;
+		case PIN_JOINT_LIMIT_UPPER: {
+			return joint->get_pin_upper_angle();
+		} break;
+		case PIN_JOINT_LIMIT_LOWER: {
+			return joint->get_pin_lower_angle();
+		} break;
+		case PIN_JOINT_MOTOR_TARGET_VELOCITY: {
+			return joint->get_pin_motor();
+		} break;
 	}
 	return 0;
+}
+void PhysicsServerBox2D::_pin_joint_set_flag(const RID &joint, PhysicsServer2D::PinJointFlag p_flag, bool p_enabled) {
+	Box2DJoint *joint = joint_owner.get_or_null(p_joint);
+	ERR_FAIL_COND(!joint);
+	switch (p_param) {
+		case PIN_JOINT_FLAG_USE_LIMIT: {
+			joint->set_pin_use_limits(p_enabled);
+		} break;
+		case PIN_JOINT_FLAG_ENABLE_MOTOR: {
+			joint->set_pin_use_motor(p_enabled);
+		} break;
+	}
+}
+bool PhysicsServerBox2D::_pin_joint_get_flag(const RID &joint, PhysicsServer2D::PinJointFlag p_flag) const {
+	Box2DJoint *joint = joint_owner.get_or_null(p_joint);
+	ERR_FAIL_COND_V(!joint, false);
+	switch (p_param) {
+		case PIN_JOINT_FLAG_USE_LIMIT: {
+			return joint->get_pin_softness(p_flag);
+		} break;
+		case PIN_JOINT_FLAG_ENABLE_MOTOR: {
+			return joint->get_upper_angle(p_flag);
+		} break;
+	}
+	return false;
 }
 void PhysicsServerBox2D::_damped_spring_joint_set_param(const RID &p_joint, PhysicsServer2D::DampedSpringParam p_param, double p_value) {
 	Box2DJoint *joint = joint_owner.get_or_null(p_joint);

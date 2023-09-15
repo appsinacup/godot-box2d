@@ -33,23 +33,91 @@ void Box2DJoint::_recreate_joint() {
 	}
 }
 
-void Box2DJoint::set_bias(real_t p_data) {
-	common.bias = p_data;
-}
-void Box2DJoint::set_max_bias(real_t p_data) {
-	common.max_bias = p_data;
-}
 void Box2DJoint::set_max_force(real_t p_data) {
 	common.max_force = p_data;
-}
-real_t Box2DJoint::get_bias() {
-	return common.bias;
-}
-real_t Box2DJoint::get_max_bias() {
-	return common.max_bias;
+	switch (type) {
+		case PhysicsServer2D::JointType::JOINT_TYPE_PIN: {
+			b2RevoluteJointDef *revolute_joint_def = (b2RevoluteJointDef *)joint_def;
+			revolute_joint_def->maxMotorTorque = common.max_force;
+			if (joint) {
+				((b2RevoluteJoint *)joint)->SetMaxMotorTorque(revolute_joint_def->maxMotorTorque);
+			}
+		} break;
+		case PhysicsServer2D::JointType::JOINT_TYPE_GROOVE: {
+			b2PrismaticJointDef *prismatic_joint_def = (b2PrismaticJointDef *)joint_def;
+			prismatic_joint_def->maxMotorForce = common.max_force;
+			if (joint) {
+				((b2PrismaticJoint *)joint)->SetMaxMotorForce(prismatic_joint_def->maxMotorForce);
+			}
+		} break;
+		default: {
+			ERR_PRINT("Unkown joint type");
+		}
+	}
 }
 real_t Box2DJoint::get_max_force() {
 	return common.max_force;
+}
+void Box2DJoint::set_pin_lower_angle(real_t angle) {
+	pin.lower_angle = angle;
+	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
+		((b2RevoluteJointDef *)joint_def)->lowerAngle = angle;
+		if (joint) {
+			((b2RevoluteJoint *)joint)->SetLimits(pin.lower_angle, pin.upper_angle);
+		}
+	}
+}
+real_t Box2DJoint::get_pin_lower_angle() {
+	return pin.lower_angle;
+}
+void Box2DJoint::set_pin_upper_angle(real_t angle) {
+	pin.upper_angle = angle;
+	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
+		((b2RevoluteJointDef *)joint_def)->upperAngle = angle;
+		if (joint) {
+			((b2RevoluteJoint *)joint)->SetLimits(pin.lower_angle, pin.upper_angle);
+		}
+	}
+}
+real_t Box2DJoint::get_pin_upper_angle() {
+	return pin.upper_angle;
+}
+void Box2DJoint::set_pin_motor(real_t motor) {
+	pin.motor = motor;
+	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
+		((b2RevoluteJointDef *)joint_def)->motorSpeed = motor;
+		if (joint) {
+			((b2RevoluteJoint *)joint)->SetMotorSpeed(pin.motor);
+		}
+	}
+}
+real_t Box2DJoint::get_pin_motor() {
+	return pin.motor;
+}
+
+void Box2DJoint::set_pin_use_limits(bool p_enable) {
+	pin.enable_limits = p_enable;
+	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
+		((b2RevoluteJointDef *)joint_def)->enableLimit = pin.enable_limits;
+		if (joint) {
+			((b2RevoluteJoint *)joint)->EnableLimit(pin.enable_limits);
+		}
+	}
+}
+bool Box2DJoint::get_pin_use_limits() {
+	return pin.enable_limits;
+}
+void Box2DJoint::set_pin_use_motor(bool p_enable) {
+	pin.enable_motor = motor;
+	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
+		((b2RevoluteJointDef *)joint_def)->enableMotor = pin.enable_motor;
+		if (joint) {
+			((b2RevoluteJoint *)joint)->EnableMotor(pin.enable_motor);
+		}
+	}
+}
+bool Box2DJoint::get_pin_use_motor() {
+	return pin.enable_motor;
 }
 
 void Box2DJoint::set_disable_collisions(bool p_disable_collisions) {
@@ -160,6 +228,20 @@ void Box2DJoint::set_damped_spring_damping(real_t p_damped_spring_damping) {
 real_t Box2DJoint::get_damped_spring_damping() {
 	return box2d_to_godot(damped_spring.damping);
 }
+b2Vec2 Box2DJoint::get_reaction_force() {
+	float inv_step = 1.0f / space->get_step();
+	if (!joint || !space) {
+		return b2Vec2_zero;
+	}
+	return joint->GetReactionForce(inv_step);
+}
+real_t Box2DJoint::get_reaction_torque() {
+	float inv_step = 1.0f / space->get_step();
+	if (!joint || !space) {
+		return 0.0f;
+	}
+	return joint->GetReactionTorque(inv_step);
+}
 
 Box2DBody *Box2DJoint::get_body_a() {
 	return common.body_a;
@@ -176,14 +258,19 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 	switch (type) {
 		case PhysicsServer2D::JointType::JOINT_TYPE_PIN: {
 			b2RevoluteJointDef *revolute_joint_def = (b2RevoluteJointDef *)joint_def;
-			revolute_joint_def->enableMotor = true;
 			revolute_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a);
+
+			revolute_joint_def->maxMotorTorque = common.max_force + 10;
+			revolute_joint_def->lowerAngle = common.lower_angle;
+			revolute_joint_def->upperAngle = common.upper_angle;
+			revolute_joint_def->enableLimit = pin.enable_limits;
+			revolute_joint_def->motorSpeed = common.motor;
+			revolute_joint_def->enableMotor = pin.enable_motor;
 		} break;
 		case PhysicsServer2D::JointType::JOINT_TYPE_DAMPED_SPRING: {
 			b2DistanceJointDef *distance_joint_def = (b2DistanceJointDef *)joint_def;
 			b2LinearStiffness(distance_joint_def->stiffness, distance_joint_def->damping, damped_spring.stiffness, damped_spring.damping, common.body_a->get_b2Body(), common.body_b->get_b2Body());
 			distance_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a, common.anchor_b);
-
 			distance_joint_def->length = damped_spring.rest_length;
 			distance_joint_def->minLength = b2_epsilon;
 		} break;
@@ -193,6 +280,7 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			prismatic_joint_def->lowerTranslation = -groove.lower_translation;
 			prismatic_joint_def->upperTranslation = groove.upper_translation;
 			prismatic_joint_def->enableLimit = true;
+			prismatic_joint_def->maxMotorForce = common.max_force;
 		} break;
 		default: {
 			ERR_PRINT("Unkown joint type");
