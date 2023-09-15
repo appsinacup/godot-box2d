@@ -10,6 +10,13 @@
 
 A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot), implemented as a GDExtension.
 
+# Limitations/Known Issues
+
+- Having non symetrical physics mask/layers results in collision on both bodies.
+- Circles and capsules only support uniform scaling and don't support skewing.
+- Mass works as density instead of total mass.
+- Character Controller is not very precise.
+
 # Installation
 
 - Automatic (Recommended): Download the plugin from the official [Godot Asset Store](https://godotengine.org/asset-library/asset/2007) using the `AssetLib` tab in Godot.
@@ -30,13 +37,6 @@ After installing, go to `Advanced Settings` -> `Physics` -> `2D`. Change `Physic
 - Improves joints by [predictive joint limits](https://box2d.org/posts/2020/04/predictive-joint-limits/).
 
 - Box2D is binary deterministic. Godot Box2D should also be binary deterministic, however no such tests were run yet.
-
-
-# Limitations
-
-- Having non symetrical physics mask/layers results in collision on both bodies.
-- Circles and capsules only support uniform scaling and don't support skewing.
-- Mass works as density instead of total mass.
 
 # Roadmap
 
