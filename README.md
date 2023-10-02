@@ -14,7 +14,6 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 - Having non symetrical physics mask/layers results in collision on both bodies.
 - Circles and capsules only support uniform scaling and don't support skewing.
-- Mass works as density instead of total mass.
 - Character Controller is not very precise.
 
 # Installation
