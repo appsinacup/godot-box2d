@@ -4,6 +4,7 @@
 
 - [Zero friction physics material does not simulate](https://github.com/appsinacup/godot-box2d/issues/40)
 - [Applying impulse ignores rigidbody mass and introduces a ton of angular motion.](https://github.com/appsinacup/godot-box2d/issues/41)
+- Revert mass is density change.
 
 ## [v0.6](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.6)
 
