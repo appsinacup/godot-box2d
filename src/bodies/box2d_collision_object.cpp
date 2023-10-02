@@ -352,7 +352,6 @@ Vector2 Box2DCollisionObject::get_velocity_at_local_position(const Vector2 &p_lo
 }
 void Box2DCollisionObject::apply_central_impulse(const Vector2 &impulse) {
 	if (body && body->GetType() == b2BodyType::b2_dynamicBody) {
-		ERR_PRINT(rtos(body->GetMass()));
 		body->ApplyLinearImpulseToCenter(godot_to_box2d(impulse), true);
 	}
 }
