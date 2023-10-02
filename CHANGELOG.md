@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.7](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.7)
+
+- [Zero friction physics material does not simulate](https://github.com/appsinacup/godot-box2d/issues/40)
+
 ## [v0.6](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.6)
 
 - Fix Polygon Skin not letting objects fall through small gaps. Also fix inside out polygons bug.
