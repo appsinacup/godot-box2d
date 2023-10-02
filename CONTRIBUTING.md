@@ -49,7 +49,7 @@ NOTE: the simulation for box2d goes slower (eg. 30 fps), while for godot physics
 
 ```
 git submodule sync
-git submodule update
+git submodule update --recursive --remote
 git submodule foreach git pull
 ```
 

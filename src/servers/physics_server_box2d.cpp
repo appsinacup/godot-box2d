@@ -758,10 +758,10 @@ void PhysicsServerBox2D::_body_set_param(const RID &p_body, PhysicsServer2D::Bod
 	switch (p_param) {
 		case BODY_PARAM_BOUNCE: {
 			body->set_bounce(variant_to_number(p_value));
-		}
+		} break;
 		case BODY_PARAM_FRICTION: {
 			body->set_friction(variant_to_number(p_value));
-		}
+		} break;
 		case BODY_PARAM_MASS: {
 			body->set_mass(variant_to_number(p_value));
 		} break;
