@@ -108,7 +108,7 @@ bool Box2DJoint::get_pin_use_limits() {
 	return pin.enable_limits;
 }
 void Box2DJoint::set_pin_use_motor(bool p_enable) {
-	pin.enable_motor = motor;
+	pin.enable_motor = p_enable;
 	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
 		((b2RevoluteJointDef *)joint_def)->enableMotor = pin.enable_motor;
 		if (joint) {
@@ -260,11 +260,11 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			b2RevoluteJointDef *revolute_joint_def = (b2RevoluteJointDef *)joint_def;
 			revolute_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a);
 
-			revolute_joint_def->maxMotorTorque = common.max_force + 10;
-			revolute_joint_def->lowerAngle = common.lower_angle;
-			revolute_joint_def->upperAngle = common.upper_angle;
+			revolute_joint_def->maxMotorTorque = common.max_force;
+			revolute_joint_def->lowerAngle = pin.lower_angle;
+			revolute_joint_def->upperAngle = pin.upper_angle;
 			revolute_joint_def->enableLimit = pin.enable_limits;
-			revolute_joint_def->motorSpeed = common.motor;
+			revolute_joint_def->motorSpeed = pin.motor;
 			revolute_joint_def->enableMotor = pin.enable_motor;
 		} break;
 		case PhysicsServer2D::JointType::JOINT_TYPE_DAMPED_SPRING: {

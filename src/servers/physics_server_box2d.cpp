@@ -1185,7 +1185,8 @@ void PhysicsServerBox2D::_pin_joint_set_param(const RID &p_joint, PhysicsServer2
 		case PIN_JOINT_SOFTNESS: {
 			joint->set_pin_softness(p_value);
 		} break;
-		case PIN_JOINT_LIMIT_UPPER: {
+		/*
+		case PIN_JOINT_SOFTNESS: {
 			joint->set_pin_upper_angle(p_value);
 		} break;
 		case PIN_JOINT_LIMIT_LOWER: {
@@ -1193,7 +1194,7 @@ void PhysicsServerBox2D::_pin_joint_set_param(const RID &p_joint, PhysicsServer2
 		} break;
 		case PIN_JOINT_MOTOR_TARGET_VELOCITY: {
 			joint->set_pin_motor(p_value);
-		} break;
+		} break;*/
 	}
 }
 double PhysicsServerBox2D::_pin_joint_get_param(const RID &p_joint, PhysicsServer2D::PinJointParam p_param) const {
@@ -1203,6 +1204,7 @@ double PhysicsServerBox2D::_pin_joint_get_param(const RID &p_joint, PhysicsServe
 		case PIN_JOINT_SOFTNESS: {
 			return joint->get_pin_softness();
 		} break;
+		/*
 		case PIN_JOINT_LIMIT_UPPER: {
 			return joint->get_pin_upper_angle();
 		} break;
@@ -1211,7 +1213,7 @@ double PhysicsServerBox2D::_pin_joint_get_param(const RID &p_joint, PhysicsServe
 		} break;
 		case PIN_JOINT_MOTOR_TARGET_VELOCITY: {
 			return joint->get_pin_motor();
-		} break;
+		} break;*/
 	}
 	return 0;
 }
