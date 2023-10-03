@@ -1215,6 +1215,7 @@ double PhysicsServerBox2D::_pin_joint_get_param(const RID &p_joint, PhysicsServe
 	}
 	return 0;
 }
+/*
 void PhysicsServerBox2D::_pin_joint_set_flag(const RID &joint, PhysicsServer2D::PinJointFlag p_flag, bool p_enabled) {
 	Box2DJoint *joint = joint_owner.get_or_null(p_joint);
 	ERR_FAIL_COND(!joint);
@@ -1240,6 +1241,7 @@ bool PhysicsServerBox2D::_pin_joint_get_flag(const RID &joint, PhysicsServer2D::
 	}
 	return false;
 }
+*/
 void PhysicsServerBox2D::_damped_spring_joint_set_param(const RID &p_joint, PhysicsServer2D::DampedSpringParam p_param, double p_value) {
 	Box2DJoint *joint = joint_owner.get_or_null(p_joint);
 	ERR_FAIL_COND(!joint);

@@ -182,8 +182,8 @@ public:
 	virtual void _joint_make_damped_spring(const RID &joint, const Vector2 &anchor_a, const Vector2 &anchor_b, const RID &body_a, const RID &body_b) override;
 	virtual void _pin_joint_set_param(const RID &joint, PhysicsServer2D::PinJointParam param, double value) override;
 	virtual double _pin_joint_get_param(const RID &joint, PhysicsServer2D::PinJointParam param) const override;
-	virtual void _pin_joint_set_flag(const RID &joint, PhysicsServer2D::PinJointFlag flag, bool enabled) override;
-	virtual bool _pin_joint_get_flag(const RID &joint, PhysicsServer2D::PinJointFlag flag) const override;
+	//virtual void _pin_joint_set_flag(const RID &joint, PhysicsServer2D::PinJointFlag flag, bool enabled) override;
+	//virtual bool _pin_joint_get_flag(const RID &joint, PhysicsServer2D::PinJointFlag flag) const override;
 	virtual void _damped_spring_joint_set_param(const RID &joint, PhysicsServer2D::DampedSpringParam param, double value) override;
 	virtual double _damped_spring_joint_get_param(const RID &joint, PhysicsServer2D::DampedSpringParam param) const override;
 	virtual PhysicsServer2D::JointType _joint_get_type(const RID &joint) const override;
