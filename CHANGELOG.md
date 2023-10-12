@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.8](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.7)
+
+- Fixes [SegmentShape2D seems unsupported](https://github.com/appsinacup/godot-box2d/issues/47).
+- Fixes [Shapecast2D node does not detect collisions](https://github.com/appsinacup/godot-box2d/issues/48).
+
 ## [v0.7](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.7)
 
 - [Zero friction physics material does not simulate](https://github.com/appsinacup/godot-box2d/issues/40)
