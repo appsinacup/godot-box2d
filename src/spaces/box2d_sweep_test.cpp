@@ -234,9 +234,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 						manifold.normal = -manifold.normal;
 					}
 
-					b2Vec2 normal = manifold.normal;
-					normal.Normalize();
-					if (b2Dot(normal, motion) <= FLT_EPSILON) {
+					if (b2Dot(manifold.normal, motion) <= FLT_EPSILON && !Vector2(motion.x, motion.y).is_zero_approx()) {
 						break;
 					}
 
