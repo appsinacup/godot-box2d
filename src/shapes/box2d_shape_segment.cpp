@@ -7,7 +7,7 @@
 #include <box2d/b2_edge_shape.h>
 #include <box2d/b2_polygon_shape.h>
 
-constexpr float SEGMENT_SIZE = 0.5f;
+constexpr float SEGMENT_SIZE = 1.0;
 
 void Box2DShapeSegment::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::RECT2);
