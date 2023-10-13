@@ -37,13 +37,13 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 ## Limitations
 
-- Character Controller is not very precise and might get stuck.
-- Having non symetrical physics mask/layers results in collision on both bodies.
-- Circles and capsules only support uniform scaling and don't support skewing.
-- Missing thread-safety.
-- Missing double precision builds.
-- Missing cross platform determinism.
-- Missing webgl builds.
+- Character Controller is not very precise and might get stuck. (WIP)
+- Having non symetrical physics mask/layers results in collision on both bodies. (Can't fix)
+- Circles and capsules only support uniform scaling and don't support skewing. (Won't fix)
+- Missing thread-safety. (WIP)
+- Missing double precision builds. (WIP)
+- Missing cross platform determinism. (WIP)
+- Missing webgl builds. (WIP)
 
 ## Supported Platforms
 
@@ -58,7 +58,7 @@ Curently the Godot Box2d addon builds for:
 ## Installation
 
 - Automatic (Recommended): Download the plugin from the official [Godot Asset Store](https://godotengine.org/asset-library/asset/2007) using the `AssetLib` tab in Godot.
-- Manual: Download the [Github Release ](https://github.com/appsinacup/godot-box2d/releases/latest) `godot-box2d.zip` and move only the `addons\` folder into your project `addons\` folder.
+- Manual: Download the [Github Release](https://github.com/appsinacup/godot-box2d/releases/latest) `godot-box2d.zip` and move only the `addons\` folder into your project `addons\` folder.
 
 After installing, go to `Advanced Settings` -> `Physics` -> `2D`. Change `Physics Engine` to `Box2D`.
 
@@ -70,15 +70,15 @@ Video Tutorial:
 
 ### Improved stability
 
-Improved physics stability in some cases with high number of rigidbodies.
+- Improved physics stability in some cases with high number of rigidbodies.
 
-Improves polygon collision by fixing [ghost collision](https://box2d.org/posts/2020/06/ghost-collisions/).
+- Improves polygon collision by fixing [ghost collision](https://box2d.org/posts/2020/06/ghost-collisions/).
 
-Improves joints by [predictive joint limits](https://box2d.org/posts/2020/04/predictive-joint-limits/).
+- Improves joints by [predictive joint limits](https://box2d.org/posts/2020/04/predictive-joint-limits/).
 
 ### Determinism
 
-Box2D is binary deterministic. Godot Box2D should also be binary deterministic, however no such tests were run yet.
+Box2D is binary deterministic. Godot Box2D should also be binary deterministic, however no such tests were run yet. The newest version of Box2D, v3, will also support cross determinism. When that is done, will also add it here.
 
 ## License
 
