@@ -151,17 +151,12 @@ b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, in
 	b2DistanceInput input;
 	b2SimplexCache cache;
 	cache.count = 0;
-	extra_margin = godot_to_box2d(extra_margin);
-	shapeA->m_radius += extra_margin;
-	shapeB->m_radius += extra_margin;
 	input.proxyA.Set(shapeA, child_index_A);
 	input.proxyB.Set(shapeB, child_index_B);
 	input.transformA = p_transformA;
 	input.transformB = p_transformB;
 	input.useRadii = true;
 	b2Distance(&output, &cache, &input);
-	shapeA->m_radius -= extra_margin;
-	shapeB->m_radius -= extra_margin;
 	b2PolygonShape *polyA = (b2PolygonShape *)shapeA;
 	b2PolygonShape *polyB = (b2PolygonShape *)shapeB;
 	return output;
@@ -207,6 +202,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 	toi_input.sweepA = sweep_A;
 	toi_input.sweepB = sweep_B;
 	b2WorldManifold manifold;
+	shape_A->m_radius += extra_margin;
 	for (int i = 0; i < shape_A->GetChildCount(); i++) {
 		for (int j = 0; j < shape_B->GetChildCount(); j++) {
 			toi_input.proxyA.Set(shape_A, i);
@@ -238,6 +234,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 						break;
 					}
 
+					shape_A->m_radius -= extra_margin;
 					return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold.pointCount, manifold, true };
 				}
 				default: {
@@ -245,6 +242,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 			}
 		}
 	}
+	shape_A->m_radius -= extra_margin;
 	return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, b2DistanceOutput(), toi_output, 0, manifold, false };
 }
 Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
@@ -260,11 +258,12 @@ Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_sha
 			p_collision_mask,
 			p_collide_with_bodies,
 			p_collide_with_areas);
-	b2Transform shape_A_transform(godot_to_box2d(p_transform.get_origin()) - b2Vec2(p_margin, p_margin), b2Rot(p_transform.get_rotation()));
+	real_t margin = godot_to_box2d(p_margin);
+	b2Transform shape_A_transform(godot_to_box2d(p_transform.get_origin()) - b2Vec2(margin, margin), b2Rot(p_transform.get_rotation()));
 	Vector<b2Fixture *> shapes_result;
 	for (Box2DShape *shape : p_shapes) {
 		b2AABB aabb = get_shape_aabb(shape, shape_A_transform);
-		aabb.Combine(get_shape_aabb(shape, b2Transform(shape_A_transform.p + motion + b2Vec2(p_margin, p_margin), shape_A_transform.q)));
+		aabb.Combine(get_shape_aabb(shape, b2Transform(shape_A_transform.p + motion + b2Vec2(margin, margin), shape_A_transform.q)));
 		space_state->space->get_b2World()->QueryAABB(&callback, aabb);
 		shapes_result.append_array(callback.get_results());
 	}
@@ -284,6 +283,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 	if (p_max_results == 0) {
 		return results;
 	}
+	real_t margin = godot_to_box2d(p_margin);
 	b2Transform shape_A_transform(godot_to_box2d(p_transform.get_origin()), b2Rot(p_transform.get_rotation()));
 	b2Vec2 motion = godot_to_box2d(p_motion);
 	b2Sweep sweepA = create_b2_sweep(shape_A_transform, b2Vec2_zero, motion);
@@ -320,7 +320,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 					sweep_shape_A.fixture = body_shape_A.fixtures[i];
 				}
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
-				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B, p_margin);
+				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B, margin);
 				if (output.collision) {
 					results.append(output);
 				}
