@@ -19,34 +19,29 @@
 #include <box2d/b2_time_of_impact.h>
 
 real_t SweepTestResult::safe_fraction() {
+	return toi_output.t;
 	b2Vec2 motion_normal = sweep_shape_A.sweep.c - sweep_shape_A.sweep.c0;
 	float motion_length = motion_normal.Normalize();
 	float unsafe_length = motion_length * toi_output.t;
-	b2Vec2 separation = distance_output.pointA - sweep_shape_A.transform.p;
-	float separation_distance = separation.Length();
-	// Vector projection https://math.stackexchange.com/questions/108980/projecting-a-point-onto-a-vector-2d
-	b2Vec2 projection = (b2Cross(separation, motion_normal)) * motion_normal;
+	if (manifold.pointCount != 0) {
+		b2Vec2 separation = world_manifold.separations[0] * world_manifold.normal;
+		// Vector projection https://math.stackexchange.com/questions/108980/projecting-a-point-onto-a-vector-2d
+		b2Vec2 projection = (b2Cross(separation, motion_normal)) * motion_normal;
 
-	float safe_length = unsafe_length - projection.Length();
-	if (is_zero(safe_length) || is_zero(motion_length) || safe_length < 0) {
-		return 0;
+		float safe_length = unsafe_length - projection.Length();
+		if (is_zero(safe_length) || is_zero(motion_length) || safe_length < 0) {
+			return 0;
+		}
+		float safe_fraction = safe_length / motion_length;
+		if (safe_fraction < 0) {
+			safe_fraction = 0;
+		}
+		return safe_fraction;
 	}
-	float safe_fraction = safe_length / motion_length;
-	if (safe_fraction < 0) {
-		safe_fraction = 0;
-	}
-	return safe_fraction;
+	return unsafe_length;
 }
-real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
+real_t SweepTestResult::unsafe_fraction() {
 	return toi_output.t;
-	if (is_zero(safe_fraction) || safe_fraction < 0) {
-		return 0;
-	}
-	float unsafe_fraction = safe_fraction;
-	if (unsafe_fraction >= 1) {
-		unsafe_fraction = 1;
-	}
-	return unsafe_fraction;
 }
 
 b2Sweep Box2DSweepTest::create_b2_sweep(b2Transform p_transform, b2Vec2 p_center, b2Vec2 p_motion) {
