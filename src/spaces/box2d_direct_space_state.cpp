@@ -131,9 +131,10 @@ bool Box2DDirectSpaceState::_cast_motion(const RID &shape_rid, const Transform2D
 	ERR_FAIL_COND_V(!const_shape, 0);
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, motion, margin, 0, collision_mask, collide_with_bodies, collide_with_areas, this);
-	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shape, transform, motion, margin, collide_with_bodies, collide_with_areas, 2048, query_result, this);
-	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
-	if (sweep_test_result.collision && closest_safe != nullptr && closest_unsafe != nullptr) {
+	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shape, transform, motion, margin, collide_with_bodies, collide_with_areas, 64, query_result, this);
+	sweep_test_results = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
+	if (!sweep_test_results.is_empty() && closest_safe != nullptr && closest_unsafe != nullptr) {
+		SweepTestResult sweep_test_result = sweep_test_results[0];
 		*closest_safe = sweep_test_result.safe_fraction();
 		*closest_unsafe = sweep_test_result.unsafe_fraction();
 	}
@@ -164,11 +165,12 @@ bool Box2DDirectSpaceState::_rest_info(const RID &shape_rid, const Transform2D &
 	ERR_FAIL_COND_V(!const_shape, 0);
 	Box2DShape *shape = const_cast<Box2DShape *>(const_shape);
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shape, transform, motion, margin, 0, collision_mask, collide_with_bodies, collide_with_areas, this);
-	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shape, transform, motion, margin, collide_with_bodies, collide_with_areas, 2048, query_result, this);
-	SweepTestResult sweep_test_result = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
-	if (!sweep_test_result.collision) {
+	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(shape, transform, motion, margin, collide_with_bodies, collide_with_areas, 64, query_result, this);
+	sweep_test_results = Box2DSweepTest::closest_result_in_cast(sweep_test_results);
+	if (sweep_test_results.is_empty()) {
 		return false;
 	}
+	SweepTestResult sweep_test_result = sweep_test_results[0];
 	if (rest_info != nullptr) {
 		PhysicsServer2DExtensionShapeRestInfo &result_instance = *rest_info;
 		result_instance.shape = sweep_test_result.sweep_shape_B.fixture->GetUserData().shape_idx;
