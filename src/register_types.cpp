@@ -11,6 +11,8 @@
 #include "bodies/box2d_direct_body_state.h"
 #include "servers/physics_server_box2d.h"
 #include "spaces/box2d_direct_space_state.h"
+#include "joints/box2d_gear_joint_2d.h"
+#include "joints/box2d_joint_custom.h"
 
 using namespace godot;
 
@@ -29,6 +31,9 @@ void initialize_physics_server_box2d_module(ModuleInitializationLevel p_level) {
 		} break;
 		case MODULE_INITIALIZATION_LEVEL_SCENE: {
 			Box2DProjectSettings::register_settings();
+
+			ClassDB::register_class<Box2DJoint2D>(true);
+			ClassDB::register_class<GearJoint2D>();
 		} break;
 		default: {
 		} break;
