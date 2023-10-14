@@ -35,7 +35,7 @@ class Box2DJoint {
 		b2Vec2 axis;
 	};
 	struct CommonJoint {
-		real_t max_force = 0;
+		real_t max_force = 3.40282e+38;
 		Box2DBody *body_a = nullptr;
 		Box2DBody *body_b = nullptr;
 		b2Vec2 anchor_a;

@@ -34,7 +34,7 @@ void Box2DJoint::_recreate_joint() {
 }
 
 void Box2DJoint::set_max_force(real_t p_data) {
-	common.max_force = p_data;
+	common.max_force = godot_to_box2d(p_data);
 	switch (type) {
 		case PhysicsServer2D::JointType::JOINT_TYPE_PIN: {
 			b2RevoluteJointDef *revolute_joint_def = (b2RevoluteJointDef *)joint_def;
@@ -56,7 +56,7 @@ void Box2DJoint::set_max_force(real_t p_data) {
 	}
 }
 real_t Box2DJoint::get_max_force() {
-	return common.max_force;
+	return box2d_to_godot(common.max_force);
 }
 void Box2DJoint::set_pin_lower_angle(real_t angle) {
 	pin.lower_angle = angle;
@@ -83,20 +83,21 @@ real_t Box2DJoint::get_pin_upper_angle() {
 	return pin.upper_angle;
 }
 void Box2DJoint::set_pin_motor(real_t motor) {
-	pin.motor = motor;
+	pin.motor = godot_to_box2d(motor);
 	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
-		((b2RevoluteJointDef *)joint_def)->motorSpeed = motor;
+		((b2RevoluteJointDef *)joint_def)->motorSpeed = pin.motor;
 		if (joint) {
 			((b2RevoluteJoint *)joint)->SetMotorSpeed(pin.motor);
 		}
 	}
 }
 real_t Box2DJoint::get_pin_motor() {
-	return pin.motor;
+	return box2d_to_godot(pin.motor);
 }
 
 void Box2DJoint::set_pin_use_limits(bool p_enable) {
 	pin.enable_limits = p_enable;
+	ERR_PRINT("set enable limits? " + rtos(pin.enable_limits));
 	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
 		((b2RevoluteJointDef *)joint_def)->enableLimit = pin.enable_limits;
 		if (joint) {
@@ -109,10 +110,15 @@ bool Box2DJoint::get_pin_use_limits() {
 }
 void Box2DJoint::set_pin_use_motor(bool p_enable) {
 	pin.enable_motor = p_enable;
+	ERR_PRINT("set enable motor? " + rtos(p_enable));
+	ERR_PRINT("type? " + rtos(type));
 	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
 		((b2RevoluteJointDef *)joint_def)->enableMotor = pin.enable_motor;
+		ERR_PRINT("enable it? " + rtos(pin.enable_motor));
 		if (joint) {
+			ERR_PRINT("yes enable it? " + rtos(pin.enable_motor));
 			((b2RevoluteJoint *)joint)->EnableMotor(pin.enable_motor);
+			((b2RevoluteJoint *)joint)->SetMotorSpeed(pin.motor);
 		}
 	}
 }
