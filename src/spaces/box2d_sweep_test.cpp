@@ -38,6 +38,7 @@ real_t SweepTestResult::safe_fraction() {
 	return safe_fraction;
 }
 real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
+	return toi_output.t;
 	if (is_zero(safe_fraction) || safe_fraction < 0) {
 		return 0;
 	}
@@ -146,7 +147,7 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 	return IntersectionManifoldResult{ manifold, flipped };
 }
 
-b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B, float extra_margin) {
+b2DistanceOutput Box2DSweepTest::call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B) {
 	b2DistanceOutput output;
 	b2DistanceInput input;
 	b2SimplexCache cache;
@@ -216,7 +217,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 					// move transform_A and B to end transform;
 					sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
 					sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
-					b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j, extra_margin);
+					b2DistanceOutput distance_output = call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j);
 					if (distance_output.distance > b2_epsilon) {
 						break;
 					}
@@ -225,17 +226,20 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 					if (!intersection.intersecting()) {
 						break;
 					}
-					manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
 					if (intersection.flipped) {
+						manifold.Initialize(&local_manifold, p_sweep_shape_B.transform, shape_B->m_radius, p_sweep_shape_A.transform, shape_A->m_radius);
 						manifold.normal = -manifold.normal;
+					} else {
+						manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
 					}
 
 					if (b2Dot(manifold.normal, motion) <= FLT_EPSILON && !Vector2(motion.x, motion.y).is_zero_approx()) {
 						break;
 					}
 
+					manifold.normal.Normalize(); // normalize the normal
 					shape_A->m_radius -= extra_margin;
-					return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold.pointCount, manifold, true };
+					return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold, manifold, true };
 				}
 				default: {
 				} break;
@@ -243,7 +247,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 		}
 	}
 	shape_A->m_radius -= extra_margin;
-	return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, b2DistanceOutput(), toi_output, 0, manifold, false };
+	return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, b2DistanceOutput(), toi_output, b2Manifold(), manifold, false };
 }
 Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
 	Vector<Box2DShape *> shapes;

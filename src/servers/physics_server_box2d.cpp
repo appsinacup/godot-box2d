@@ -158,11 +158,11 @@ bool PhysicsServerBox2D::_shape_collide(const RID &p_shape_A, const Transform2D 
 	auto *results = static_cast<Vector2 *>(p_results);
 	int count = 0;
 	for (SweepTestResult sweep_result : sweep_results) {
-		for (int i = 0; i < sweep_result.manifold_point_count; i++) {
+		for (int i = 0; i < sweep_result.manifold.pointCount; i++) {
 			if (count >= p_result_max) {
 				return !sweep_results.is_empty();
 			}
-			results[count++] = box2d_to_godot(sweep_result.manifold.points[i]);
+			results[count++] = box2d_to_godot(sweep_result.world_manifold.points[i]);
 		}
 	}
 	*p_result_count = count;
@@ -981,7 +981,6 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		Box2DShape *shape = body->get_shape(i);
 		shapes.append(shape);
 	}
-
 	Vector<b2Fixture *> query_result = Box2DSweepTest::query_aabb_motion(shapes, p_from, p_motion, p_margin, body->get_collision_layer(), body->get_collision_mask(), true, false, (Box2DDirectSpaceState *)body->get_space_state());
 	Vector<SweepTestResult> sweep_test_results = Box2DSweepTest::multiple_shapes_cast(body->get_shapes(), p_from, p_motion, p_margin, true, false, 2048, query_result, (Box2DDirectSpaceState *)body->get_space_state());
 	for (int i = 0; i < sweep_test_results.size(); i++) {
@@ -1020,21 +1019,25 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	}
 	PhysicsServer2DExtensionMotionResult &current_result = *p_result;
 	if (!sweep_test_result.collision) {
-		current_result.travel = p_motion;
+		current_result.travel += p_motion;
 		current_result.remainder = Vector2();
 		current_result.collision_safe_fraction = 0;
 		current_result.collision_unsafe_fraction = 0;
 		return false;
 	}
+	if (sweep_test_result.manifold.pointCount != 0 && sweep_test_result.world_manifold.separations[0] < 0) {
+		current_result.travel = box2d_to_godot(sweep_test_result.world_manifold.separations[0] * sweep_test_result.world_manifold.normal);
+	}
+
 	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
 	current_result.collider = body_B->get_self();
 	current_result.collider_id = body_B->get_object_instance_id();
-	current_result.collision_point = box2d_to_godot(sweep_test_result.manifold.points[0]);
-	current_result.collision_normal = -Vector2(sweep_test_result.manifold.normal.x, sweep_test_result.manifold.normal.y).normalized();
+	current_result.collision_point = box2d_to_godot(sweep_test_result.world_manifold.points[0]);
+	current_result.collision_normal = -Vector2(sweep_test_result.world_manifold.normal.x, sweep_test_result.world_manifold.normal.y);
 	current_result.collider_velocity = box2d_to_godot(body_B->get_b2Body()->GetLinearVelocity());
 	current_result.collision_safe_fraction = sweep_test_result.safe_fraction();
 	current_result.collision_unsafe_fraction = sweep_test_result.unsafe_fraction(current_result.collision_safe_fraction);
-	current_result.travel = p_motion * current_result.collision_safe_fraction;
+	current_result.travel += p_motion * current_result.collision_safe_fraction;
 	current_result.remainder = p_motion - current_result.travel;
 	int shape_A_index = 0;
 	for (int i = 0; i < body->get_shape_count(); i++) {
