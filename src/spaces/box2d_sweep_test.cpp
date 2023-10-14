@@ -20,32 +20,14 @@
 
 real_t SweepTestResult::safe_fraction() {
 	b2Vec2 motion_normal = sweep_shape_A.sweep.c - sweep_shape_A.sweep.c0;
-	float motion_length = motion_normal.Normalize();
-	float unsafe_length = motion_length * toi_output.t;
-	b2Vec2 separation = distance_output.pointA - sweep_shape_A.transform.p;
-	float separation_distance = separation.Length();
-	// Vector projection https://math.stackexchange.com/questions/108980/projecting-a-point-onto-a-vector-2d
-	b2Vec2 projection = (b2Cross(separation, motion_normal)) * motion_normal;
-
-	float safe_length = unsafe_length - projection.Length();
-	if (is_zero(safe_length) || is_zero(motion_length) || safe_length < 0) {
-		return 0;
+	float motion_length = motion_normal.Length();
+	if (manifold.pointCount != 0 && world_manifold.separations[0] < 0 && motion_length != 0.0) {
+		return toi_output.t + world_manifold.separations[0] / motion_length;
 	}
-	float safe_fraction = safe_length / motion_length;
-	if (safe_fraction < 0) {
-		safe_fraction = 0;
-	}
-	return safe_fraction;
+	return toi_output.t;
 }
-real_t SweepTestResult::unsafe_fraction(float safe_fraction) {
-	if (is_zero(safe_fraction) || safe_fraction < 0) {
-		return 0;
-	}
-	float unsafe_fraction = safe_fraction;
-	if (unsafe_fraction >= 1) {
-		unsafe_fraction = 1;
-	}
-	return unsafe_fraction;
+real_t SweepTestResult::unsafe_fraction() {
+	return toi_output.t;
 }
 
 b2Sweep Box2DSweepTest::create_b2_sweep(b2Transform p_transform, b2Vec2 p_center, b2Vec2 p_motion) {
@@ -146,7 +128,7 @@ IntersectionManifoldResult _evaluate_intersection_manifold(const b2Shape *p_shap
 	return IntersectionManifoldResult{ manifold, flipped };
 }
 
-b2DistanceOutput _call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B, float extra_margin) {
+b2DistanceOutput Box2DSweepTest::call_b2_distance(b2Transform p_transformA, b2Shape *shapeA, int child_index_A, b2Transform p_transformB, b2Shape *shapeB, int child_index_B) {
 	b2DistanceOutput output;
 	b2DistanceInput input;
 	b2SimplexCache cache;
@@ -192,7 +174,7 @@ b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
 	return aabb_total;
 }
 
-SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *shape_A, SweepShape p_sweep_shape_B, b2Shape *shape_B, float extra_margin) {
+Vector<SweepTestResult> Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *shape_A, SweepShape p_sweep_shape_B, b2Shape *shape_B, float extra_margin) {
 	b2TOIInput toi_input;
 	b2TOIOutput toi_output;
 	b2Sweep sweep_A = p_sweep_shape_A.sweep;
@@ -202,7 +184,9 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 	toi_input.sweepA = sweep_A;
 	toi_input.sweepB = sweep_B;
 	b2WorldManifold manifold;
+	// add margin, remove it later at end of function
 	shape_A->m_radius += extra_margin;
+	Vector<SweepTestResult> results;
 	for (int i = 0; i < shape_A->GetChildCount(); i++) {
 		for (int j = 0; j < shape_B->GetChildCount(); j++) {
 			toi_input.proxyA.Set(shape_A, i);
@@ -216,7 +200,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 					// move transform_A and B to end transform;
 					sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
 					sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
-					b2DistanceOutput distance_output = _call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j, extra_margin);
+					b2DistanceOutput distance_output = call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j);
 					if (distance_output.distance > b2_epsilon) {
 						break;
 					}
@@ -225,17 +209,20 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 					if (!intersection.intersecting()) {
 						break;
 					}
-					manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
 					if (intersection.flipped) {
+						manifold.Initialize(&local_manifold, p_sweep_shape_B.transform, shape_B->m_radius, p_sweep_shape_A.transform, shape_A->m_radius);
 						manifold.normal = -manifold.normal;
+					} else {
+						manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
 					}
 
 					if (b2Dot(manifold.normal, motion) <= FLT_EPSILON && !Vector2(motion.x, motion.y).is_zero_approx()) {
 						break;
 					}
 
-					shape_A->m_radius -= extra_margin;
-					return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold.pointCount, manifold, true };
+					manifold.normal.Normalize(); // normalize the normal
+					SweepTestResult result{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold, manifold };
+					results.append(result);
 				}
 				default: {
 				} break;
@@ -243,7 +230,7 @@ SweepTestResult Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b2Shape *
 		}
 	}
 	shape_A->m_radius -= extra_margin;
-	return SweepTestResult{ p_sweep_shape_A, p_sweep_shape_B, b2DistanceOutput(), toi_output, 0, manifold, false };
+	return results;
 }
 Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
 	Vector<Box2DShape *> shapes;
@@ -320,9 +307,9 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 					sweep_shape_A.fixture = body_shape_A.fixtures[i];
 				}
 				SweepShape sweep_shape_B{ box2d_shape_B, sweepB, fixture_B, body_B->GetTransform() };
-				SweepTestResult output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B, margin);
-				if (output.collision) {
-					results.append(output);
+				Vector<SweepTestResult> output = Box2DSweepTest::shape_cast(sweep_shape_A, shape_A, sweep_shape_B, shape_B, margin);
+				if (!output.is_empty()) {
+					results.append_array(output);
 				}
 				if (body_shape_A.fixtures.is_empty()) {
 					box2d_shape_A->erase_shape(shape_A);
@@ -334,12 +321,18 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 	return results;
 }
 
-SweepTestResult Box2DSweepTest::closest_result_in_cast(Vector<SweepTestResult> p_results) {
+Vector<SweepTestResult> Box2DSweepTest::closest_result_in_cast(Vector<SweepTestResult> p_results) {
 	SweepTestResult min_result;
+	bool found_min = false;
 	for (SweepTestResult result : p_results) {
-		if (!min_result.collision || result.toi_output.t < min_result.toi_output.t) {
+		if (result.toi_output.t < min_result.toi_output.t) {
 			min_result = result;
+			found_min = true;
 		}
 	}
-	return min_result;
+	Vector<SweepTestResult> results;
+	if (found_min) {
+		results.append(min_result);
+	}
+	return results;
 }

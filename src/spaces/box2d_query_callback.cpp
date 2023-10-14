@@ -2,7 +2,7 @@
 
 #include "../b2_user_settings.h"
 
-#define QUERY_MAX_SIZE 2048
+#define QUERY_MAX_SIZE 64
 
 Box2DQueryCallback::Box2DQueryCallback(Box2DDirectSpaceState *p_space_state,
 		uint32_t p_collision_layer,
