@@ -189,44 +189,47 @@ Vector<SweepTestResult> Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b
 	Vector<SweepTestResult> results;
 	for (int i = 0; i < shape_A->GetChildCount(); i++) {
 		for (int j = 0; j < shape_B->GetChildCount(); j++) {
-			toi_input.proxyA.Set(shape_A, i);
-			toi_input.proxyB.Set(shape_B, j);
-			b2TimeOfImpact(&toi_output, &toi_input);
-			switch (toi_output.state) {
-				case b2TOIOutput::State::e_failed: // failed still gives a result, it just doesn't guarantee accuracy
-				case b2TOIOutput::State::e_overlapped:
-				case b2TOIOutput::State::e_touching: {
-					double hit_ratio = toi_output.t;
-					// move transform_A and B to end transform;
-					sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
-					sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
-					b2DistanceOutput distance_output = call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j);
-					if (distance_output.distance > b2_epsilon) {
-						break;
-					}
-					IntersectionManifoldResult intersection = _evaluate_intersection_manifold(shape_A, i, p_sweep_shape_A.transform, shape_B, j, p_sweep_shape_B.transform);
-					b2Manifold local_manifold = intersection.manifold;
-					if (!intersection.intersecting()) {
-						break;
-					}
-					if (intersection.flipped) {
-						manifold.Initialize(&local_manifold, p_sweep_shape_B.transform, shape_B->m_radius, p_sweep_shape_A.transform, shape_A->m_radius);
-						manifold.normal = -manifold.normal;
-					} else {
-						manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
-					}
-
-					if (b2Dot(manifold.normal, motion) <= FLT_EPSILON && !Vector2(motion.x, motion.y).is_zero_approx()) {
-						break;
-					}
-
-					manifold.normal.Normalize(); // normalize the normal
-					SweepTestResult result{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold, manifold };
-					results.append(result);
-				}
-				default: {
-				} break;
+			bool intersects = false;
+			// no need to do the time of impact, assume they intersect at start and just do distance
+			if (motion.LengthSquared() < b2_epsilon) {
+				toi_output.t = 0;
+				intersects = true;
+			} else {
+				toi_input.proxyA.Set(shape_A, i);
+				toi_input.proxyB.Set(shape_B, j);
+				b2TimeOfImpact(&toi_output, &toi_input);
+				intersects = toi_output.state == b2TOIOutput::State::e_failed || toi_output.state == b2TOIOutput::State::e_overlapped || toi_output.state == b2TOIOutput::State::e_touching;
+				// move transform_A and B to end transform;
+				sweep_A.GetTransform(&p_sweep_shape_A.transform, toi_output.t);
+				sweep_B.GetTransform(&p_sweep_shape_B.transform, toi_output.t);
 			}
+			if (!intersects) {
+				continue;
+			}
+			// calculate distance
+			b2DistanceOutput distance_output = call_b2_distance(p_sweep_shape_A.transform, shape_A, i, p_sweep_shape_B.transform, shape_B, j);
+			if (distance_output.distance > b2_epsilon) {
+				break;
+			}
+			IntersectionManifoldResult intersection = _evaluate_intersection_manifold(shape_A, i, p_sweep_shape_A.transform, shape_B, j, p_sweep_shape_B.transform);
+			b2Manifold local_manifold = intersection.manifold;
+			if (!intersection.intersecting()) {
+				break;
+			}
+			if (intersection.flipped) {
+				manifold.Initialize(&local_manifold, p_sweep_shape_B.transform, shape_B->m_radius, p_sweep_shape_A.transform, shape_A->m_radius);
+				manifold.normal = -manifold.normal;
+			} else {
+				manifold.Initialize(&local_manifold, p_sweep_shape_A.transform, shape_A->m_radius, p_sweep_shape_B.transform, shape_B->m_radius);
+			}
+
+			if (b2Dot(manifold.normal, motion) <= FLT_EPSILON && !Vector2(motion.x, motion.y).is_zero_approx()) {
+				break;
+			}
+
+			manifold.normal.Normalize(); // normalize the normal
+			SweepTestResult result{ p_sweep_shape_A, p_sweep_shape_B, distance_output, toi_output, local_manifold, manifold };
+			results.append(result);
 		}
 	}
 	shape_A->m_radius -= extra_margin;
