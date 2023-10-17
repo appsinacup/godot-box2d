@@ -33,11 +33,22 @@ void Box2DSpaceContactListener::EndContact(b2Contact *contact) {
 
 void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB, b2WorldManifold worldManifold, int points_count) {
 	if (b2_body_A->GetType() != b2BodyType::b2_dynamicBody && b2_body_B->GetType() == b2BodyType::b2_dynamicBody) {
-		if (points_count > 0) {
-			b2_body_B->ApplyLinearImpulse(b2_body_B->GetMass() * bodyA->get_constant_linear_velocity(), worldManifold.points[0], true);
+		Vector2 linear_velocity = bodyB->get_linear_velocity();
+		bool linear_velocity_set = false;
+		if (!is_zero(bodyA->get_constant_linear_velocity().x)) {
+			linear_velocity.x = bodyA->get_constant_linear_velocity().x;
+			linear_velocity_set = true;
 		}
-		float inertia = b2_body_B->GetInertia() - b2_body_B->GetMass() * b2Dot(b2_body_B->GetLocalCenter(), b2_body_B->GetLocalCenter());
-		b2_body_B->ApplyTorque(inertia * bodyA->get_constant_angular_velocity(), true);
+		if (!is_zero(bodyA->get_constant_linear_velocity().y)) {
+			linear_velocity.y = bodyA->get_constant_linear_velocity().y;
+			linear_velocity_set = true;
+		}
+		if (linear_velocity_set) {
+			bodyB->set_linear_velocity(linear_velocity);
+		}
+		if (!is_zero(bodyA->get_constant_angular_velocity())) {
+			bodyB->set_angular_velocity(bodyA->get_constant_angular_velocity());
+		}
 	}
 }
 

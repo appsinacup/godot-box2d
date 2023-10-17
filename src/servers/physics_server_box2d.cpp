@@ -902,7 +902,12 @@ double PhysicsServerBox2D::_body_get_constant_torque(const RID &p_body) const {
 void PhysicsServerBox2D::_body_set_axis_velocity(const RID &p_body, const Vector2 &p_axis_velocity) {
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	ERR_FAIL_COND(!body);
-	body->set_linear_velocity(p_axis_velocity);
+
+	Vector2 v = body->get_direct_state()->get_linear_velocity();
+	Vector2 axis = p_axis_velocity.normalized();
+	v -= axis * axis.dot(v);
+	v += p_axis_velocity;
+	body->get_direct_state()->set_linear_velocity(v);
 }
 void PhysicsServerBox2D::_body_add_collision_exception(const RID &p_body, const RID &p_excepted_body) {
 	Box2DBody *body = body_owner.get_or_null(p_body);

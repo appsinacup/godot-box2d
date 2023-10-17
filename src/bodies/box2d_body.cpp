@@ -120,7 +120,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 			set_linear_velocity(linear_velocity);
 		} break;
 		case PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY: {
-			float angular_velocity = godot_to_box2d(variant_to_number(p_variant));
+			float angular_velocity = variant_to_number(p_variant);
 			set_angular_velocity(angular_velocity);
 		} break;
 		case PhysicsServer2D::BODY_STATE_SLEEPING: {

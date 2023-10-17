@@ -97,7 +97,6 @@ real_t Box2DJoint::get_pin_motor() {
 
 void Box2DJoint::set_pin_use_limits(bool p_enable) {
 	pin.enable_limits = p_enable;
-	ERR_PRINT("set enable limits? " + rtos(pin.enable_limits));
 	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
 		((b2RevoluteJointDef *)joint_def)->enableLimit = pin.enable_limits;
 		if (joint) {
@@ -110,13 +109,9 @@ bool Box2DJoint::get_pin_use_limits() {
 }
 void Box2DJoint::set_pin_use_motor(bool p_enable) {
 	pin.enable_motor = p_enable;
-	ERR_PRINT("set enable motor? " + rtos(p_enable));
-	ERR_PRINT("type? " + rtos(type));
 	if (type == PhysicsServer2D::JointType::JOINT_TYPE_PIN) {
 		((b2RevoluteJointDef *)joint_def)->enableMotor = pin.enable_motor;
-		ERR_PRINT("enable it? " + rtos(pin.enable_motor));
 		if (joint) {
-			ERR_PRINT("yes enable it? " + rtos(pin.enable_motor));
 			((b2RevoluteJoint *)joint)->EnableMotor(pin.enable_motor);
 			((b2RevoluteJoint *)joint)->SetMotorSpeed(pin.motor);
 		}
