@@ -40,7 +40,8 @@ private:
 	Box2DDirectSpaceState *direct_state = nullptr;
 	Box2DSpaceContactFilter *contact_filter;
 	Box2DSpaceContactListener *contact_listener;
-	double step_value = 0.016f; // TODO set step value from project settings
+	double step_value = 0.016f;
+
 public:
 	_FORCE_INLINE_ Box2DArea *get_default_area() const { return default_area; }
 	/* PHYSICS SERVER API */

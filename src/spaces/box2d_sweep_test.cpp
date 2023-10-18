@@ -280,20 +280,20 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 	Transform2D identity;
 	for (int b = 0; b < p_other_fixtures.size(); b++) {
 		b2Fixture *fixture_B = p_other_fixtures[b];
+		ERR_FAIL_COND_V(!fixture_B, results);
 		b2Shape *shape_B = fixture_B->GetShape();
+		ERR_FAIL_COND_V(!shape_B, results);
 		b2Body *body_B = fixture_B->GetBody();
-		if (!body_B) {
-			ERR_FAIL_V(results);
-		}
+		ERR_FAIL_COND_V(!body_B, results);
 		Box2DCollisionObject *collision_object_B = body_B->GetUserData().collision_object;
+		ERR_FAIL_COND_V(!collision_object_B, results);
 		Box2DShape *box2d_shape_B = collision_object_B->get_shape(fixture_B->GetUserData().shape_idx);
-		if (!box2d_shape_B) {
-			ERR_FAIL_V(results);
-		}
+		ERR_FAIL_COND_V(!box2d_shape_B, results);
 		b2Sweep sweepB = create_b2_sweep(body_B->GetTransform(), body_B->GetLocalCenter(), b2Vec2_zero);
 		for (Box2DCollisionObject::Shape body_shape_A : p_shapes) {
 			Box2DShape *box2d_shape_A = body_shape_A.shape;
-			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(false); i++) {
+			ERR_FAIL_COND_V(!box2d_shape_A, results);
+			for (int i = 0; i < box2d_shape_A->get_b2Shape_count(true); i++) {
 				Box2DShape::ShapeInfo shape_info{ i, identity, false, false };
 				b2Shape *shape_A;
 				if (!body_shape_A.fixtures.is_empty()) {
@@ -305,6 +305,7 @@ Vector<SweepTestResult> Box2DSweepTest::multiple_shapes_cast(Vector<Box2DCollisi
 				} else {
 					shape_A = box2d_shape_A->get_transformed_b2Shape(shape_info, nullptr);
 				}
+				ERR_FAIL_COND_V(!shape_A, results);
 				SweepShape sweep_shape_A{ box2d_shape_A, sweepA, nullptr, shape_A_transform };
 				if (!body_shape_A.fixtures.is_empty()) {
 					sweep_shape_A.fixture = body_shape_A.fixtures[i];

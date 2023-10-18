@@ -18,10 +18,10 @@
 void Box2DCollisionObject::reset_mass_properties() {
 	if (body) {
 		body->ResetMassData();
-		mass_data.mass = 1.0f;
-		body->SetMassData(&mass_data);
 		mass_data.center = body->GetLocalCenter();
 		mass_data.I = body->GetMassData().I;
+		mass_data.mass = 1.0f;
+		body->SetMassData(&mass_data);
 	} else {
 		mass_data.mass = 1.0f;
 		mass_data.I = 0;
@@ -35,9 +35,9 @@ void Box2DCollisionObject::set_mass(real_t p_mass) {
 	}
 	mass_data.mass = p_mass;
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		b2MassData new_mass_data = body->GetMassData();
+		new_mass_data.mass = mass_data.mass;
+		body->SetMassData(&new_mass_data);
 	}
 }
 double Box2DCollisionObject::get_mass() const {
@@ -52,14 +52,14 @@ void Box2DCollisionObject::set_inertia(real_t p_inertia) {
 	}
 	mass_data.I = godot_to_box2d(godot_to_box2d(p_inertia));
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		b2MassData new_mass_data = body->GetMassData();
+		new_mass_data.I = mass_data.I;
+		body->SetMassData(&new_mass_data);
 	}
 }
 double Box2DCollisionObject::get_inertia() const {
 	if (!body) {
-		return mass_data.I;
+		return box2d_to_godot(box2d_to_godot(mass_data.I));
 	}
 	return box2d_to_godot(box2d_to_godot(mass_data.I - mass_data.mass * b2Dot(mass_data.center, mass_data.center)));
 }
@@ -69,9 +69,9 @@ void Box2DCollisionObject::set_center_of_mass(Vector2 p_center_of_mass) {
 	}
 	mass_data.center = godot_to_box2d(p_center_of_mass);
 	if (body) {
-		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
+		b2MassData new_mass_data = body->GetMassData();
+		new_mass_data.center = mass_data.center;
+		body->SetMassData(&new_mass_data);
 	}
 }
 Vector2 Box2DCollisionObject::get_center_of_mass() const {
@@ -135,7 +135,7 @@ double Box2DCollisionObject::get_angular_damp() const {
 }
 
 void Box2DCollisionObject::recalculate_total_linear_damp() {
-	if (omit_force_integration) {
+	if (omit_force_integration || mode != PhysicsServer2D::BODY_MODE_RIGID) {
 		body_def->linearDamping = 0.0f;
 		if (body) {
 			body->SetLinearDamping(body_def->linearDamping);
@@ -183,7 +183,7 @@ void Box2DCollisionObject::recalculate_total_linear_damp() {
 }
 
 void Box2DCollisionObject::recalculate_total_angular_damp() {
-	if (omit_force_integration) {
+	if (omit_force_integration || mode != PhysicsServer2D::BODY_MODE_RIGID) {
 		body_def->angularDamping = 0.0f;
 		if (body) {
 			body->SetAngularDamping(body_def->angularDamping);
@@ -317,7 +317,7 @@ Vector2 Box2DCollisionObject::get_linear_velocity() const {
 	if (body) {
 		return box2d_to_godot(body->GetLinearVelocity());
 	}
-	return Vector2();
+	return box2d_to_godot(body_def->linearVelocity);
 }
 void Box2DCollisionObject::set_angular_velocity(double p_velocity) {
 	body_def->angularVelocity = p_velocity;
@@ -514,7 +514,7 @@ Vector2 Box2DCollisionObject::get_contact_impulse(int32_t contact_idx) const {
 double Box2DCollisionObject::get_step() const {
 	Box2DSpace *space = get_space();
 	if (!space) {
-		return 0;
+		return 0.016f;
 	}
 	return space->get_step();
 }
@@ -767,7 +767,7 @@ void Box2DCollisionObject::_update_shapes() {
 
 		//not quite correct, should compute the next matrix..
 		//Transform2D xform = transform * s.xform;
-		bool is_static = body->GetType() == b2_staticBody;
+		bool is_static = body->GetType() != b2_dynamicBody;
 		if (s.fixtures.is_empty()) {
 			int box2d_shape_count = s.shape->get_b2Shape_count(is_static);
 			s.fixtures.resize(box2d_shape_count);
@@ -821,9 +821,11 @@ void Box2DCollisionObject::_update_shapes() {
 		// revert mass
 		mass_data.mass = old_mass;
 		// TODO only do this if we need to automatically compute local center.
-		mass_data.center = body->GetLocalCenter();
-		mass_data.center = b2Vec2_zero;
+		//mass_data.center = body->GetLocalCenter();
+		//mass_data.center = b2Vec2_zero;
 		body->SetMassData(&mass_data);
+		// Calculate actual center
+		//mass_data.center = body->GetLocalCenter();
 	}
 }
 void Box2DCollisionObject::before_step() {
@@ -860,6 +862,9 @@ void Box2DCollisionObject::sort_areas() {
 }
 void Box2DCollisionObject::recalculate_total_gravity() {
 	total_gravity = b2Vec2_zero;
+	if (mode != PhysicsServer2D::BODY_MODE_RIGID) {
+		return;
+	}
 	// compute gravity from other areas
 	bool keep_computing = true;
 	for (Box2DArea *area : areas) {
@@ -903,8 +908,6 @@ void Box2DCollisionObject::set_b2Body(b2Body *p_body) {
 	body = p_body;
 	if (body) {
 		body->SetMassData(&mass_data);
-		mass_data.center = body->GetLocalCenter();
-		mass_data.I = body->GetMassData().I;
 		body->SetAwake(true);
 	}
 }

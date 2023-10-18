@@ -44,10 +44,10 @@ void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b
 			linear_velocity_set = true;
 		}
 		if (linear_velocity_set) {
-			bodyB->set_linear_velocity(linear_velocity);
+			//bodyB->set_linear_velocity(linear_velocity);
 		}
 		if (!is_zero(bodyA->get_constant_angular_velocity())) {
-			bodyB->set_angular_velocity(bodyA->get_constant_angular_velocity());
+			//bodyB->set_angular_velocity(bodyA->get_constant_angular_velocity());
 		}
 	}
 }

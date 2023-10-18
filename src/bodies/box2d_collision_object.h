@@ -39,6 +39,7 @@ public:
 	};
 
 protected:
+	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
 	Type type;
 	RID self;
 	ObjectID object_instance_id;

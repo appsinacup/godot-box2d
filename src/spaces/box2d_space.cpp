@@ -173,6 +173,7 @@ double Box2DSpace::get_step() {
 
 Box2DSpace::Box2DSpace() {
 	world = memnew(b2World(b2Vec2_zero)); // gravity comes from areas
+	step_value = Box2DProjectSettings::get_physics_fps() ? 1.0f / (real_t)Box2DProjectSettings::get_physics_fps() : 0.016f;
 	contact_filter = memnew(Box2DSpaceContactFilter);
 	contact_listener = memnew(Box2DSpaceContactListener(this));
 	default_area = memnew(Box2DArea);

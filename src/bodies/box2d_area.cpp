@@ -157,7 +157,7 @@ b2Vec2 Box2DArea::get_b2_gravity(Transform2D transform) const {
 		return gravity.gravity * gravity.vector;
 	}
 
-	const Vector2 point = get_transform().xform(box2d_to_godot(gravity.vector));
+	const Vector2 point = get_transform().xform(Vector2(gravity.vector.x, gravity.vector.y));
 	const Vector2 to_point = point - transform.get_origin();
 	const float to_point_dist_sq = std::max(to_point.length_squared(), CMP_EPSILON);
 	const Vector2 to_point_dir = to_point / Math::sqrt(to_point_dist_sq);
@@ -192,8 +192,10 @@ void Box2DArea::remove_body(Box2DCollisionObject *p_body) {
 
 Box2DArea::Box2DArea() :
 		Box2DCollisionObject(TYPE_AREA) {
-	damping.linear_damp = 0.1f;
-	damping.angular_damp = 1.0f;
+	damping.linear_damp = Box2DProjectSettings::get_default_linear_damp();
+	damping.angular_damp = Box2DProjectSettings::get_default_angular_damp();
+	gravity.gravity = Box2DProjectSettings::get_default_gravity();
+	gravity.vector = b2Vec2(Box2DProjectSettings::get_default_gravity_vector().x, Box2DProjectSettings::get_default_gravity_vector().y);
 	// areas are sensors and dynamic bodies, but don't move.
 	// b2_staticBody don't collide with b2_staticBody or b2_kinematicBody
 	// b2_kinematicBody don't collide with b2_staticBody or b2_kinematicBody

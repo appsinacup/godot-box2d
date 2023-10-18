@@ -1077,12 +1077,12 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 
 	PhysicsServer2DExtensionMotionResult &current_result = *p_result;
 
+	current_result.travel = body_position.get_origin() - p_from.get_origin();
 	if (sweep_test_results_step_3.is_empty()) {
-		current_result.travel = p_motion;
+		current_result.travel += p_motion;
 		current_result.remainder = Vector2();
 		current_result.collision_safe_fraction = 0;
 		current_result.collision_unsafe_fraction = 0;
-		current_result.travel += body_position.get_origin() - p_from.get_origin();
 		return false;
 	}
 	SweepTestResult sweep_test_result = sweep_test_results_step_3[0];
@@ -1099,9 +1099,8 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		current_result.collision_safe_fraction = sweep_test_results_step_2.get(0).safe_fraction();
 		current_result.collision_unsafe_fraction = sweep_test_results_step_2.get(0).unsafe_fraction();
 	}
-	current_result.travel = p_motion * current_result.collision_safe_fraction;
+	current_result.travel += p_motion * current_result.collision_safe_fraction;
 	current_result.remainder = p_motion - current_result.travel;
-	current_result.travel += body_position.get_origin() - p_from.get_origin();
 	int shape_A_index = 0;
 	for (int i = 0; i < body->get_shape_count(); i++) {
 		if (body->get_shape(i) == sweep_test_result.sweep_shape_A.shape) {
