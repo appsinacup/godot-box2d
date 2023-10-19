@@ -1033,6 +1033,16 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 				break;
 			}
 			for (SweepTestResult result : sweep_test_results) {
+				Vector2 n = Vector2(result.world_manifold.normal.x, result.world_manifold.normal.y);
+				// separation from margin
+				if (result.distance_output.distance > min_contact_depth + CMP_EPSILON) {
+					ERR_PRINT("dist margin " + rtos( result.distance_output.distance));
+					recover_step -= n * ((p_margin - result.distance_output.distance) - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
+				} else {
+					ERR_PRINT("dist separation " + rtos(result.world_manifold.separations[0]));
+					// separation from intersection
+					recover_step += n * (p_margin - result.world_manifold.separations[0] - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
+				}
 				float dist = p_margin - (result.distance_output.pointA - result.distance_output.pointB).Length();
 				Vector2 a(result.distance_output.pointA.x, result.distance_output.pointA.y);
 				Vector2 b(result.distance_output.pointB.x, result.distance_output.pointB.y);
@@ -1042,16 +1052,16 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 				}
 
 				// Compute plane on b towards a.
-				Vector2 n = Vector2(result.world_manifold.normal.x, result.world_manifold.normal.y);
+				//Vector2 n = Vector2(result.world_manifold.normal.x, result.world_manifold.normal.y);
 				// Move it outside as to fit the margin
 				real_t d = n.dot(b);
 
 				// Compute depth on recovered motion.
 				real_t depth = n.dot(a + recover_step) - d;
-				depth = dist;
+				depth = ABS(dist);
 				if (depth > min_contact_depth + CMP_EPSILON) {
 					// Only recover if there is penetration.
-					recover_step -= n * (depth - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
+					//recover_step -= n * (depth - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
 				}
 			}
 			body_position.columns[2] -= recover_step;
@@ -1083,7 +1093,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 
 	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
 
-	Box2DSpaceContactListener::handle_static_constant_linear_velocity(body_B->get_b2Body(), body_B, body->get_b2Body(), body);
+	Vector2 conveyer_belt_speed = Box2DSpaceContactListener::handle_static_constant_linear_velocity(body_B->get_b2Body(), body_B, body->get_b2Body(), body, false);
 
 	current_result.collider = body_B->get_self();
 	current_result.collider_id = body_B->get_object_instance_id();
@@ -1096,7 +1106,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		current_result.collision_safe_fraction = sweep_test_results_step_2.get(0).safe_fraction();
 		current_result.collision_unsafe_fraction = sweep_test_results_step_2.get(0).unsafe_fraction();
 	}
-	current_result.travel += p_motion * current_result.collision_safe_fraction + body->get_constant_linear_velocity() * body->get_step();
+	current_result.travel += p_motion * current_result.collision_safe_fraction + conveyer_belt_speed * body->get_step();
 	current_result.remainder = p_motion - p_motion * current_result.collision_safe_fraction;
 	int shape_A_index = 0;
 	for (int i = 0; i < body->get_shape_count(); i++) {
