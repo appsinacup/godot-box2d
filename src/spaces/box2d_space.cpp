@@ -89,7 +89,6 @@ void Box2DSpace::call_queries() {
 		state_query_list.remove(state_query_list.first());
 		b->call_queries();
 	}
-	// TODO: areas
 }
 
 Box2DDirectSpaceState *Box2DSpace::get_direct_state(PhysicsServerBox2D *p_physics_server) {
