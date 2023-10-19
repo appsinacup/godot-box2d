@@ -35,28 +35,27 @@ double Box2DDirectBodyState::_get_inverse_inertia() const {
 }
 void Box2DDirectBodyState::_set_linear_velocity(const Vector2 &velocity) {
 	ERR_FAIL_NULL(body);
-	body->set_linear_velocity(velocity);
+	body->set_state(PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY, velocity);
 }
 Vector2 Box2DDirectBodyState::_get_linear_velocity() const {
 	ERR_FAIL_NULL_V(body, Vector2());
-	return body->get_linear_velocity();
+	return body->get_state(PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY);
 }
 void Box2DDirectBodyState::_set_angular_velocity(double velocity) {
 	ERR_FAIL_NULL(body);
-	body->set_angular_velocity(velocity);
+	body->set_state(PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY, velocity);
 }
 double Box2DDirectBodyState::_get_angular_velocity() const {
 	ERR_FAIL_NULL_V(body, 0);
-	return body->get_angular_velocity();
+	return body->get_state(PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY);
 }
 void Box2DDirectBodyState::_set_transform(const Transform2D &transform) {
 	ERR_FAIL_NULL(body);
-	body->set_transform(transform);
-	body->set_sleep_state(false);
+	body->set_state(PhysicsServer2D::BODY_STATE_TRANSFORM, transform);
 }
 Transform2D Box2DDirectBodyState::_get_transform() const {
 	ERR_FAIL_NULL_V(body, Transform2D());
-	return body->get_transform();
+	return body->get_state(PhysicsServer2D::BODY_STATE_TRANSFORM);
 }
 Vector2 Box2DDirectBodyState::_get_velocity_at_local_position(const Vector2 &local_position) const {
 	ERR_FAIL_NULL_V(body, Vector2());

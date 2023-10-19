@@ -18,6 +18,11 @@ class Box2DJoint {
 	RID self;
 	struct Pin {
 		real_t softness = 0;
+		real_t lower_angle = 0;
+		real_t upper_angle = 0;
+		real_t motor = 0;
+		bool enable_motor = false;
+		bool enable_limits = false;
 	};
 	struct DampedSpring {
 		real_t rest_length = 0;
@@ -30,9 +35,7 @@ class Box2DJoint {
 		b2Vec2 axis;
 	};
 	struct CommonJoint {
-		real_t bias = 0;
-		real_t max_bias = 0;
-		real_t max_force = 0;
+		real_t max_force = 3.40282e+38;
 		Box2DBody *body_a = nullptr;
 		Box2DBody *body_b = nullptr;
 		b2Vec2 anchor_a;
@@ -61,12 +64,18 @@ public:
 	_FORCE_INLINE_ bool is_configured() const { return configured; }
 	Box2DBody *get_body_a();
 	Box2DBody *get_body_b();
-	void set_bias(real_t p_data);
-	void set_max_bias(real_t p_data);
 	void set_max_force(real_t p_data);
-	real_t get_bias();
-	real_t get_max_bias();
 	real_t get_max_force();
+	void set_pin_lower_angle(real_t angle);
+	real_t get_pin_lower_angle();
+	void set_pin_upper_angle(real_t angle);
+	real_t get_pin_upper_angle();
+	void set_pin_motor(real_t motor);
+	real_t get_pin_motor();
+	void set_pin_use_limits(bool p_enable);
+	bool get_pin_use_limits();
+	void set_pin_use_motor(bool p_enable);
+	bool get_pin_use_motor();
 	Variant get_data() const;
 	void clear();
 	void set_disable_collisions(bool disable_collisions);
@@ -82,6 +91,9 @@ public:
 	real_t get_damped_spring_stiffness();
 	void set_damped_spring_damping(real_t p_damped_spring_damping);
 	real_t get_damped_spring_damping();
+
+	b2Vec2 get_reaction_force();
+	real_t get_reaction_torque();
 
 	b2JointDef *get_b2JointDef();
 	b2Joint *get_b2Joint();

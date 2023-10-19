@@ -31,13 +31,24 @@ void Box2DSpaceContactListener::EndContact(b2Contact *contact) {
 	handle_contact(contact, PhysicsServer2D::AreaBodyStatus::AREA_BODY_REMOVED);
 }
 
-void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB, b2WorldManifold worldManifold, int points_count) {
-	if (b2_body_A->GetType() != b2BodyType::b2_dynamicBody && b2_body_B->GetType() == b2BodyType::b2_dynamicBody) {
-		if (points_count > 0) {
-			b2_body_B->ApplyLinearImpulse(b2_body_B->GetMass() * bodyA->get_constant_linear_velocity(), worldManifold.points[0], true);
+void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB) {
+	if (b2_body_A->GetType() != b2BodyType::b2_dynamicBody) {
+		Vector2 linear_velocity = bodyB->get_linear_velocity();
+		bool linear_velocity_set = false;
+		if (!is_zero(bodyA->get_constant_linear_velocity().x)) {
+			linear_velocity.x = bodyA->get_constant_linear_velocity().x;
+			linear_velocity_set = true;
 		}
-		float inertia = b2_body_B->GetInertia() - b2_body_B->GetMass() * b2Dot(b2_body_B->GetLocalCenter(), b2_body_B->GetLocalCenter());
-		b2_body_B->ApplyTorque(inertia * bodyA->get_constant_angular_velocity(), true);
+		if (!is_zero(bodyA->get_constant_linear_velocity().y)) {
+			linear_velocity.y = bodyA->get_constant_linear_velocity().y;
+			linear_velocity_set = true;
+		}
+		if (linear_velocity_set) {
+			bodyB->set_linear_velocity(linear_velocity);
+		}
+		if (!is_zero(bodyA->get_constant_angular_velocity())) {
+			bodyB->set_angular_velocity(bodyA->get_constant_angular_velocity());
+		}
 	}
 }
 
@@ -70,9 +81,8 @@ void Box2DSpaceContactListener::PreSolve(b2Contact *contact, const b2Manifold *o
 	bool one_way_collision_B = fixtureB_user_data.one_way_collision;
 	b2Vec2 one_way_collision_direction_A(fixtureA_user_data.one_way_collision_direction_x, fixtureA_user_data.one_way_collision_direction_y);
 	b2Vec2 one_way_collision_direction_B(fixtureB_user_data.one_way_collision_direction_x, fixtureB_user_data.one_way_collision_direction_y);
-	contact->GetWorldManifold(&world_manifold);
-	handle_static_constant_linear_velocity(b2_body_A, bodyA, b2_body_B, bodyB, world_manifold, contact->GetManifold()->pointCount);
-	handle_static_constant_linear_velocity(b2_body_B, bodyB, b2_body_A, bodyA, world_manifold, contact->GetManifold()->pointCount);
+	handle_static_constant_linear_velocity(b2_body_A, bodyA, b2_body_B, bodyB);
+	handle_static_constant_linear_velocity(b2_body_B, bodyB, b2_body_A, bodyA);
 	b2Vec2 b2_body_A_position = b2_body_A->GetPosition();
 	b2Vec2 b2_body_B_position = b2_body_B->GetPosition();
 	if (one_way_collision_A) {

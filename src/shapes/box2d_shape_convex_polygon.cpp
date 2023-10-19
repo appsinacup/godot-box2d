@@ -157,7 +157,7 @@ int Box2DShapeConvexPolygon::remove_bad_points(b2Vec2 *vertices, int32 count) {
 
 	for (;;) {
 		if (m >= b2_maxPolygonVertices) {
-			ERR_PRINT("Cannot compute convex hull.");
+			ERR_PRINT("Cannot compute convex hull." + rtos(m));
 			// cannot compute convex hull
 			return 0;
 		}

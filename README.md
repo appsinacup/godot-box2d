@@ -10,7 +10,7 @@
     <a href="https://github.com/erincatto/box2d" alt="Box2D Version">
         <img src="https://img.shields.io/badge/Box2D-v2.4.1-%23478cbf?logoColor=white" /></a>
     <a href="https://github.com/godotengine/godot-cpp" alt="Godot Version">
-        <img src="https://img.shields.io/badge/Godot-v4.1-%23478cbf?logo=godot-engine&logoColor=white" /></a>
+        <img src="https://img.shields.io/badge/Godot-v4.2-%23478cbf?logo=godot-engine&logoColor=white" /></a>
     <a href="https://github.com/appsinacup/godot-box2d/graphs/contributors" alt="Contributors">
         <img src="https://img.shields.io/github/contributors/appsinacup/godot-box2d" /></a>
     <a href="https://github.com/appsinacup/godot-box2d/pulse" alt="Activity">

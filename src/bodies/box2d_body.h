@@ -15,16 +15,12 @@ using namespace godot;
 class Box2DDirectBodyState;
 
 class Box2DBody : public Box2DCollisionObject {
-	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
-
 	SelfList<Box2DBody> active_list;
 	SelfList<Box2DBody> direct_state_query_list;
 	bool default_sleep_state = false;
 	bool active = true;
 	bool can_sleep = true;
 	PhysicsServer2D::CCDMode collision_mode = PhysicsServer2D::CCD_MODE_DISABLED;
-
-	Transform2D new_transform;
 
 	Callable body_force_integration_callback;
 	Variant body_force_integration_userdata;

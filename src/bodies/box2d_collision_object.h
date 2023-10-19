@@ -39,6 +39,7 @@ public:
 	};
 
 protected:
+	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
 	Type type;
 	RID self;
 	ObjectID object_instance_id;
@@ -61,6 +62,8 @@ protected:
 	struct ConstantForces {
 		b2Vec2 constant_force = b2Vec2_zero;
 		real_t constant_torque = 0;
+		b2Vec2 constant_velocity = b2Vec2_zero;
+		real_t constant_angular = 0;
 	};
 	ConstantForces constant_forces;
 	struct PhysicsMaterial {
@@ -124,7 +127,7 @@ public:
 	double get_mass() const;
 	double get_inertia() const;
 	void reset_mass_properties();
-	b2Vec2 get_constant_linear_velocity();
+	Vector2 get_constant_linear_velocity();
 	float get_constant_angular_velocity();
 
 	// Direct Body API

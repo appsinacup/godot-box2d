@@ -60,7 +60,7 @@ b2Shape *Box2DShapeConcavePolygon::_get_transformed_b2Shape(ShapeInfo shape_info
 		delete[] box2d_points;
 		return shape;
 	}
-	ERR_FAIL_COND_V(shape_info.index > points.size(), nullptr);
+	ERR_FAIL_COND_V(shape_info.index >= points.size(), nullptr);
 	// if not make multiple small squares the size of a line
 	b2PolygonShape *shape = memnew(b2PolygonShape);
 	b2Vec2 box2d_points[4];

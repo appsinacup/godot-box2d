@@ -63,7 +63,7 @@ void Box2DBody::set_mode(PhysicsServer2D::BodyMode p_mode) {
 	mode = p_mode;
 	switch (p_mode) {
 		case PhysicsServer2D::BODY_MODE_STATIC: {
-			body_def->type = b2_staticBody;
+			body_def->type = b2_kinematicBody;
 			body_def->fixedRotation = false;
 			set_active(false);
 		} break;
@@ -87,6 +87,10 @@ void Box2DBody::set_mode(PhysicsServer2D::BodyMode p_mode) {
 		body->SetType(body_def->type);
 		body->SetFixedRotation(body_def->fixedRotation);
 	}
+	recalculate_total_angular_damp();
+	recalculate_total_linear_damp();
+	recalculate_total_gravity();
+	_update_shapes();
 }
 
 PhysicsServer2D::BodyMode Box2DBody::get_mode() const {
@@ -96,12 +100,18 @@ PhysicsServer2D::BodyMode Box2DBody::get_mode() const {
 void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_variant) {
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
-			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
-				_set_transform(p_variant);
-				// TODO
-			} else if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
-				_set_transform(p_variant);
-				//wakeup_neighbours();
+			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC || mode == PhysicsServer2D::BODY_MODE_STATIC) {
+				if (!body || !space) {
+					_set_transform(p_variant);
+				} else {
+					// set speed instead of directly changing the body
+					Transform2D transform = p_variant;
+					Transform2D old_transform = get_state(PhysicsServer2D::BODY_STATE_TRANSFORM);
+					float angle_diff = (transform.get_rotation() - old_transform.get_rotation()) * (1.0f / get_step());
+					b2Vec2 pos_diff = godot_to_box2d((transform.get_origin() - old_transform.get_origin()) * (1.0f / get_step()));
+					body->SetLinearVelocity(pos_diff + body->GetLinearVelocity());
+					body->SetAngularVelocity(angle_diff + body->GetAngularVelocity());
+				}
 			} else { // rigid body
 				//Transform2D t = p_variant;
 				//t.orthonormalize();
@@ -120,7 +130,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 			set_linear_velocity(linear_velocity);
 		} break;
 		case PhysicsServer2D::BODY_STATE_ANGULAR_VELOCITY: {
-			float angular_velocity = godot_to_box2d(variant_to_number(p_variant));
+			float angular_velocity = variant_to_number(p_variant);
 			set_angular_velocity(angular_velocity);
 		} break;
 		case PhysicsServer2D::BODY_STATE_SLEEPING: {
@@ -212,6 +222,10 @@ void Box2DBody::after_step() {
 	if (body_state_sync_callback.is_valid() || body_force_integration_callback.is_valid()) {
 		get_space()->body_add_to_state_query_list(&direct_state_query_list);
 	}
+	if (body && body->GetType() != b2_dynamicBody) {
+		body->SetLinearVelocity(b2Vec2_zero);
+		body->SetAngularVelocity(0);
+	}
 }
 
 void Box2DBody::call_queries() {
@@ -261,6 +275,8 @@ Box2DBody::Box2DBody() :
 		Box2DCollisionObject(TYPE_BODY),
 		active_list(this),
 		direct_state_query_list(this) {
+	damping.linear_damp = Box2DProjectSettings::get_default_linear_damp();
+	damping.angular_damp = Box2DProjectSettings::get_default_angular_damp();
 }
 
 Box2DBody::~Box2DBody() {
