@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.8](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.7)
+## [v0.8](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.8)
 
 - Fix [Character body 2d conveyer belt not working](https://github.com/appsinacup/godot-box2d/issues/58)
 - Fix [if the collision shape of character body2d is moved, test_body_moved doesnt work propertly](https://github.com/appsinacup/godot-box2d/issues/55)
