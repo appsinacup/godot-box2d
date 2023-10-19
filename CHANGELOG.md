@@ -2,6 +2,7 @@
 
 ## [v0.8](https://github.com/godot-box2d/godot-box2d/releases/tag/v0.7)
 
+- Fix [if the collision shape of character body2d is moved, test_body_moved doesnt work propertly](https://github.com/appsinacup/godot-box2d/issues/55)
 - Fix [Add limits and motor to pin joint](https://github.com/appsinacup/godot-box2d/issues/52).
 - Fix the character controller margin to work.
 - Fixes [SegmentShape2D seems unsupported](https://github.com/appsinacup/godot-box2d/issues/47).
