@@ -20,7 +20,7 @@ public:
 	Box2DSpaceContactListener(Box2DSpace *p_space) :
 			space(p_space) {}
 
-	static void handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB, b2WorldManifold world_manifold, int points_count);
+	static void handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB);
 	static bool should_disable_collision_one_way_direction(b2Vec2 one_way_collision_direction_A, b2Body *b2_body_A, b2Body *b2_body_B, b2Vec2 body_B_velocity);
 
 	/// Called when two fixtures begin to touch.

@@ -300,6 +300,10 @@ double Box2DCollisionObject::get_inverse_inertia() const {
 	return 1.0f / mass_data.I;
 }
 void Box2DCollisionObject::set_linear_velocity(const Vector2 &p_linear_velocity) {
+	if (mode != PhysicsServer2D::BODY_MODE_RIGID && mode != PhysicsServer2D::BODY_MODE_RIGID_LINEAR) {
+		constant_forces.constant_velocity = godot_to_box2d(p_linear_velocity);
+		return;
+	}
 	body_def->linearVelocity = godot_to_box2d(p_linear_velocity);
 	if (body) {
 		body->SetLinearVelocity(body_def->linearVelocity);
@@ -307,10 +311,10 @@ void Box2DCollisionObject::set_linear_velocity(const Vector2 &p_linear_velocity)
 }
 
 Vector2 Box2DCollisionObject::get_constant_linear_velocity() {
-	return box2d_to_godot(body_def->linearVelocity);
+	return box2d_to_godot(constant_forces.constant_velocity);
 }
 float Box2DCollisionObject::get_constant_angular_velocity() {
-	return body_def->angularVelocity;
+	return constant_forces.constant_angular;
 }
 
 Vector2 Box2DCollisionObject::get_linear_velocity() const {
@@ -320,6 +324,10 @@ Vector2 Box2DCollisionObject::get_linear_velocity() const {
 	return box2d_to_godot(body_def->linearVelocity);
 }
 void Box2DCollisionObject::set_angular_velocity(double p_velocity) {
+	if (mode != PhysicsServer2D::BODY_MODE_RIGID && mode != PhysicsServer2D::BODY_MODE_RIGID_LINEAR) {
+		constant_forces.constant_angular = p_velocity;
+		return;
+	}
 	body_def->angularVelocity = p_velocity;
 	if (body) {
 		body->SetAngularVelocity(body_def->angularVelocity);
@@ -599,7 +607,6 @@ void Box2DCollisionObject::set_shape(int p_index, Box2DShape *p_shape) {
 
 void Box2DCollisionObject::set_shape_transform(int p_index, const Transform2D &p_transform) {
 	ERR_FAIL_INDEX(p_index, shapes.size());
-
 	shapes.write[p_index].xform = p_transform;
 	// TODO only update this shape
 	_update_shapes();

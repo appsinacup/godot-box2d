@@ -566,7 +566,6 @@ void PhysicsServerBox2D::_body_add_shape(const RID &p_body, const RID &p_shape, 
 
 	Box2DShape *shape = shape_owner.get_or_null(p_shape);
 	ERR_FAIL_COND(!shape);
-
 	body->add_shape(shape, p_transform, p_disabled);
 }
 
@@ -1088,6 +1087,10 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	SweepTestResult sweep_test_result = sweep_test_results_step_3[0];
 
 	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
+
+	// handle conveyer belts, still WIP/TODO
+	Box2DSpaceContactListener::handle_static_constant_linear_velocity(body_B->get_b2Body(), body_B, body->get_b2Body(), body);
+
 	current_result.collider = body_B->get_self();
 	current_result.collider_id = body_B->get_object_instance_id();
 	current_result.collision_point = box2d_to_godot(sweep_test_result.world_manifold.points[0]);

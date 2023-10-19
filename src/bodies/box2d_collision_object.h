@@ -62,6 +62,8 @@ protected:
 	struct ConstantForces {
 		b2Vec2 constant_force = b2Vec2_zero;
 		real_t constant_torque = 0;
+		b2Vec2 constant_velocity = b2Vec2_zero;
+		real_t constant_angular = 0;
 	};
 	ConstantForces constant_forces;
 	struct PhysicsMaterial {

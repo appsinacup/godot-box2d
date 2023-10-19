@@ -101,7 +101,7 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 	switch (p_state) {
 		case PhysicsServer2D::BODY_STATE_TRANSFORM: {
 			if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC || mode == PhysicsServer2D::BODY_MODE_STATIC) {
-				if (!body) {
+				if (!body || !space) {
 					_set_transform(p_variant);
 				} else {
 					// set speed instead of directly changing the body
