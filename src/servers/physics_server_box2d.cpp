@@ -1096,7 +1096,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		current_result.collision_safe_fraction = sweep_test_results_step_2.get(0).safe_fraction();
 		current_result.collision_unsafe_fraction = sweep_test_results_step_2.get(0).unsafe_fraction();
 	}
-	current_result.travel += p_motion * current_result.collision_safe_fraction;
+	current_result.travel += p_motion * current_result.collision_safe_fraction + body->get_constant_linear_velocity() * body->get_step();
 	current_result.remainder = p_motion - p_motion * current_result.collision_safe_fraction;
 	int shape_A_index = 0;
 	for (int i = 0; i < body->get_shape_count(); i++) {
