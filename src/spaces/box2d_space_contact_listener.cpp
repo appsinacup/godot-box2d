@@ -4,6 +4,7 @@
 
 #include "../bodies/box2d_area.h"
 #include "../bodies/box2d_collision_object.h"
+#include "../bodies/box2d_direct_body_state.h"
 #include "box2d/b2_contact.h"
 #include <box2d/b2_shape.h>
 

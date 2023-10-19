@@ -144,17 +144,17 @@ b2DistanceOutput Box2DSweepTest::call_b2_distance(b2Transform p_transformA, b2Sh
 	return output;
 }
 
-b2AABB get_shape_aabb(Box2DShape *shape, const b2Transform &shape_transform) {
+b2AABB get_shape_aabb(Box2DCollisionObject::Shape p_shape, const b2Transform &shape_transform) {
 	b2AABB aabb;
 	b2AABB aabb_total;
 	bool first_time = true;
+	Box2DShape *shape = p_shape.shape;
 	ERR_FAIL_COND_V(!shape, b2AABB());
 	if (shape->get_b2Shape_count(false) == 0) {
 		ERR_FAIL_V_MSG(aabb_total, "Cannot get aabb of empty shape.");
 	}
-	Transform2D identity;
 	for (int i = 0; i < shape->get_b2Shape_count(false); i++) {
-		Box2DShape::ShapeInfo shape_info{ i, identity, false, false };
+		Box2DShape::ShapeInfo shape_info{ i, p_shape.xform, false, false };
 		b2Shape *b2_shape = shape->get_transformed_b2Shape(shape_info, nullptr);
 		for (int j = 0; j < b2_shape->GetChildCount(); j++) {
 			b2_shape->ComputeAABB(&aabb, shape_transform, j);
@@ -236,12 +236,14 @@ Vector<SweepTestResult> Box2DSweepTest::shape_cast(SweepShape p_sweep_shape_A, b
 	return results;
 }
 Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Box2DShape *p_shape, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
-	Vector<Box2DShape *> shapes;
-	shapes.append(p_shape);
+	Vector<Box2DCollisionObject::Shape> shapes;
+	Box2DCollisionObject::Shape shape;
+	shape.shape = p_shape;
+	shapes.append(shape);
 	return query_aabb_motion(shapes, p_transform, p_motion, p_margin, p_collision_layer, p_collision_mask, p_collide_with_bodies, p_collide_with_areas, space_state);
 }
 
-Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
+Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DCollisionObject::Shape> p_shapes, const Transform2D &p_transform, const Vector2 &p_motion, double p_margin, uint32_t p_collision_layer, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, Box2DDirectSpaceState *space_state) {
 	b2Vec2 motion = godot_to_box2d(p_motion);
 	Box2DQueryCallback callback(space_state,
 			p_collision_layer,
@@ -251,7 +253,7 @@ Vector<b2Fixture *> Box2DSweepTest::query_aabb_motion(Vector<Box2DShape *> p_sha
 	real_t margin = godot_to_box2d(p_margin);
 	b2Transform shape_A_transform(godot_to_box2d(p_transform.get_origin()) - b2Vec2(margin, margin), b2Rot(p_transform.get_rotation()));
 	Vector<b2Fixture *> shapes_result;
-	for (Box2DShape *shape : p_shapes) {
+	for (Box2DCollisionObject::Shape shape : p_shapes) {
 		b2AABB aabb = get_shape_aabb(shape, shape_A_transform);
 		aabb.Combine(get_shape_aabb(shape, b2Transform(shape_A_transform.p + motion + b2Vec2(margin, margin), shape_A_transform.q)));
 		space_state->space->get_b2World()->QueryAABB(&callback, aabb);

@@ -109,20 +109,12 @@ void Box2DBody::set_state(PhysicsServer2D::BodyState p_state, const Variant &p_v
 					Transform2D old_transform = get_state(PhysicsServer2D::BODY_STATE_TRANSFORM);
 					float angle_diff = (transform.get_rotation() - old_transform.get_rotation()) * (1.0f / get_step());
 					b2Vec2 pos_diff = godot_to_box2d((transform.get_origin() - old_transform.get_origin()) * (1.0f / get_step()));
-					body->SetLinearVelocity(pos_diff + body->GetLinearVelocity());
-					body->SetAngularVelocity(angle_diff + body->GetAngularVelocity());
+					body->SetLinearVelocity(pos_diff);
+					body->SetAngularVelocity(angle_diff);
 				}
 			} else { // rigid body
-				//Transform2D t = p_variant;
-				//t.orthonormalize();
-				//new_transform = get_transform(); // used as old to compute motion
-				//if (t == new_transform) {
-				//	break;
-				//}
 				_set_transform(p_variant);
 				set_sleep_state(false);
-				//_set_inv_transform(get_transform().inverse());
-				//_update_transform_dependent();
 			}
 		} break;
 		case PhysicsServer2D::BODY_STATE_LINEAR_VELOCITY: {

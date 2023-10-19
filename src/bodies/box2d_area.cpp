@@ -35,7 +35,6 @@ void Box2DArea::call_monitor(Box2DCollisionObject *body, PhysicsServer2D::AreaBo
 
 void Box2DArea::set_transform(const Transform2D &p_transform) {
 	// TODO: add to moved list?
-
 	_set_transform(p_transform);
 	// _set_inv_transform(p_transform.affine_inverse());
 }

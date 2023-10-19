@@ -601,14 +601,12 @@ void Box2DCollisionObject::set_shape(int p_index, Box2DShape *p_shape) {
 	// if there was previously a shape, clear it
 	clear_shape(p_index);
 	shapes.write[p_index].shape = p_shape;
-	// TODO only update this shape
 	_update_shapes();
 }
 
 void Box2DCollisionObject::set_shape_transform(int p_index, const Transform2D &p_transform) {
 	ERR_FAIL_INDEX(p_index, shapes.size());
 	shapes.write[p_index].xform = p_transform;
-	// TODO only update this shape
 	_update_shapes();
 }
 
