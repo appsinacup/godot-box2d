@@ -21,8 +21,12 @@
 real_t SweepTestResult::safe_fraction() {
 	b2Vec2 motion_normal = sweep_shape_A.sweep.c - sweep_shape_A.sweep.c0;
 	float motion_length = motion_normal.Length();
-	if (manifold.pointCount != 0 && world_manifold.separations[0] < 0 && motion_length != 0.0) {
-		return toi_output.t + world_manifold.separations[0] / motion_length;
+	if (manifold.pointCount != 0 && motion_length != 0.0) {
+		float largest_separation = 0.0;
+		for (int j = 0; j < manifold.pointCount; j++) {
+			largest_separation = MIN(world_manifold.separations[j], largest_separation);
+		}
+		return toi_output.t + largest_separation / motion_length;
 	}
 	return toi_output.t;
 }
