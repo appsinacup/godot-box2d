@@ -37,9 +37,10 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 ## Limitations
 
-- Character Controller is not very precise and might get stuck. (WIP)
+- Character Controller is not very precise. (WIP)
+- Body Pickable option is not implemented. (WIP)
 - Having non symetrical physics mask/layers results in collision on both bodies. (Can't fix)
-- Circles and capsules only support uniform scaling and don't support skewing. (Won't fix)
+- Circles and capsules only support uniform scaling and don't support skewing. (WIP? if people need this)
 - Missing thread-safety. (WIP)
 - Missing double precision builds. (WIP)
 - Missing cross platform determinism. (WIP)

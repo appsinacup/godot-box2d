@@ -32,7 +32,7 @@ void Box2DSpaceContactListener::EndContact(b2Contact *contact) {
 	handle_contact(contact, PhysicsServer2D::AreaBodyStatus::AREA_BODY_REMOVED);
 }
 
-void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB) {
+Vector2 Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b2_body_A, Box2DCollisionObject *bodyA, b2Body *b2_body_B, Box2DCollisionObject *bodyB, bool set_velocities) {
 	if (b2_body_A->GetType() != b2BodyType::b2_dynamicBody) {
 		Vector2 linear_velocity = bodyB->get_linear_velocity();
 		bool linear_velocity_set = false;
@@ -44,13 +44,15 @@ void Box2DSpaceContactListener::handle_static_constant_linear_velocity(b2Body *b
 			linear_velocity.y = bodyA->get_constant_linear_velocity().y;
 			linear_velocity_set = true;
 		}
-		if (linear_velocity_set) {
+		if (linear_velocity_set && set_velocities) {
 			bodyB->set_linear_velocity(linear_velocity);
 		}
-		if (!is_zero(bodyA->get_constant_angular_velocity())) {
+		if (!is_zero(bodyA->get_constant_angular_velocity()) && set_velocities) {
 			bodyB->set_angular_velocity(bodyA->get_constant_angular_velocity());
 		}
+		return bodyA->get_constant_linear_velocity();
 	}
+	return Vector2();
 }
 
 bool Box2DSpaceContactListener::should_disable_collision_one_way_direction(b2Vec2 one_way_collision_direction_A, b2Body *b2_body_A, b2Body *b2_body_B, b2Vec2 body_B_velocity) {

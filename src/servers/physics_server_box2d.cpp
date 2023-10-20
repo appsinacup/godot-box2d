@@ -1009,6 +1009,7 @@ Vector<SweepTestResult> remove_disabled_and_one_way_wrong_direction(Vector<Sweep
 }
 
 #define TEST_MOTION_MIN_CONTACT_DEPTH_FACTOR 0.05
+#define TEST_MIN_MARGIN 0.001
 #define BODY_MOTION_RECOVER_ATTEMPTS 4
 #define BODY_MOTION_RECOVER_RATIO 0.4
 
@@ -1016,6 +1017,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	if (!p_result) {
 		return false;
 	}
+	p_margin = MAX(TEST_MIN_MARGIN, p_margin);
 	Box2DBody *body = body_owner.get_or_null(p_body);
 	Transform2D body_position = p_from;
 	ERR_FAIL_COND_V(!body, false);
@@ -1033,25 +1035,17 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 				break;
 			}
 			for (SweepTestResult result : sweep_test_results) {
-				float dist = p_margin - (result.distance_output.pointA - result.distance_output.pointB).Length();
-				Vector2 a(result.distance_output.pointA.x, result.distance_output.pointA.y);
-				Vector2 b(result.distance_output.pointB.x, result.distance_output.pointB.y);
-				if (result.manifold.pointCount == 2) {
-					//Vector2 a(result.world_manifold.points[0].x, result.world_manifold.points[0].y);
-					//Vector2 b(result.world_manifold.points[1].x, result.world_manifold.points[1].y);
-				}
-
-				// Compute plane on b towards a.
 				Vector2 n = Vector2(result.world_manifold.normal.x, result.world_manifold.normal.y);
-				// Move it outside as to fit the margin
-				real_t d = n.dot(b);
+				float largest_separation = CMP_EPSILON;
+				for (int j = 0; j < result.manifold.pointCount; j++) {
+					largest_separation = MIN(result.world_manifold.separations[j], largest_separation);
+				}
+				largest_separation = box2d_to_godot(-largest_separation);
 
-				// Compute depth on recovered motion.
-				real_t depth = n.dot(a + recover_step) - d;
-				depth = dist;
-				if (depth > min_contact_depth + CMP_EPSILON) {
-					// Only recover if there is penetration.
-					recover_step -= n * (depth - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
+				// separation from intersection
+				// TODO figure out more of this, this will do for now.
+				if (largest_separation > min_contact_depth + CMP_EPSILON) {
+					recover_step += n * (largest_separation - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
 				}
 			}
 			body_position.columns[2] -= recover_step;
@@ -1072,6 +1066,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 	PhysicsServer2DExtensionMotionResult &current_result = *p_result;
 
 	current_result.travel = body_position.get_origin() - p_from.get_origin();
+
 	if (sweep_test_results_step_3.is_empty()) {
 		current_result.travel += p_motion;
 		current_result.remainder = Vector2();
@@ -1083,7 +1078,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 
 	Box2DCollisionObject *body_B = sweep_test_result.sweep_shape_B.fixture->GetBody()->GetUserData().collision_object;
 
-	Box2DSpaceContactListener::handle_static_constant_linear_velocity(body_B->get_b2Body(), body_B, body->get_b2Body(), body);
+	Vector2 conveyer_belt_speed = Box2DSpaceContactListener::handle_static_constant_linear_velocity(body_B->get_b2Body(), body_B, body->get_b2Body(), body, false);
 
 	current_result.collider = body_B->get_self();
 	current_result.collider_id = body_B->get_object_instance_id();
@@ -1096,7 +1091,7 @@ bool PhysicsServerBox2D::_body_test_motion(const RID &p_body, const Transform2D 
 		current_result.collision_safe_fraction = sweep_test_results_step_2.get(0).safe_fraction();
 		current_result.collision_unsafe_fraction = sweep_test_results_step_2.get(0).unsafe_fraction();
 	}
-	current_result.travel += p_motion * current_result.collision_safe_fraction + body->get_constant_linear_velocity() * body->get_step();
+	current_result.travel += p_motion * current_result.collision_safe_fraction + conveyer_belt_speed * body->get_step();
 	current_result.remainder = p_motion - p_motion * current_result.collision_safe_fraction;
 	int shape_A_index = 0;
 	for (int i = 0; i < body->get_shape_count(); i++) {
