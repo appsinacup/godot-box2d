@@ -23,8 +23,6 @@
 <img src="stability-comparison.gif"/>
 </p>
 
-[![Build Status](https://github.com/appsinacup/godot-box2d/actions/workflows/runner.yml/badge.svg?branch=main)](https://github.com/appsinacup/godot-box2d/actions/workflows/runner.yml)
-
 A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot), implemented as a GDExtension.
 
 ## Table of Contents
