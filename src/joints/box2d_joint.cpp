@@ -193,14 +193,14 @@ void Box2DJoint::set_damped_spring_rest_length(real_t p_damped_spring_rest_lengt
 	}
 }
 real_t Box2DJoint::get_damped_spring_rest_length() {
-	return box2d_to_godot(damped_spring.rest_length);
+	return box2d_to_godot(box2d_to_godot(damped_spring.rest_length));
 }
 
 void Box2DJoint::set_damped_spring_stiffness(real_t p_damped_spring_stiffness) {
-	if (damped_spring.stiffness == godot_to_box2d(p_damped_spring_stiffness)) {
+	if (damped_spring.stiffness == godot_to_box2d(godot_to_box2d(p_damped_spring_stiffness))) {
 		return;
 	}
-	damped_spring.stiffness = godot_to_box2d(p_damped_spring_stiffness);
+	damped_spring.stiffness = godot_to_box2d(godot_to_box2d(p_damped_spring_stiffness));
 	if (joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		float stiffness = 0.0f;
@@ -210,14 +210,14 @@ void Box2DJoint::set_damped_spring_stiffness(real_t p_damped_spring_stiffness) {
 	}
 }
 real_t Box2DJoint::get_damped_spring_stiffness() {
-	return box2d_to_godot(damped_spring.stiffness);
+	return box2d_to_godot(box2d_to_godot(damped_spring.stiffness));
 }
 
 void Box2DJoint::set_damped_spring_damping(real_t p_damped_spring_damping) {
-	if (damped_spring.damping == godot_to_box2d(p_damped_spring_damping)) {
+	if (damped_spring.damping == godot_to_box2d(godot_to_box2d(p_damped_spring_damping))) {
 		return;
 	}
-	damped_spring.damping = godot_to_box2d(p_damped_spring_damping);
+	damped_spring.damping = godot_to_box2d(godot_to_box2d(p_damped_spring_damping));
 	if (joint && common.body_a && common.body_b) {
 		b2DistanceJoint *distance_joint = (b2DistanceJoint *)joint;
 		float stiffness = 0.0f;
@@ -227,7 +227,7 @@ void Box2DJoint::set_damped_spring_damping(real_t p_damped_spring_damping) {
 	}
 }
 real_t Box2DJoint::get_damped_spring_damping() {
-	return box2d_to_godot(damped_spring.damping);
+	return box2d_to_godot(box2d_to_godot(damped_spring.damping));
 }
 b2Vec2 Box2DJoint::get_reaction_force() {
 	float inv_step = 1.0f / space->get_step();
@@ -273,7 +273,8 @@ b2JointDef *Box2DJoint::get_b2JointDef() {
 			b2LinearStiffness(distance_joint_def->stiffness, distance_joint_def->damping, damped_spring.stiffness, damped_spring.damping, common.body_a->get_b2Body(), common.body_b->get_b2Body());
 			distance_joint_def->Initialize(common.body_a->get_b2Body(), common.body_b->get_b2Body(), common.anchor_a, common.anchor_b);
 			distance_joint_def->length = damped_spring.rest_length;
-			distance_joint_def->minLength = b2_epsilon;
+			//distance_joint_def->minLength = damped_spring.rest_length;
+			//distance_joint_def->maxLength = damped_spring.rest_length;
 		} break;
 		case PhysicsServer2D::JointType::JOINT_TYPE_GROOVE: {
 			b2PrismaticJointDef *prismatic_joint_def = (b2PrismaticJointDef *)joint_def;
