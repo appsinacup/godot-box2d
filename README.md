@@ -31,7 +31,8 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 2. [Supported Platforms](#supported-platforms)
 3. [Installation](#installation)
 4. [Features](#features)
-5. [License](#license)
+5. [Comparison](#comparison)
+6. [License](#license)
 
 ## Limitations
 
@@ -78,6 +79,14 @@ Video Tutorial:
 ### Determinism
 
 Box2D is binary deterministic. Godot Box2D should also be binary deterministic, however no such tests were run yet. The newest version of Box2D, v3, will also support cross determinism. When that is done, will also add it here.
+
+## Comparison
+
+Watch a comparison to Godot Physics 2D and [Rapier 2D](https://github.com/appsinacup/godot-rapier-2d) physics plugin:
+
+[![Comparison](https://img.youtube.com/vi/wgUiZ7E19eM/0.jpg)](https://www.youtube.com/watch?v=wgUiZ7E19eM)
+
+Or read about it on [appsinacup.com/godot-physics-vs-box2d-vs-rapier2d](https://appsinacup.com/godot-physics-vs-box2d-vs-rapier2d/)
 
 ## License
 
