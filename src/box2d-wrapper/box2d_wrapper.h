@@ -15,8 +15,10 @@ enum class BodyType {
 };
 
 struct Handle {
-	uint32_t id;
-	uint32_t generation;
+	int16_t world_index;
+	int32_t object_index;
+	int16_t world;
+	uint16_t revision;
 };
 
 #if defined(REAL_T_IS_DOUBLE)
