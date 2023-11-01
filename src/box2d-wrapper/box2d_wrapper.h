@@ -1,8 +1,8 @@
 #ifndef BOX2D_WRAPPER_H
 #define BOX2D_WRAPPER_H
 
-#include <cstdint>
 #include <stdio.h>
+#include <cstdint>
 
 /* Generated with cbindgen:0.26.0 */
 
