@@ -5,6 +5,9 @@
 
 #include <godot_cpp/core/memory.hpp>
 
+#include <box2d/b2_api.h>
+#include <box2d/b2_types.h>
+
 // Tunable Constants
 
 // You can use this to change the length scale used by your game.

@@ -104,10 +104,6 @@ int Box2DProjectSettings::get_velocity_iterations() {
 	return get_setting<int>(VELOCITY_ITERATIONS);
 }
 
-float Box2DProjectSettings::get_scaling_factor() {
-	return get_setting<float>(SCALING_FACTOR);
-}
-
 int Box2DProjectSettings::get_physics_fps() {
 	return get_setting<int>(PHYSICS_FPS);
 }

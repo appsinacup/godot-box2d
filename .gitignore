@@ -1,5 +1,6 @@
 # Binaries
 *.os
+*.o
 *.dblite
 
 # Generated directories with binaries

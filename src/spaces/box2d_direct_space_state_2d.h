@@ -1,0 +1,39 @@
+#ifndef BOX2D_DIRECT_SPACE_STATE_2D_H
+#define BOX2D_DIRECT_SPACE_STATE_2D_H
+
+#include "../bodies/box2d_area_2d.h"
+#include "../bodies/box2d_body_2d.h"
+#include "box2d_space_2d.h"
+
+#include <gdextension_interface.h>
+#include <godot_cpp/classes/physics_direct_space_state2d.hpp>
+#include <godot_cpp/classes/physics_direct_space_state2d_extension.hpp>
+#include <godot_cpp/classes/physics_server2d.hpp>
+#include <godot_cpp/classes/physics_server2d_extension_motion_result.hpp>
+#include <godot_cpp/classes/physics_server2d_extension_ray_result.hpp>
+#include <godot_cpp/classes/physics_server2d_extension_shape_rest_info.hpp>
+#include <godot_cpp/classes/physics_server2d_extension_shape_result.hpp>
+#include <godot_cpp/classes/physics_test_motion_result2d.hpp>
+#include <godot_cpp/templates/hash_set.hpp>
+
+using namespace godot;
+
+class Box2DDirectSpaceState2D : public PhysicsDirectSpaceState2DExtension {
+	GDCLASS(Box2DDirectSpaceState2D, PhysicsDirectSpaceState2DExtension);
+
+protected:
+	static void _bind_methods() {}
+
+public:
+	Box2DSpace2D *space = nullptr;
+	virtual int _intersect_point(const Vector2 &position, uint64_t canvas_instance_id, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *r_results, int32_t p_result_max) override;
+	virtual bool _intersect_ray(const Vector2 &from, const Vector2 &to, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, bool hit_from_inside, PhysicsServer2DExtensionRayResult *r_result) override;
+	virtual int _intersect_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *r_results, int32_t p_result_max) override;
+	virtual bool _cast_motion(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, float *p_closest_safe, float *p_closest_unsafe) override;
+	virtual bool _collide_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, void *results, int32_t max_results, int32_t *result_count) override;
+	virtual bool _rest_info(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeRestInfo *r_info) override;
+
+	Box2DDirectSpaceState2D() {}
+};
+
+#endif // BOX2D_DIRECT_SPACE_STATE_2D_H
