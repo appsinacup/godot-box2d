@@ -119,29 +119,28 @@ box2d::OneWayDirection Box2DSpace2D::collision_modify_contacts_callback(box2d::H
 	box2d::OneWayDirection result;
 	result.body1 = false;
 	result.body2 = false;
+	result.last_timestep = 0.001;
 
 	Box2DSpace2D *space = Box2DPhysicsServer2D::singleton->get_active_space(world_handle);
 	ERR_FAIL_COND_V(!space, result);
+	ERR_FAIL_COND_V(!filter_info, result);
 	result.last_timestep = space->get_last_step();
 
-	Box2DCollisionObject2D *collision_object_1;
-	Box2DCollisionObject2D *collision_object_2;
+	ERR_FAIL_COND_V(!box2d::is_user_data_valid(filter_info->user_data1), result);
+	ERR_FAIL_COND_V(!box2d::is_user_data_valid(filter_info->user_data2), result);
 	uint32_t shape1;
 	uint32_t shape2;
-	if (box2d::is_user_data_valid(filter_info->user_data1)) {
-		collision_object_1 = Box2DCollisionObject2D::get_collider_user_data(filter_info->user_data1, shape1);
-	}
-
-	if (box2d::is_user_data_valid(filter_info->user_data2)) {
-		collision_object_2 = Box2DCollisionObject2D::get_collider_user_data(filter_info->user_data2, shape2);
-	}
+	Box2DCollisionObject2D *collision_object_1 = Box2DCollisionObject2D::get_collider_user_data(filter_info->user_data1, shape1);
+	Box2DCollisionObject2D *collision_object_2 = Box2DCollisionObject2D::get_collider_user_data(filter_info->user_data2, shape2);
 	ERR_FAIL_COND_V(!collision_object_1, result);
 	ERR_FAIL_COND_V(!collision_object_2, result);
 	if (collision_object_1->interacts_with(collision_object_2)) {
+		ERR_FAIL_COND_V(collision_object_1->is_shape_disabled(shape1), result);
+		ERR_FAIL_COND_V(collision_object_2->is_shape_disabled(shape2), result);
 		result.body1 = collision_object_1->is_shape_set_as_one_way_collision(shape1);
 		result.body1_margin = collision_object_1->get_shape_one_way_collision_margin(shape1);
 		result.body2 = collision_object_2->is_shape_set_as_one_way_collision(shape2);
-		result.body2_margin = collision_object_1->get_shape_one_way_collision_margin(shape2);
+		result.body2_margin = collision_object_2->get_shape_one_way_collision_margin(shape2);
 		if (collision_object_1->get_type() == Box2DCollisionObject2D::TYPE_BODY && collision_object_2->get_type() == Box2DCollisionObject2D::TYPE_BODY) {
 			Box2DBody2D *body1 = static_cast<Box2DBody2D *>(collision_object_1);
 			Box2DBody2D *body2 = static_cast<Box2DBody2D *>(collision_object_2);
@@ -162,6 +161,7 @@ box2d::OneWayDirection Box2DSpace2D::collision_modify_contacts_callback(box2d::H
 
 	return result;
 }
+
 
 void Box2DSpace2D::collision_event_callback(box2d::Handle world_handle, const box2d::CollisionEventInfo *event_info) {
 	Box2DSpace2D *space = Box2DPhysicsServer2D::singleton->get_active_space(world_handle);
@@ -333,7 +333,6 @@ bool Box2DSpace2D::contact_force_event_callback(box2d::Handle world_handle, cons
 bool Box2DSpace2D::contact_point_callback(box2d::Handle world_handle, const box2d::ContactPointInfo *contact_info, const box2d::ContactForceEventInfo *event_info) {
 	Box2DSpace2D *space = Box2DPhysicsServer2D::singleton->get_active_space(world_handle);
 	ERR_FAIL_COND_V(!space, false);
-	ERR_FAIL_COND_V(space->get_handle().id != world_handle.id, false);
 
 	Vector2 pos1(contact_info->local_pos_1.x, contact_info->local_pos_1.y);
 	Vector2 pos2(contact_info->local_pos_2.x, contact_info->local_pos_2.y);
