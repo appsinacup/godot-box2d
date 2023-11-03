@@ -103,6 +103,7 @@ Handle box2d::body_create(Handle world_handle,
 	body_def.userData = (void*)user_data;
 	body_def.type = body_type_to_b2_body_type(body_type);
 	b2BodyId body_id = b2World_CreateBody(handle_to_world_handle(world_handle), &body_def);
+	return body_handle_to_handle(body_id);
 }
 
 void box2d::body_destroy(Handle world_handle, Handle body_handle) {
