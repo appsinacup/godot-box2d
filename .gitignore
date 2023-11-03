@@ -4,8 +4,8 @@
 *.dblite
 
 # Generated directories with binaries
-dist/addons/godot-box2d/bin/libgodot-box2d.macos.template_debug.framework/libgodot-box2d.macos.template_debug
-dist/addons/godot-box2d/bin/libgodot-box2d.macos.template_release.framework/libgodot-box2d.macos.template_release
+bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_debug.framework/libgodot-box2d.macos.template_debug
+bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_release.framework/libgodot-box2d.macos.template_release
 
 .DS_Store
 .vscode
