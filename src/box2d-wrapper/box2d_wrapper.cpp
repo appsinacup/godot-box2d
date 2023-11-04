@@ -1,7 +1,6 @@
 #include "box2d_wrapper.h"
-#include "box2d_conversion.h"
+#include "box2d_holder.h"
 #include <box2d/box2d.h>
-#include <box2d/hull.h>
 #include <godot_cpp/templates/hash_set.hpp>
 
 using namespace box2d;
@@ -12,44 +11,10 @@ enum class ShapeType {
 	Polygon,
 };
 
+Box2DHolder holder;
+
 Handle new_shape_handle(ShapeType type) {
 	return Handle{-1,rand(),-1,static_cast<uint16_t>(type)};
-}
-
-godot::HashMap<Handle, b2Polygon> polygons;
-godot::HashMap<Handle, b2Circle> circles;
-godot::HashMap<Handle, b2Segment> segments;
-
-Handle create_collider(Handle shape_handle, b2BodyId body_id, b2ShapeDef *shape_def) {
-	switch(ShapeType(shape_handle.revision)) {
-		case ShapeType::Circle: {
-			ERR_FAIL_COND_V(!circles.has(shape_handle), invalid_handle());
-			return shape_handle_to_handle(b2Body_CreateCircle(body_id, shape_def, &circles.get(shape_handle)));
-		}
-		case ShapeType::Polygon: {
-			ERR_FAIL_COND_V(!polygons.has(shape_handle), invalid_handle());
-			return shape_handle_to_handle(b2Body_CreatePolygon(body_id, shape_def, &polygons.get(shape_handle)));
-		}
-		case ShapeType::Segment: {
-			ERR_FAIL_COND_V(!segments.has(shape_handle), invalid_handle());
-			return shape_handle_to_handle(b2Body_CreateSegment(body_id, shape_def, &segments.get(shape_handle)));
-		}
-	}
-	return invalid_handle();
-}
-
-void destroy_shape(Handle shape_handle) {
-	switch(ShapeType(shape_handle.revision)) {
-		case ShapeType::Circle: {
-			circles.erase(shape_handle);
-		} break;
-		case ShapeType::Polygon: {
-			polygons.erase(shape_handle);
-		} break;
-		case ShapeType::Segment: {
-			segments.erase(shape_handle);
-		} break;
-	}
 }
 
 bool box2d::are_handles_equal(Handle handle1, Handle handle2) {
@@ -61,35 +26,44 @@ bool box2d::are_handles_equal(Handle handle1, Handle handle2) {
 
 
 void box2d::body_add_force(Handle world_handle, Handle body_handle, const Vector *force) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->ApplyForceToCenter(vector_to_b2_vec(*force), true);
 }
 
 void box2d::body_add_force_at_point(Handle world_handle,
 		Handle body_handle,
 		const Vector *force,
 		const Vector *point) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->ApplyForce(vector_to_b2_vec(*force), vector_to_b2_vec(*point), true);
 }
 
 void box2d::body_add_torque(Handle world_handle, Handle body_handle, Real torque) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->ApplyTorque(torque, true);
 }
 
 void box2d::body_apply_impulse(Handle world_handle, Handle body_handle, const Vector *impulse) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->ApplyLinearImpulseToCenter(vector_to_b2_vec(*impulse), true);
 }
 
 void box2d::body_apply_impulse_at_point(Handle world_handle,
 		Handle body_handle,
 		const Vector *impulse,
 		const Vector *point) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->ApplyLinearImpulse(vector_to_b2_vec(*impulse), vector_to_b2_vec(*point), true);
 }
 
 void box2d::body_apply_torque_impulse(Handle world_handle, Handle body_handle, Real torque_impulse) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->ApplyAngularImpulse(torque_impulse, true);
 }
 
 void box2d::body_change_mode(Handle world_handle, Handle body_handle, BodyType body_type, bool wakeup) {
-	b2BodyId body_id = handle_to_body_handle(body_handle);
-	b2Body_SetType(body_id, body_type_to_b2_body_type(body_type));
-	if (wakeup) {
-		b2Body_Wake(body_id);
-	}
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetType(body_type_to_b2_body_type(body_type));
 }
 
 Handle box2d::body_create(Handle world_handle,
@@ -97,28 +71,35 @@ Handle box2d::body_create(Handle world_handle,
 		Real rot,
 		const UserData *user_data,
 		BodyType body_type) {
-	b2BodyDef body_def = b2DefaultBodyDef();
+	b2BodyDef body_def;
 	body_def.position = b2Vec2{pos->x, pos->y};
 	body_def.angle = rot;
 	body_def.userData = (void*)user_data;
 	body_def.type = body_type_to_b2_body_type(body_type);
-	b2BodyId body_id = b2World_CreateBody(handle_to_world_handle(world_handle), &body_def);
-	return body_handle_to_handle(body_id);
+	b2World *world = holder.handle_to_world(world_handle);
+	b2Body *body = world->CreateBody(&body_def);
+	return holder.body_to_handle(body);
 }
 
 void box2d::body_destroy(Handle world_handle, Handle body_handle) {
-	b2World_DestroyBody(handle_to_body_handle(body_handle));
+	b2World *world = holder.handle_to_world(world_handle);
+	b2Body *body = holder.handle_to_body(body_handle);
+	world->DestroyBody(body);
 }
 
 void box2d::body_force_sleep(Handle world_handle, Handle body_handle) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetAwake(false);
 }
 
 Real box2d::body_get_angle(Handle world_handle, Handle body_handle) {
-	return b2Body_GetAngle(handle_to_body_handle(body_handle));
+	b2Body *body = holder.handle_to_body(body_handle);
+	return body->GetAngle();
 }
 
 Real box2d::body_get_angular_velocity(Handle world_handle, Handle body_handle) {
-	return b2Body_GetAngularVelocity(handle_to_body_handle(body_handle));
+	b2Body *body = holder.handle_to_body(body_handle);
+	return body->GetAngularVelocity();
 }
 
 Vector box2d::body_get_constant_force(Handle world_handle, Handle body_handle) {
@@ -130,15 +111,18 @@ Real box2d::body_get_constant_torque(Handle world_handle, Handle body_handle) {
 }
 
 Vector box2d::body_get_linear_velocity(Handle world_handle, Handle body_handle) {
-	return b2_vec_to_vector(b2Body_GetLinearVelocity(handle_to_body_handle(body_handle)));
+	b2Body *body = holder.handle_to_body(body_handle);
+	return b2_vec_to_vector(body->GetLinearVelocity());
 }
 
 Vector box2d::body_get_position(Handle world_handle, Handle body_handle) {
-	return b2_vec_to_vector(b2Body_GetPosition(handle_to_body_handle(body_handle)));
+	b2Body *body = holder.handle_to_body(body_handle);
+	return b2_vec_to_vector(body->GetPosition());
 }
 
 bool box2d::body_is_ccd_enabled(Handle world_handle, Handle body_handle) {
-	return false;
+	b2Body *body = holder.handle_to_body(body_handle);
+	return body->IsBullet();
 }
 
 void box2d::body_reset_forces(Handle world_handle, Handle body_handle) {
@@ -148,29 +132,41 @@ void box2d::body_reset_torques(Handle world_handle, Handle body_handle) {
 }
 
 void box2d::body_set_angular_damping(Handle world_handle, Handle body_handle, Real angular_damping) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetAngularDamping(angular_damping);
 }
 
 void box2d::body_set_angular_velocity(Handle world_handle, Handle body_handle, Real vel) {
-	b2Body_SetAngularVelocity(handle_to_body_handle(body_handle), vel);
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetAngularVelocity(vel);
 }
 
 void box2d::body_set_can_sleep(Handle world_handle, Handle body_handle, bool can_sleep) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetSleepingAllowed(can_sleep);
 }
 
 void box2d::body_set_ccd_enabled(Handle world_handle, Handle body_handle, bool enable) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetBullet(enable);
 }
 
 void box2d::body_set_gravity_scale(Handle world_handle,
 		Handle body_handle,
 		Real gravity_scale,
 		bool wake_up) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetGravityScale(gravity_scale);
 }
 
 void box2d::body_set_linear_damping(Handle world_handle, Handle body_handle, Real linear_damping) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetLinearDamping(linear_damping);
 }
 
 void box2d::body_set_linear_velocity(Handle world_handle, Handle body_handle, const Vector *vel) {
-	b2Body_SetLinearVelocity(handle_to_body_handle(body_handle), vector_to_b2_vec(*vel));
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetLinearVelocity(vector_to_b2_vec(*vel));
 }
 
 void box2d::body_set_mass_properties(Handle world_handle,
@@ -185,7 +181,8 @@ void box2d::body_set_mass_properties(Handle world_handle,
 		vector_to_b2_vec(*local_com),
 		inertia
 	};
-	//b2Body_SetMassData(mass_data);
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetMassData(&mass_data);
 }
 
 void box2d::body_set_transform(Handle world_handle,
@@ -193,29 +190,37 @@ void box2d::body_set_transform(Handle world_handle,
 		const Vector *pos,
 		Real rot,
 		bool wake_up) {
-	b2BodyId body_id = handle_to_body_handle(body_handle);
-	b2Body_SetTransform(body_id, vector_to_b2_vec(*pos), rot);
-	if (wake_up) {
-		b2Body_Wake(body_id);
-	}
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetTransform(vector_to_b2_vec(*pos), rot);
+	// TODO kinematic
 }
 
 void box2d::body_update_material(Handle world_handle, Handle body_handle, const Material *mat) {
+	b2Body *body = holder.handle_to_body(body_handle);
+	for (b2Fixture* fixture = body->GetFixtureList(); fixture = fixture->GetNext()) {
+		fixture->SetFriction(mat->friction);
+		fixture->SetRestitution(mat->restitution);
+	}
 }
 
 void box2d::body_wake_up(Handle world_handle, Handle body_handle, bool strong) {
-	b2Body_Wake(handle_to_body_handle(body_handle));
+	b2Body *body = holder.handle_to_body(body_handle);
+	body->SetAwake(true);
 }
 
 Handle box2d::collider_create_sensor(Handle world_handle,
 		Handle shape_handle,
 		Handle body_handle,
 		const UserData *user_data) {
-	b2ShapeDef shape_def = b2DefaultShapeDef();
-	shape_def.isSensor = true;
-	shape_def.userData = (void*)user_data;
-	b2BodyId body_id = handle_to_body_handle(body_handle);
-	return create_collider(shape_handle, body_id, &shape_def);
+	b2Body *body = holder.handle_to_body(body_handle);
+	b2Shape *shape = holder.handle_to_shape(shape_handle);
+	b2FixtureDef fixture_def;
+	fixture_def.shape = shape;
+	fixture_def.density = 1.0f;
+	fixture_def.isSensor = true;
+	fixture_def.userData = user_data;
+	b2Fixture *fixture = body->CreateFixture(&fixture_def);
+	return holder.collider_to_handle(fixture);
 }
 
 Handle box2d::collider_create_solid(Handle world_handle,
@@ -223,22 +228,30 @@ Handle box2d::collider_create_solid(Handle world_handle,
 		const Material *mat,
 		Handle body_handle,
 		const UserData *user_data) {
-	b2ShapeDef shape_def = b2DefaultShapeDef();
-	shape_def.isSensor = false;
-	shape_def.userData = (void*)user_data;
-	b2BodyId body_id = handle_to_body_handle(body_handle);
-	return create_collider(shape_handle, body_id, &shape_def);
+	b2Body *body = holder.handle_to_body(body_handle);
+	b2Shape *shape = holder.handle_to_shape(shape_handle);
+	b2FixtureDef fixture_def;
+	fixture_def.shape = shape;
+	fixture_def.density = 1.0f;
+	fixture_def.isSensor = false;
+	fixture_def.userData = user_data;
+	b2Fixture *fixture = body->CreateFixture(&fixture_def);
+	return holder.collider_to_handle(fixture);
 }
 
 void box2d::collider_destroy(Handle world_handle, Handle handle) {
+	b2Fixture *fixture = holder.handle_to_collider(handle);
+	fixture->GetBody()->DestroyFixture(fixture);
 }
 
 Real box2d::collider_get_angle(Handle world_handle, Handle handle) {
-	return 0.0;
+	b2Transform *transform = holder.handle_to_collider_transform(handle);
+	return transform->q.GetAngle();
 }
 
 Vector box2d::collider_get_position(Handle world_handle, Handle handle) {
-	return Vector();
+	b2Transform *transform = holder.handle_to_collider_transform(handle);
+	return b2_vec_to_vector(transform->p);
 }
 
 void box2d::collider_set_collision_events_enabled(Handle world_handle, Handle handle, bool enable) {
@@ -248,6 +261,8 @@ void box2d::collider_set_contact_force_events_enabled(Handle world_handle, Handl
 }
 
 void box2d::collider_set_transform(Handle world_handle, Handle handle, ShapeInfo shape_info) {
+	b2Transform *transform = holder.handle_to_collider_transform(handle);
+	return b2_vec_to_vector(transform->p);
 }
 
 Material box2d::default_material() {
@@ -341,16 +356,7 @@ Handle box2d::joint_create_prismatic(Handle world_handle,
 		const Vector *anchor_1,
 		const Vector *anchor_2,
 		const Vector *limits) {
-	b2PrismaticJointDef joint_def = b2DefaultPrismaticJointDef();
-	joint_def.bodyIdA = handle_to_body_handle(body_handle_1);
-	joint_def.bodyIdB = handle_to_body_handle(body_handle_2);
-	joint_def.localAxisA = vector_to_b2_vec(*axis);
-	joint_def.localAnchorA = vector_to_b2_vec(*anchor_1);
-	joint_def.localAnchorB = vector_to_b2_vec(*anchor_2);
-	joint_def.lowerTranslation = limits->x;
-	joint_def.upperTranslation = limits->y;
-	b2JointId joint_id = b2World_CreatePrismaticJoint(handle_to_world_handle(world_handle), &joint_def);
-	return joint_handle_to_handle(joint_id);
+	return invalid_handle();
 }
 
 Handle box2d::joint_create_revolute(Handle world_handle,
@@ -363,19 +369,10 @@ Handle box2d::joint_create_revolute(Handle world_handle,
 		bool angular_limit_enabled,
 		Real motor_target_velocity,
 		bool motor_enabled) {
-	b2RevoluteJointDef joint_def = b2DefaultRevoluteJointDef();
-	joint_def.bodyIdA = handle_to_body_handle(body_handle_1);
-	joint_def.bodyIdB = handle_to_body_handle(body_handle_2);
-	joint_def.localAnchorA = vector_to_b2_vec(*anchor_1);
-	joint_def.localAnchorB = vector_to_b2_vec(*anchor_2);
-	joint_def.enableMotor = motor_enabled;
-	joint_def.motorSpeed = motor_target_velocity;
-	b2JointId joint_id = b2World_CreateRevoluteJoint(handle_to_world_handle(world_handle), &joint_def);
-	return joint_handle_to_handle(joint_id);
+	return invalid_handle();
 }
 
 void box2d::joint_destroy(Handle world_handle, Handle joint_handle) {
-	b2World_DestroyJoint(handle_to_joint_handle(joint_handle));
 }
 
 ShapeCastResult box2d::shape_casting(Handle world_handle,
@@ -396,15 +393,19 @@ ShapeCastResult box2d::shape_collide(const Vector *motion1,
 }
 
 Handle box2d::shape_create_box(const Vector *size) {
-	return polygons.insert(new_shape_handle(ShapeType::Polygon), b2MakeBox(size->x, size->y))->key;
+	b2PolygonShape *shape = memnew(b2PolygonShape);
+	shape->SetAsBox(size->x, size->y);
+	return holder.shape_to_handle(shape);
 }
 
 Handle box2d::shape_create_capsule(Real half_height, Real radius) {
-	return polygons.insert(new_shape_handle(ShapeType::Polygon), b2MakeCapsule(b2Vec2{0, -half_height}, b2Vec2{0, half_height}, radius))->key;
+	return invalid_handle();
 }
 
 Handle box2d::shape_create_circle(Real radius) {
-	return circles.insert(new_shape_handle(ShapeType::Circle), b2Circle{b2Vec2{0,0}, radius})->key;
+	b2CircleShape *shape = memnew(b2CircleShape);
+	shape->m_radius = radius;
+	return holder.shape_to_handle(shape);
 }
 
 Handle box2d::shape_create_convave_polyline(const Vector *points, size_t point_count) {
@@ -412,15 +413,7 @@ Handle box2d::shape_create_convave_polyline(const Vector *points, size_t point_c
 }
 
 Handle box2d::shape_create_convex_polyline(const Vector *points, size_t point_count) {
-	b2Vec2 b2_points[point_count];
-	for (int i=0; i<point_count; i++) {
-		b2_points[i] = vector_to_b2_vec(points[i]);
-	}
-	b2Hull hull = b2ComputeHull(b2_points, point_count);
-	if (hull.count < 0) {
-		return invalid_handle()
-	}
-	return polygons.insert(new_shape_handle(ShapeType::Polygon), b2MakePolygon(&hull, 0.0))->key;
+	return invalid_handle();
 }
 
 Handle box2d::shape_create_halfspace(const Vector *normal) {
@@ -428,7 +421,8 @@ Handle box2d::shape_create_halfspace(const Vector *normal) {
 }
 
 void box2d::shape_destroy(Handle shape_handle) {
-	destroy_shape(shape_handle);
+	b2Shape* shape = holder.handle_to_shape(shape_handle);
+	memfree(shape);
 }
 
 ContactResult box2d::shapes_contact(Handle world_handle,
@@ -439,17 +433,17 @@ ContactResult box2d::shapes_contact(Handle world_handle,
 }
 
 Handle box2d::world_create(const WorldSettings *settings) {
-	b2WorldDef world_def = b2DefaultWorldDef();
-	b2WorldId handle = b2CreateWorld(&world_def);
-	return world_handle_to_handle(handle);
+	b2World *world = memnew(b2World(b2Vec2_zero));
+	return holder.world_to_handle(world);
 }
 
 void box2d::world_destroy(Handle world_handle) {
-	b2DestroyWorld(handle_to_world_handle(world_handle));
+	b2World *world = holder.handle_to_world(world_handle);
+	memfree(world);
 }
 
 size_t box2d::world_get_active_objects_count(Handle world_handle) {
-	return b2World_GetStatistics(handle_to_world_handle(world_handle)).bodyCount;
+	return 0.0;
 }
 
 void box2d::world_set_active_body_callback(Handle world_handle, ActiveBodyCallback callback) {
@@ -478,5 +472,7 @@ void box2d::world_set_sensor_collision_filter_callback(Handle world_handle,
 }
 
 void box2d::world_step(Handle world_handle, const SimulationSettings *settings) {
-	b2World_Step(handle_to_world_handle(world_handle), settings->dt, settings->max_velocity_iterations, settings-> max_velocity_iterations);
+	b2World *world = holder.handle_to_world(world_handle);
+	world->SetGravity(vector_to_b2_vec(settings->gravity));
+	world->Step(settings->dt, settings->max_velocity_iterations, 3);
 }

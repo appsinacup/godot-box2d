@@ -39,6 +39,11 @@ runs:
         SCONS_CACHE_DIR: .scons-cache
       run: |
         cd godot-cpp && scons target=${{ inputs.target }} platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes ${{ inputs.sconsflags }}
+    - name: Build Box2D
+      shell: sh
+      run: |
+        ./scripts/build-box2d.sh
+
     - name: Build Physics Server Box2D
       shell: sh
       env:
