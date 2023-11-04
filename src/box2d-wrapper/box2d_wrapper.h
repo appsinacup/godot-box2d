@@ -314,7 +314,7 @@ Handle collider_create_solid(Handle world_handle,
 		Handle body_handle,
 		const UserData *user_data);
 /
-void collider_destroy(Handle world_handle, Handle handle);
+		void collider_destroy(Handle world_handle, Handle handle);
 
 Real collider_get_angle(Handle world_handle, Handle handle);
 

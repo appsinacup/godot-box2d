@@ -14,16 +14,15 @@ enum class ShapeType {
 Box2DHolder holder;
 
 Handle new_shape_handle(ShapeType type) {
-	return Handle{-1,rand(),-1,static_cast<uint16_t>(type)};
+	return Handle{ -1, rand(), -1, static_cast<uint16_t>(type) };
 }
 
 bool box2d::are_handles_equal(Handle handle1, Handle handle2) {
 	return handle1.object_index == handle2.object_index &&
-		handle1.revision == handle2.revision &&
-		handle1.world == handle2.world &&
-		handle1.world_index == handle2.world_index;
+			handle1.revision == handle2.revision &&
+			handle1.world == handle2.world &&
+			handle1.world_index == handle2.world_index;
 }
-
 
 void box2d::body_add_force(Handle world_handle, Handle body_handle, const Vector *force) {
 	b2Body *body = holder.handle_to_body(body_handle);
@@ -72,9 +71,9 @@ Handle box2d::body_create(Handle world_handle,
 		const UserData *user_data,
 		BodyType body_type) {
 	b2BodyDef body_def;
-	body_def.position = b2Vec2{pos->x, pos->y};
+	body_def.position = b2Vec2{ pos->x, pos->y };
 	body_def.angle = rot;
-	body_def.userData = (void*)user_data;
+	body_def.userData = (void *)user_data;
 	body_def.type = body_type_to_b2_body_type(body_type);
 	b2World *world = holder.handle_to_world(world_handle);
 	b2Body *body = world->CreateBody(&body_def);
@@ -197,7 +196,7 @@ void box2d::body_set_transform(Handle world_handle,
 
 void box2d::body_update_material(Handle world_handle, Handle body_handle, const Material *mat) {
 	b2Body *body = holder.handle_to_body(body_handle);
-	for (b2Fixture* fixture = body->GetFixtureList(); fixture = fixture->GetNext()) {
+	for (b2Fixture *fixture = body->GetFixtureList(); fixture = fixture->GetNext()) {
 		fixture->SetFriction(mat->friction);
 		fixture->SetRestitution(mat->restitution);
 	}
@@ -270,7 +269,7 @@ Material box2d::default_material() {
 }
 
 QueryExcludedInfo box2d::default_query_excluded_info() {
-	return QueryExcludedInfo{0,0,nullptr,0,0};
+	return QueryExcludedInfo{ 0, 0, nullptr, 0, 0 };
 }
 
 WorldSettings box2d::default_world_settings() {
@@ -325,11 +324,11 @@ size_t box2d::intersect_shape(Handle world_handle,
 }
 
 Handle box2d::invalid_handle() {
-	return Handle{-1,-1,-1,0};
+	return Handle{ -1, -1, -1, 0 };
 }
 
 UserData box2d::invalid_user_data() {
-	return UserData{uint64_t(-1), uint64_t(-1)};
+	return UserData{ uint64_t(-1), uint64_t(-1) };
 }
 
 bool box2d::is_handle_valid(Handle handle) {
@@ -421,7 +420,7 @@ Handle box2d::shape_create_halfspace(const Vector *normal) {
 }
 
 void box2d::shape_destroy(Handle shape_handle) {
-	b2Shape* shape = holder.handle_to_shape(shape_handle);
+	b2Shape *shape = holder.handle_to_shape(shape_handle);
 	memfree(shape);
 }
 

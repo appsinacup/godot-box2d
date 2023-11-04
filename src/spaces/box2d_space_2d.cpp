@@ -162,7 +162,6 @@ box2d::OneWayDirection Box2DSpace2D::collision_modify_contacts_callback(box2d::H
 	return result;
 }
 
-
 void Box2DSpace2D::collision_event_callback(box2d::Handle world_handle, const box2d::CollisionEventInfo *event_info) {
 	Box2DSpace2D *space = Box2DPhysicsServer2D::singleton->get_active_space(world_handle);
 	ERR_FAIL_COND(!space);
