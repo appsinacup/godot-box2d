@@ -209,7 +209,7 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 			for (int k = 0; k < 8; k++) {
 				real_t fraction = low + (hi - low) * fraction_coeff;
 
-				body_shape_info.position = box2d::Vector{ (body_shape_transform.get_origin() + p_motion * fraction).x,
+				body_shape_info.position = b2Vec2{ (body_shape_transform.get_origin() + p_motion * fraction).x,
 					(body_shape_transform.get_origin() + p_motion * fraction).y };
 				box2d::ContactResult step_contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
 				if (step_contact.collided && !step_contact.within_margin) {
@@ -237,7 +237,7 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 				}
 			}
 			body_shape_info.position =
-					box2d::Vector{ (body_shape_transform.get_origin() + p_motion * (hi + contact_max_allowed_penetration)).x,
+					b2Vec2{ (body_shape_transform.get_origin() + p_motion * (hi + contact_max_allowed_penetration)).x,
 						(body_shape_transform.get_origin() + p_motion * (hi + contact_max_allowed_penetration)).y };
 			box2d::ContactResult contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
 			if (should_skip_collision_one_dir(contact, body_shape, collision_body, shape_index, col_shape_transform, p_margin, p_space.get_last_step(), p_motion)) {

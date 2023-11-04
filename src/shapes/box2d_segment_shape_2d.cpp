@@ -1,6 +1,6 @@
 #include "box2d_segment_shape_2d.h"
 
-box2d::Handle Box2DSegmentShape2D::create_box2d_shape() const {
+b2Shape* Box2DSegmentShape2D::create_box2d_shape() const {
 	Vector2 direction = b - a;
 	direction.normalize();
 
@@ -12,11 +12,11 @@ box2d::Handle Box2DSegmentShape2D::create_box2d_shape() const {
 	Vector2 p3 = b + perpendicular * height / 2.0;
 	Vector2 p4 = b - perpendicular * height / 2.0;
 
-	box2d::Vector box2d_points[4];
-	box2d_points[0] = box2d::Vector{ p1.x, p1.y };
-	box2d_points[1] = box2d::Vector{ p2.x, p2.y };
-	box2d_points[2] = box2d::Vector{ p3.x, p3.y };
-	box2d_points[3] = box2d::Vector{ p4.x, p4.y };
+	b2Vec2 box2d_points[4];
+	box2d_points[0] = b2Vec2{ p1.x, p1.y };
+	box2d_points[1] = b2Vec2{ p2.x, p2.y };
+	box2d_points[2] = b2Vec2{ p3.x, p3.y };
+	box2d_points[3] = b2Vec2{ p4.x, p4.y };
 
 	return box2d::shape_create_convex_polyline(box2d_points, 4);
 }

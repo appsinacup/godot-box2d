@@ -32,7 +32,7 @@ private:
 		bool disabled = false;
 		bool one_way_collision = false;
 		real_t one_way_collision_margin = 0.0;
-		box2d::Handle collider_handle = box2d::invalid_handle();
+		b2Fixture* collider_handle = box2d::invalid_fixture_handle();
 	};
 
 	LocalVector<Shape> shapes;
@@ -49,7 +49,7 @@ private:
 
 protected:
 	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
-	box2d::Handle body_handle = box2d::invalid_handle();
+	b2Body* body_handle = box2d::invalid_body_handle();
 	uint32_t area_detection_counter = 0;
 
 	void _unregister_shapes();
@@ -57,7 +57,7 @@ protected:
 	void _update_transform();
 
 	virtual void _init_material(box2d::Material &mat) const {}
-	virtual void _init_collider(box2d::Handle collider_handle) const {}
+	virtual void _init_collider(b2Fixture* collider_handle) const {}
 
 	virtual void _shapes_changed() = 0;
 	void _set_space(Box2DSpace2D *p_space);
@@ -70,16 +70,16 @@ public:
 
 	_FORCE_INLINE_ void set_instance_id(const ObjectID &p_instance_id) { instance_id = p_instance_id; }
 	_FORCE_INLINE_ ObjectID get_instance_id() const { return instance_id; }
-	_FORCE_INLINE_ box2d::Handle get_body_handle() { return body_handle; }
+	_FORCE_INLINE_ b2Body* get_body_handle() { return body_handle; }
 
 	_FORCE_INLINE_ void set_canvas_instance_id(const ObjectID &p_canvas_instance_id) { canvas_instance_id = p_canvas_instance_id; }
 	_FORCE_INLINE_ ObjectID get_canvas_instance_id() const { return canvas_instance_id; }
 
-	void set_body_user_data(box2d::UserData &r_user_data) const;
-	static Box2DCollisionObject2D *get_body_user_data(const box2d::UserData &p_user_data);
+	void set_body_user_data(b2BodyUserData &r_user_data);
+	static Box2DCollisionObject2D *get_body_user_data(const b2BodyUserData &p_user_data);
 
-	void set_collider_user_data(box2d::UserData &r_user_data, uint32_t p_shape_index) const;
-	static Box2DCollisionObject2D *get_collider_user_data(const box2d::UserData &p_user_data, uint32_t &r_shape_index);
+	void set_collider_user_data(b2FixtureUserData &r_user_data, uint32_t p_shape_index);
+	static Box2DCollisionObject2D *get_collider_user_data(const b2FixtureUserData &p_user_data, uint32_t &r_shape_index);
 
 	void _shape_changed(Box2DShape2D *p_shape) override;
 

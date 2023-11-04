@@ -18,15 +18,15 @@
 // this too much because b2BlockAllocator has a maximum object size.
 #define b2_maxPolygonVertices 8
 
-class Box2DCollisionObject;
-class Box2DShape;
+class Box2DCollisionObject2D;
+class Box2DShape2D;
 
 // You can define this to inject whatever data you want in b2Body
 struct B2_API b2BodyUserData {
 	b2BodyUserData() :
 			collision_object(nullptr) {}
 
-	Box2DCollisionObject *collision_object;
+	Box2DCollisionObject2D *collision_object;
 };
 
 // You can define this to inject whatever data you want in b2Fixture
@@ -39,7 +39,8 @@ struct B2_API b2FixtureUserData {
 	float one_way_collision_direction_y;
 	int shape_idx;
 	int box2d_fixture_idx;
-	Box2DShape *shape;
+	Box2DShape2D *shape;
+	Box2DCollisionObject2D *collision_object;
 };
 
 /// You can define this to inject whatever data you want in b2Joint

@@ -1,11 +1,11 @@
 #include "box2d_concave_polygon_shape_2d.h"
 
-box2d::Handle Box2DConcavePolygonShape2D::create_box2d_shape() const {
+b2Shape* Box2DConcavePolygonShape2D::create_box2d_shape() const {
 	int point_count = points.size();
-	ERR_FAIL_COND_V(point_count < 3, box2d::invalid_handle());
-	box2d::Vector *box2d_points = (box2d::Vector *)alloca(point_count * sizeof(box2d::Vector));
+	ERR_FAIL_COND_V(point_count < 3, box2d::invalid_shape_handle());
+	b2Vec2 *box2d_points = (b2Vec2 *)alloca(point_count * sizeof(b2Vec2));
 	for (int i = 0; i < point_count; i++) {
-		box2d_points[i] = box2d::Vector{ (points[i].x), (points[i].y) };
+		box2d_points[i] = b2Vec2{ (points[i].x), (points[i].y) };
 	}
 	return box2d::shape_create_convave_polyline(box2d_points, point_count);
 }

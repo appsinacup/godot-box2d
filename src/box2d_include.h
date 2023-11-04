@@ -21,7 +21,7 @@ inline uint64_t handle_pair_hash(Handle handle1, Handle handle2) {
 	return hash1 + (hash2 << 32);
 }
 
-inline ShapeInfo shape_info_from_body_shape(box2d::Handle shape_handle, const Transform2D &transform) {
+inline ShapeInfo shape_info_from_body_shape(b2Shape* shape_handle, const Transform2D &transform) {
 	Vector2 origin = transform.get_origin();
 	Vector2 scale = transform.get_scale();
 	return ShapeInfo{

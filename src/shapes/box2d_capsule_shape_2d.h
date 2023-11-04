@@ -19,7 +19,7 @@ public:
 	virtual real_t get_moment_of_inertia(real_t p_mass, const Size2 &p_scale) const override;
 
 protected:
-	virtual box2d::Handle create_box2d_shape() const override;
+	virtual b2Shape* create_box2d_shape() const override;
 };
 
 #endif // BOX2D_CAPSULE_SHAPE_2D_H

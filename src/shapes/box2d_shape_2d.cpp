@@ -12,11 +12,11 @@ void Box2DShape2D::configure(const Rect2 &p_aabb) {
 void Box2DShape2D::destroy_box2d_shape() {
 	if (box2d::is_handle_valid(shape_handle)) {
 		box2d::shape_destroy(shape_handle);
-		shape_handle = box2d::invalid_handle();
+		shape_handle = box2d::invalid_shape_handle();
 	}
 }
 
-box2d::Handle Box2DShape2D::get_box2d_shape() {
+b2Shape* Box2DShape2D::get_box2d_shape() {
 	if (!box2d::is_handle_valid(shape_handle)) {
 		shape_handle = create_box2d_shape();
 	}

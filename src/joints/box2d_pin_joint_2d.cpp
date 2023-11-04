@@ -72,13 +72,13 @@ Box2DPinJoint2D::Box2DPinJoint2D(const Vector2 &p_pos, Box2DBody2D *p_body_a, Bo
 	Vector2 anchor_A = p_body_a->get_inv_transform().xform(p_pos);
 	Vector2 anchor_B = p_body_b ? p_body_b->get_inv_transform().xform(p_pos) : p_pos;
 
-	box2d::Vector box2d_anchor_A = { anchor_A.x, anchor_A.y };
-	box2d::Vector box2d_anchor_B = { anchor_B.x, anchor_B.y };
+	b2Vec2 box2d_anchor_A = { anchor_A.x, anchor_A.y };
+	b2Vec2 box2d_anchor_B = { anchor_B.x, anchor_B.y };
 
 	ERR_FAIL_COND(!p_body_a->get_space());
 	ERR_FAIL_COND(p_body_a->get_space() != p_body_b->get_space());
 	space_handle = p_body_a->get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-	handle = box2d::joint_create_revolute(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), &box2d_anchor_A, &box2d_anchor_B, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
+	handle = box2d::joint_create_revolute(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), box2d_anchor_A, box2d_anchor_B, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
 }

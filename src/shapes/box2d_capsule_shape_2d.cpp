@@ -1,6 +1,6 @@
 #include "box2d_capsule_shape_2d.h"
 
-box2d::Handle Box2DCapsuleShape2D::create_box2d_shape() const {
+b2Shape* Box2DCapsuleShape2D::create_box2d_shape() const {
 	return box2d::shape_create_capsule((height / 2.0) - radius, radius);
 }
 

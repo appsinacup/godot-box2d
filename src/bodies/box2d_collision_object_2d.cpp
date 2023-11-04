@@ -1,5 +1,6 @@
 #include "box2d_collision_object_2d.h"
 
+#include "../b2_user_settings.h"
 #include "../servers/box2d_physics_server_2d.h"
 #include "../spaces/box2d_space_2d.h"
 
@@ -149,12 +150,12 @@ void Box2DCollisionObject2D::_update_transform() {
 		return;
 	}
 
-	box2d::Handle space_handle = space->get_handle();
+	b2World* space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
-	box2d::Vector position = box2d::body_get_position(space_handle, body_handle);
+	b2Vec2 position = box2d::body_get_position(space_handle, body_handle);
 	real_t angle = box2d::body_get_angle(space_handle, body_handle);
 
 	transform.set_origin(Vector2(position.x, position.y));
@@ -168,15 +169,15 @@ void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool 
 	inv_transform = transform.affine_inverse();
 
 	if (space) {
-		box2d::Handle space_handle = space->get_handle();
+		b2World* space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
 		const Vector2 &origin = transform.get_origin();
-		box2d::Vector position = { origin.x, origin.y };
+		b2Vec2 position = { origin.x, origin.y };
 		real_t rotation = transform.get_rotation();
-		box2d::body_set_transform(space_handle, body_handle, &position, rotation, wake_up);
+		box2d::body_set_transform(space_handle, body_handle, position, rotation, wake_up);
 	}
 }
 
@@ -185,7 +186,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 		return;
 	}
 
-	box2d::Handle space_handle = space->get_handle();
+	b2World* space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(box2d::is_handle_valid(shape.collider_handle));
@@ -193,18 +194,18 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 	box2d::Material mat = box2d::default_material();
 	_init_material(mat);
 
-	box2d::Handle shape_handle = shape.shape->get_box2d_shape();
+	b2Shape* shape_handle = shape.shape->get_box2d_shape();
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape_handle));
 
-	box2d::UserData user_data;
+	b2FixtureUserData user_data;
 	set_collider_user_data(user_data, p_shape_index);
 
 	switch (type) {
 		case TYPE_BODY: {
-			shape.collider_handle = box2d::collider_create_solid(space_handle, shape_handle, &mat, body_handle, &user_data);
+			shape.collider_handle = box2d::collider_create_solid(space_handle, shape_handle, &mat, body_handle, user_data);
 		} break;
 		case TYPE_AREA: {
-			shape.collider_handle = box2d::collider_create_sensor(space_handle, shape_handle, body_handle, &user_data);
+			shape.collider_handle = box2d::collider_create_sensor(space_handle, shape_handle, body_handle, user_data);
 		} break;
 	}
 
@@ -217,7 +218,7 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 		return;
 	}
 
-	box2d::Handle space_handle = space->get_handle();
+	b2World* space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape.collider_handle));
@@ -228,7 +229,7 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 	}
 
 	box2d::collider_destroy(space_handle, shape.collider_handle);
-	shape.collider_handle = box2d::invalid_handle(); // collider_handle = box2d ID
+	shape.collider_handle = box2d::invalid_fixture_handle(); // collider_handle = box2d ID
 }
 
 void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
@@ -236,10 +237,10 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 		return;
 	}
 
-	box2d::Handle space_handle = space->get_handle();
+	b2World* space_handle = space->get_handle();
 
 	const Vector2 &origin = shape.xform.get_origin();
-	box2d::Vector position = { origin.x, origin.y };
+	b2Vec2 position = { origin.x, origin.y };
 	real_t angle = shape.xform.get_rotation();
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
@@ -250,21 +251,21 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 		shape.shape->get_box2d_shape(),
 		position,
 		angle,
-		box2d::Vector{ shape.xform.get_scale().x, shape.xform.get_scale().y }
+		b2Vec2{ shape.xform.get_scale().x, shape.xform.get_scale().y }
 	};
 	box2d::collider_set_transform(space_handle, shape.collider_handle, shape_info);
 }
 
 void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	if (space) {
-		box2d::Handle space_handle = space->get_handle();
+		b2World* space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
 		// This call also destroys the colliders
 		box2d::body_destroy(space_handle, body_handle);
-		body_handle = box2d::invalid_handle();
+		body_handle = box2d::invalid_body_handle();
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
 			Shape &shape = shapes[i];
@@ -282,22 +283,22 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	space = p_space;
 
 	if (space) {
-		box2d::Handle space_handle = space->get_handle();
+		b2World* space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(box2d::is_handle_valid(body_handle));
 
-		box2d::UserData user_data;
+		b2BodyUserData user_data;
 		set_body_user_data(user_data);
 
-		box2d::Vector position = { transform.get_origin().x, transform.get_origin().y };
+		b2Vec2 position = { transform.get_origin().x, transform.get_origin().y };
 		real_t angle = transform.get_rotation();
 		if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
-			body_handle = box2d::body_create(space_handle, &position, angle, &user_data, box2d::BodyType::Static);
+			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_staticBody);
 		} else if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
-			body_handle = box2d::body_create(space_handle, &position, angle, &user_data, box2d::BodyType::Kinematic);
+			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_kinematicBody);
 		} else {
-			body_handle = box2d::body_create(space_handle, &position, angle, &user_data, box2d::BodyType::Dynamic);
+			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_dynamicBody);
 		}
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
@@ -312,22 +313,22 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	}
 }
 
-void Box2DCollisionObject2D::set_body_user_data(box2d::UserData &r_user_data) const {
-	r_user_data.part1 = (uint64_t)this;
+void Box2DCollisionObject2D::set_body_user_data(b2BodyUserData &r_user_data) {
+	r_user_data.collision_object = this;
 }
 
-Box2DCollisionObject2D *Box2DCollisionObject2D::get_body_user_data(const box2d::UserData &p_user_data) {
-	return (Box2DCollisionObject2D *)p_user_data.part1;
+Box2DCollisionObject2D *Box2DCollisionObject2D::get_body_user_data(const b2BodyUserData &p_user_data) {
+	return (Box2DCollisionObject2D *)p_user_data.collision_object;
 }
 
-void Box2DCollisionObject2D::set_collider_user_data(box2d::UserData &r_user_data, uint32_t p_shape_index) const {
-	r_user_data.part1 = (uint64_t)this;
-	r_user_data.part2 = p_shape_index;
+void Box2DCollisionObject2D::set_collider_user_data(b2FixtureUserData &r_user_data, uint32_t p_shape_index) {
+	r_user_data.collision_object = this;
+	r_user_data.shape_idx = p_shape_index;
 }
 
-Box2DCollisionObject2D *Box2DCollisionObject2D::get_collider_user_data(const box2d::UserData &p_user_data, uint32_t &r_shape_index) {
-	r_shape_index = (uint32_t)p_user_data.part2;
-	return (Box2DCollisionObject2D *)p_user_data.part1;
+Box2DCollisionObject2D *Box2DCollisionObject2D::get_collider_user_data(const b2FixtureUserData &p_user_data, uint32_t &r_shape_index) {
+	r_shape_index = (uint32_t)p_user_data.shape_idx;
+	return (Box2DCollisionObject2D *)p_user_data.collision_object;
 }
 
 void Box2DCollisionObject2D::_shape_changed(Box2DShape2D *p_shape) {

@@ -7,7 +7,6 @@ box2d_include = [
 	"src/"
 ]
 box2d_src = [
-	"aabb.c",
 	"b2_chain_shape.cpp",
 	"b2_circle_shape.cpp",
 	"b2_collide_circle.cpp",
@@ -74,3 +73,4 @@ else:
 		"bin/addons/godot-box2d/bin/libgodot-box2d{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
 		source=sources,
 	)
+Default(library)

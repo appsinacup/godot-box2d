@@ -7,7 +7,7 @@ class Box2DCircleShape2D : public Box2DShape2D {
 	real_t radius;
 
 protected:
-	virtual box2d::Handle create_box2d_shape() const override;
+	virtual b2Shape* create_box2d_shape() const override;
 
 public:
 	_FORCE_INLINE_ const real_t &get_radius() const { return radius; }

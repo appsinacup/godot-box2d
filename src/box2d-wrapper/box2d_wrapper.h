@@ -1,174 +1,148 @@
 #ifndef BOX2D_WRAPPER_H
 #define BOX2D_WRAPPER_H
 
+#include <godot_cpp/core/defs.hpp>
+#include <box2d/box2d.h>
 #include <stdio.h>
 #include <cstdint>
 
 /* Generated with cbindgen:0.26.0 */
 
+class b2FixtureUserData;
+class b2BodyUserData;
+
 namespace box2d {
 
-enum class BodyType {
-	Dynamic,
-	Kinematic,
-	Static,
-};
-
-struct Handle {
-	int16_t world_index;
-	int32_t object_index;
-	int16_t world;
-	uint16_t revision;
-};
-
-#if defined(REAL_T_IS_DOUBLE)
-/// The scalar type used throughout this crate.
-using Real = double;
-#else
-/// The scalar type used throughout this crate.
-using Real = float;
-#endif
-
-struct Vector {
-	Real x;
-	Real y;
-};
-
-struct UserData {
-	uint64_t part1;
-	uint64_t part2;
-};
-
 struct Material {
-	Real friction;
-	Real restitution;
+	real_t friction;
+	real_t restitution;
 };
 
 struct ShapeInfo {
-	Handle handle;
-	Vector position;
-	Real rotation;
-	Vector scale;
+	b2Fixture* handle;
+	b2Vec2 position;
+	real_t rotation;
+	b2Vec2 scale;
 };
 
 struct QueryExcludedInfo {
 	uint32_t query_collision_layer_mask;
 	uint64_t query_canvas_instance_id;
-	Handle *query_exclude;
+	b2Fixture* query_exclude;
 	uint32_t query_exclude_size;
 	int64_t query_exclude_body;
 };
 
 struct WorldSettings {
-	Real sleep_linear_threshold;
-	Real sleep_angular_threshold;
-	Real sleep_time_until_sleep;
-	Real solver_prediction_distance;
+	real_t sleep_linear_threshold;
+	real_t sleep_angular_threshold;
+	real_t sleep_time_until_sleep;
+	real_t solver_prediction_distance;
 };
 
 struct PointHitInfo {
-	Handle collider;
-	UserData user_data;
+	b2Fixture* collider;
+	b2FixtureUserData user_data;
 };
 
-using QueryHandleExcludedCallback = bool (*)(Handle world_handle,
-		Handle collider_handle,
-		const UserData *user_data,
+using QueryHandleExcludedCallback = bool (*)(b2World* world_handle,
+		b2Fixture* collider_handle,
+		const b2FixtureUserData user_data,
 		const QueryExcludedInfo *handle_excluded_info);
 
 struct RayHitInfo {
-	Vector position;
-	Vector normal;
-	Handle collider;
-	UserData user_data;
+	b2Vec2 position;
+	b2Vec2 normal;
+	b2Fixture* collider;
+	b2FixtureUserData user_data;
 };
 
 struct ShapeCastResult {
 	bool collided;
-	Real toi;
-	Vector witness1;
-	Vector witness2;
-	Vector normal1;
-	Vector normal2;
-	Handle collider;
-	UserData user_data;
+	real_t toi;
+	b2Vec2 witness1;
+	b2Vec2 witness2;
+	b2Vec2 normal1;
+	b2Vec2 normal2;
+	b2Fixture* collider;
+	b2FixtureUserData user_data;
 };
 
 struct ContactResult {
 	bool collided;
 	bool within_margin;
-	Real distance;
-	Vector point1;
-	Vector point2;
-	Vector normal1;
-	Vector normal2;
+	real_t distance;
+	b2Vec2 point1;
+	b2Vec2 point2;
+	b2Vec2 normal1;
+	b2Vec2 normal2;
 };
 
 struct ActiveBodyInfo {
-	Handle body_handle;
-	UserData body_user_data;
+	b2Body* body_handle;
+	b2BodyUserData body_user_data;
 };
 
-using ActiveBodyCallback = void (*)(Handle world_handle, const ActiveBodyInfo *active_body_info);
+using ActiveBodyCallback = void (*)(b2World* world_handle, const ActiveBodyInfo *active_body_info);
 
 struct CollisionFilterInfo {
-	UserData user_data1;
-	UserData user_data2;
+	b2FixtureUserData user_data1;
+	b2FixtureUserData user_data2;
 };
 
-using CollisionFilterCallback = bool (*)(Handle world_handle, const CollisionFilterInfo *filter_info);
+using CollisionFilterCallback = bool (*)(b2World* world_handle, const CollisionFilterInfo *filter_info);
 
 struct CollisionEventInfo {
-	Handle collider1;
-	Handle collider2;
-	UserData user_data1;
-	UserData user_data2;
+	b2Fixture* collider1;
+	b2Fixture* collider2;
+	b2FixtureUserData user_data1;
+	b2FixtureUserData user_data2;
 	bool is_sensor;
 	bool is_started;
 	bool is_removed;
 };
 
-using CollisionEventCallback = void (*)(Handle world_handle, const CollisionEventInfo *event_info);
+using CollisionEventCallback = void (*)(b2World* world_handle, const CollisionEventInfo *event_info);
 
 struct ContactForceEventInfo {
-	Handle collider1;
-	Handle collider2;
-	UserData user_data1;
-	UserData user_data2;
+	b2Fixture* collider1;
+	b2Fixture* collider2;
+	b2FixtureUserData user_data1;
+	b2FixtureUserData user_data2;
 };
 
-using ContactForceEventCallback = bool (*)(Handle world_handle,
+using ContactForceEventCallback = bool (*)(b2World* world_handle,
 		const ContactForceEventInfo *event_info);
 
 struct ContactPointInfo {
-	Vector local_pos_1;
-	Vector local_pos_2;
-	Vector velocity_pos_1;
-	Vector velocity_pos_2;
-	Vector normal;
-	Real distance;
-	Real impulse;
-	Real tangent_impulse;
+	b2Vec2 local_pos_1;
+	b2Vec2 local_pos_2;
+	b2Vec2 velocity_pos_1;
+	b2Vec2 velocity_pos_2;
+	b2Vec2 normal;
+	real_t distance;
+	real_t impulse;
+	real_t tangent_impulse;
 };
 
-using ContactPointCallback = bool (*)(Handle world_handle,
+using ContactPointCallback = bool (*)(b2World* world_handle,
 		const ContactPointInfo *contact_info,
 		const ContactForceEventInfo *event_info);
 
 struct OneWayDirection {
 	bool body1;
 	bool body2;
-	Real body1_margin;
-	Real body2_margin;
-	Real last_timestep;
+	real_t body1_margin;
+	real_t body2_margin;
+	real_t last_timestep;
 };
 
-using CollisionModifyContactsCallback = OneWayDirection (*)(Handle world_handle,
+using CollisionModifyContactsCallback = OneWayDirection (*)(b2World* world_handle,
 		const CollisionFilterInfo *filter_info);
 
 struct SimulationSettings {
 	/// The timestep length (default: `1.0 / 60.0`)
-	Real dt;
+	real_t dt;
 	/// Minimum timestep size when using CCD with multiple substeps (default `1.0 / 60.0 / 100.0`)
 	///
 	/// When CCD with multiple substeps is enabled, the timestep is subdivided
@@ -179,29 +153,29 @@ struct SimulationSettings {
 	/// CCD substepping, resulting in potentially more time dropped by the
 	/// motion-clamping mechanism. Setting this to an very small value may lead
 	/// to numerical instabilities.
-	Real min_ccd_dt;
+	real_t min_ccd_dt;
 	/// 0-1: multiplier for how much of the constraint violation (e.g. contact penetration)
 	/// will be compensated for during the velocity solve.
 	/// (default `0.8`).
-	Real erp;
+	real_t erp;
 	/// 0-1: the damping ratio used by the springs for Baumgarte constraints stabilization.
 	/// Lower values make the constraints more compliant (more "springy", allowing more visible penetrations
 	/// before stabilization).
 	/// (default `0.25`).
-	Real damping_ratio;
+	real_t damping_ratio;
 	/// 0-1: multiplier for how much of the joint violation
 	/// will be compensated for during the velocity solve.
 	/// (default `1.0`).
-	Real joint_erp;
+	real_t joint_erp;
 	/// The fraction of critical damping applied to the joint for constraints regularization.
 	/// (default `0.25`).
-	Real joint_damping_ratio;
+	real_t joint_damping_ratio;
 	/// Amount of penetration the engine wont attempt to correct (default: `0.001m`).
-	Real allowed_linear_error;
+	real_t allowed_linear_error;
 	/// Maximum amount of penetration the solver will attempt to resolve in one timestep.
-	Real max_penetration_correction;
+	real_t max_penetration_correction;
 	/// The maximal distance separating two objects that will generate predictive contacts (default: `0.002`).
-	Real prediction_distance;
+	real_t prediction_distance;
 	/// Maximum number of iterations performed to solve non-penetration and joint constraints (default: `4`).
 	size_t max_velocity_iterations;
 	/// Maximum number of iterations performed to solve friction constraints (default: `8`).
@@ -215,116 +189,120 @@ struct SimulationSettings {
 	size_t min_island_size;
 	/// Maximum number of substeps performed by the  solver (default: `1`).
 	size_t max_ccd_substeps;
-	Vector gravity;
+	b2Vec2 gravity;
 };
 
-bool are_handles_equal(Handle handle1, Handle handle2);
+bool are_handles_equal(b2World* handle1, b2World* handle2);
+bool are_handles_equal(b2Body* handle1, b2Body* handle2);
+bool are_handles_equal(b2Fixture* handle1, b2Fixture* handle2);
+bool are_handles_equal(b2Shape* handle1, b2Shape* handle2);
+bool are_handles_equal(b2Joint* handle1, b2Joint* handle2);
 
-void body_add_force(Handle world_handle, Handle body_handle, const Vector *force);
+void body_add_force(b2World* world_handle, b2Body* body_handle, const b2Vec2 force);
 
-void body_add_force_at_point(Handle world_handle,
-		Handle body_handle,
-		const Vector *force,
-		const Vector *point);
+void body_add_force_at_point(b2World* world_handle,
+		b2Body* body_handle,
+		const b2Vec2 force,
+		const b2Vec2 point);
 
-void body_add_torque(Handle world_handle, Handle body_handle, Real torque);
+void body_add_torque(b2World* world_handle, b2Body* body_handle, real_t torque);
 
-void body_apply_impulse(Handle world_handle, Handle body_handle, const Vector *impulse);
+void body_apply_impulse(b2World* world_handle, b2Body* body_handle, const b2Vec2 impulse);
 
-void body_apply_impulse_at_point(Handle world_handle,
-		Handle body_handle,
-		const Vector *impulse,
-		const Vector *point);
+void body_apply_impulse_at_point(b2World* world_handle,
+		b2Body* body_handle,
+		const b2Vec2 impulse,
+		const b2Vec2 point);
 
-void body_apply_torque_impulse(Handle world_handle, Handle body_handle, Real torque_impulse);
+void body_apply_torque_impulse(b2World* world_handle, b2Body* body_handle, real_t torque_impulse);
 
-void body_change_mode(Handle world_handle, Handle body_handle, BodyType body_type, bool wakeup);
+void body_change_mode(b2World* world_handle, b2Body* body_handle, b2BodyType body_type, bool wakeup);
 
-Handle body_create(Handle world_handle,
-		const Vector *pos,
-		Real rot,
-		const UserData *user_data,
-		BodyType body_type);
+b2Body* body_create(b2World* world_handle,
+		const b2Vec2 pos,
+		real_t rot,
+		const b2BodyUserData &user_data,
+		b2BodyType body_type);
 
-void body_destroy(Handle world_handle, Handle body_handle);
+void body_destroy(b2World* world_handle, b2Body* body_handle);
 
-void body_force_sleep(Handle world_handle, Handle body_handle);
+void body_force_sleep(b2World* world_handle, b2Body* body_handle);
 
-Real body_get_angle(Handle world_handle, Handle body_handle);
+real_t body_get_angle(b2World* world_handle, b2Body* body_handle);
 
-Real body_get_angular_velocity(Handle world_handle, Handle body_handle);
+real_t body_get_angular_velocity(b2World* world_handle, b2Body* body_handle);
 
-Vector body_get_constant_force(Handle world_handle, Handle body_handle);
+b2Vec2 body_get_constant_force(b2World* world_handle, b2Body* body_handle);
 
-Real body_get_constant_torque(Handle world_handle, Handle body_handle);
+real_t body_get_constant_torque(b2World* world_handle, b2Body* body_handle);
 
-Vector body_get_linear_velocity(Handle world_handle, Handle body_handle);
+b2Vec2 body_get_linear_velocity(b2World* world_handle, b2Body* body_handle);
 
-Vector body_get_position(Handle world_handle, Handle body_handle);
+b2Vec2 body_get_position(b2World* world_handle, b2Body* body_handle);
 
-bool body_is_ccd_enabled(Handle world_handle, Handle body_handle);
+bool body_is_ccd_enabled(b2World* world_handle, b2Body* body_handle);
 
-void body_reset_forces(Handle world_handle, Handle body_handle);
+void body_reset_forces(b2World* world_handle, b2Body* body_handle);
 
-void body_reset_torques(Handle world_handle, Handle body_handle);
+void body_reset_torques(b2World* world_handle, b2Body* body_handle);
 
-void body_set_angular_damping(Handle world_handle, Handle body_handle, Real angular_damping);
+void body_set_angular_damping(b2World* world_handle, b2Body* body_handle, real_t angular_damping);
 
-void body_set_angular_velocity(Handle world_handle, Handle body_handle, Real vel);
+void body_set_angular_velocity(b2World* world_handle, b2Body* body_handle, real_t vel);
 
-void body_set_can_sleep(Handle world_handle, Handle body_handle, bool can_sleep);
+void body_set_can_sleep(b2World* world_handle, b2Body* body_handle, bool can_sleep);
 
-void body_set_ccd_enabled(Handle world_handle, Handle body_handle, bool enable);
+void body_set_ccd_enabled(b2World* world_handle, b2Body* body_handle, bool enable);
 
-void body_set_gravity_scale(Handle world_handle,
-		Handle body_handle,
-		Real gravity_scale,
+void body_set_gravity_scale(b2World* world_handle,
+		b2Body* body_handle,
+		real_t gravity_scale,
 		bool wake_up);
 
-void body_set_linear_damping(Handle world_handle, Handle body_handle, Real linear_damping);
+void body_set_linear_damping(b2World* world_handle, b2Body* body_handle, real_t linear_damping);
 
-void body_set_linear_velocity(Handle world_handle, Handle body_handle, const Vector *vel);
+void body_set_linear_velocity(b2World* world_handle, b2Body* body_handle, const b2Vec2 vel);
 
-void body_set_mass_properties(Handle world_handle,
-		Handle body_handle,
-		Real mass,
-		Real inertia,
-		const Vector *local_com,
+void body_set_mass_properties(b2World* world_handle,
+		b2Body* body_handle,
+		real_t mass,
+		real_t inertia,
+		const b2Vec2 local_com,
 		bool wake_up,
 		bool force_update);
 
-void body_set_transform(Handle world_handle,
-		Handle body_handle,
-		const Vector *pos,
-		Real rot,
+void body_set_transform(b2World* world_handle,
+		b2Body* body_handle,
+		const b2Vec2 pos,
+		real_t rot,
 		bool wake_up);
 
-void body_update_material(Handle world_handle, Handle body_handle, const Material *mat);
+void body_update_material(b2World* world_handle, b2Body* body_handle, const Material *mat);
 
-void body_wake_up(Handle world_handle, Handle body_handle, bool strong);
+void body_wake_up(b2World* world_handle, b2Body* body_handle, bool strong);
 
-Handle collider_create_sensor(Handle world_handle,
-		Handle shape_handle,
-		Handle body_handle,
-		const UserData *user_data);
+b2Fixture* collider_create_sensor(b2World* world_handle,
+		b2Shape* shape_handle,
+		b2Body* body_handle,
+		const b2FixtureUserData user_data);
 
-Handle collider_create_solid(Handle world_handle,
-		Handle shape_handle,
+b2Fixture* collider_create_solid(b2World* world_handle,
+		b2Shape* shape_handle,
 		const Material *mat,
-		Handle body_handle,
-		const UserData *user_data);
-/
-		void collider_destroy(Handle world_handle, Handle handle);
+		b2Body* body_handle,
+		const b2FixtureUserData user_data);
 
-Real collider_get_angle(Handle world_handle, Handle handle);
+void collider_destroy(b2World* world_handle, b2Fixture* handle);
 
-Vector collider_get_position(Handle world_handle, Handle handle);
+real_t collider_get_angle(b2World* world_handle, b2Fixture* handle);
 
-void collider_set_collision_events_enabled(Handle world_handle, Handle handle, bool enable);
+b2Vec2 collider_get_position(b2World* world_handle, b2Fixture* handle);
 
-void collider_set_contact_force_events_enabled(Handle world_handle, Handle handle, bool enable);
+void collider_set_collision_events_enabled(b2World* world_handle, b2Fixture* handle, bool enable);
 
-void collider_set_transform(Handle world_handle, Handle handle, ShapeInfo shape_info);
+void collider_set_contact_force_events_enabled(b2World* world_handle, b2Fixture* handle, bool enable);
+
+void collider_set_transform(b2World* world_handle, b2Fixture* handle, ShapeInfo shape_info);
 
 Material default_material();
 
@@ -332,9 +310,9 @@ QueryExcludedInfo default_query_excluded_info();
 
 WorldSettings default_world_settings();
 
-size_t intersect_aabb(Handle world_handle,
-		const Vector *aabb_min,
-		const Vector *aabb_max,
+size_t intersect_aabb(b2World* world_handle,
+		const b2Vec2 aabb_min,
+		const b2Vec2 aabb_max,
 		bool collide_with_body,
 		bool collide_with_area,
 		PointHitInfo *hit_info_array,
@@ -342,8 +320,8 @@ size_t intersect_aabb(Handle world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-size_t intersect_point(Handle world_handle,
-		const Vector *position,
+size_t intersect_point(b2World* world_handle,
+		const b2Vec2 position,
 		bool collide_with_body,
 		bool collide_with_area,
 		PointHitInfo *hit_info_array,
@@ -351,10 +329,10 @@ size_t intersect_point(Handle world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-bool intersect_ray(Handle world_handle,
-		const Vector *from,
-		const Vector *dir,
-		Real length,
+bool intersect_ray(b2World* world_handle,
+		const b2Vec2 from,
+		const b2Vec2 dir,
+		real_t length,
 		bool collide_with_body,
 		bool collide_with_area,
 		bool hit_from_inside,
@@ -362,7 +340,7 @@ bool intersect_ray(Handle world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-size_t intersect_shape(Handle world_handle,
+size_t intersect_shape(b2World* world_handle,
 		ShapeInfo shape_info,
 		bool collide_with_body,
 		bool collide_with_area,
@@ -371,100 +349,111 @@ size_t intersect_shape(Handle world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-Handle invalid_handle();
+b2World* invalid_world_handle();
+b2Fixture* invalid_fixture_handle();
+b2Body* invalid_body_handle();
+b2Shape* invalid_shape_handle();
+b2Joint* invalid_joint_handle();
 
-UserData invalid_user_data();
 
-bool is_handle_valid(Handle handle);
+b2FixtureUserData invalid_fixture_user_data();
+b2BodyUserData invalid_body_user_data();
 
-bool is_user_data_valid(UserData user_data);
+bool is_handle_valid(b2Fixture *handle);
+bool is_handle_valid(b2World *handle);
+bool is_handle_valid(b2Shape *handle);
+bool is_handle_valid(b2Body *handle);
+bool is_handle_valid(b2Joint *handle);
 
-void joint_change_revolute_params(Handle world_handle,
-		Handle joint_handle,
-		Real angular_limit_lower,
-		Real angular_limit_upper,
+bool is_user_data_valid(b2FixtureUserData user_data);
+bool is_user_data_valid(b2BodyUserData user_data);
+
+void joint_change_revolute_params(b2World* world_handle,
+		b2Joint *joint_handle,
+		real_t angular_limit_lower,
+		real_t angular_limit_upper,
 		bool angular_limit_enabled,
-		Real motor_target_velocity,
+		real_t motor_target_velocity,
 		bool motor_enabled);
 
-Handle joint_create_prismatic(Handle world_handle,
-		Handle body_handle_1,
-		Handle body_handle_2,
-		const Vector *axis,
-		const Vector *anchor_1,
-		const Vector *anchor_2,
-		const Vector *limits);
+b2Joint* joint_create_prismatic(b2World* world_handle,
+		b2Body* body_handle_1,
+		b2Body* body_handle_2,
+		const b2Vec2 axis,
+		const b2Vec2 anchor_1,
+		const b2Vec2 anchor_2,
+		const b2Vec2 limits);
 
-Handle joint_create_revolute(Handle world_handle,
-		Handle body_handle_1,
-		Handle body_handle_2,
-		const Vector *anchor_1,
-		const Vector *anchor_2,
-		Real angular_limit_lower,
-		Real angular_limit_upper,
+b2Joint* joint_create_revolute(b2World* world_handle,
+		b2Body* body_handle_1,
+		b2Body* body_handle_2,
+		const b2Vec2 anchor_1,
+		const b2Vec2 anchor_2,
+		real_t angular_limit_lower,
+		real_t angular_limit_upper,
 		bool angular_limit_enabled,
-		Real motor_target_velocity,
+		real_t motor_target_velocity,
 		bool motor_enabled);
 
-void joint_destroy(Handle world_handle, Handle joint_handle);
+void joint_destroy(b2World* world_handle, b2Joint* joint_handle);
 
-ShapeCastResult shape_casting(Handle world_handle,
-		const Vector *motion,
+ShapeCastResult shape_casting(b2World* world_handle,
+		const b2Vec2 motion,
 		ShapeInfo shape_info,
 		bool collide_with_body,
 		bool collide_with_area,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-ShapeCastResult shape_collide(const Vector *motion1,
+ShapeCastResult shape_collide(const b2Vec2 motion1,
 		ShapeInfo shape_info1,
-		const Vector *motion2,
+		const b2Vec2 motion2,
 		ShapeInfo shape_info2);
 
-Handle shape_create_box(const Vector *size);
+b2Shape* shape_create_box(const b2Vec2 size);
 
-Handle shape_create_capsule(Real half_height, Real radius);
+b2Shape* shape_create_capsule(real_t half_height, real_t radius);
 
-Handle shape_create_circle(Real radius);
+b2Shape* shape_create_circle(real_t radius);
 
-Handle shape_create_convave_polyline(const Vector *points, size_t point_count);
+b2Shape* shape_create_convave_polyline(const b2Vec2 *points, size_t point_count);
 
-Handle shape_create_convex_polyline(const Vector *points, size_t point_count);
+b2Shape* shape_create_convex_polyline(const b2Vec2 *points, size_t point_count);
 
-Handle shape_create_halfspace(const Vector *normal);
+b2Shape* shape_create_halfspace(const b2Vec2 normal);
 
-void shape_destroy(Handle shape_handle);
+void shape_destroy(b2Shape* shape_handle);
 
-ContactResult shapes_contact(Handle world_handle,
+ContactResult shapes_contact(b2World* world_handle,
 		ShapeInfo shape_info1,
 		ShapeInfo shape_info2,
-		Real margin);
+		real_t margin);
 
-Handle world_create(const WorldSettings *settings);
+b2World* world_create(const WorldSettings *settings);
 
-void world_destroy(Handle world_handle);
+void world_destroy(b2World* world_handle);
 
-size_t world_get_active_objects_count(Handle world_handle);
+size_t world_get_active_objects_count(b2World* world_handle);
 
-void world_set_active_body_callback(Handle world_handle, ActiveBodyCallback callback);
+void world_set_active_body_callback(b2World* world_handle, ActiveBodyCallback callback);
 
-void world_set_body_collision_filter_callback(Handle world_handle,
+void world_set_body_collision_filter_callback(b2World* world_handle,
 		CollisionFilterCallback callback);
 
-void world_set_collision_event_callback(Handle world_handle, CollisionEventCallback callback);
+void world_set_collision_event_callback(b2World* world_handle, CollisionEventCallback callback);
 
-void world_set_contact_force_event_callback(Handle world_handle,
+void world_set_contact_force_event_callback(b2World* world_handle,
 		ContactForceEventCallback callback);
 
-void world_set_contact_point_callback(Handle world_handle, ContactPointCallback callback);
+void world_set_contact_point_callback(b2World* world_handle, ContactPointCallback callback);
 
-void world_set_modify_contacts_callback(Handle world_handle,
+void world_set_modify_contacts_callback(b2World* world_handle,
 		CollisionModifyContactsCallback callback);
 
-void world_set_sensor_collision_filter_callback(Handle world_handle,
+void world_set_sensor_collision_filter_callback(b2World* world_handle,
 		CollisionFilterCallback callback);
 
-void world_step(Handle world_handle, const SimulationSettings *settings);
+void world_step(b2World* world_handle, const SimulationSettings *settings);
 
 } // namespace box2d
 
