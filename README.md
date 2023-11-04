@@ -49,11 +49,12 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 
 Curently the Godot Box2d addon builds for:
 
-- Windows (x86_32, x86_64)
-- macOS (x86-64 + Apple Silicon)
-- iOS (arm64)
+- Windows (x86_64, x86_32)
+- macOS (x86-64 + arm64 Universal)
 - Linux (x86_64)
-- Android (arm64, x86_64)
+- Android (x86_64, arm64)
+- iOS (arm64)
+- Web (wasm32)
 
 ## Installation
 

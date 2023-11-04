@@ -2,18 +2,13 @@ name: 🐧 Linux Builds
 on:
   workflow_call:
 
-# Global Settings
-env:
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes
-
 jobs:
   linux:
     runs-on: ubuntu-20.04
-    name: Linux Build ${{ matrix.target }} ${{ matrix.arch }}
+    name: Linux Build ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-        target: [template_debug, template_release]
         arch: [x86_64]
 
     steps:
@@ -21,14 +16,12 @@ jobs:
         with:
           submodules: true
 
-      - name: Build ${{ matrix.target }} ${{ matrix.arch }}
+      - name: Build ${{ matrix.arch }}
         uses: ./.github/actions/build
         with:
-          sconsflags: ${{ env.SCONSFLAGS }}
           arch: ${{ matrix.arch }}
           platform: linux
-          target: ${{ matrix.target }}
 
-      - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
+      - name: Upload ${{ matrix.arch }}
         uses: ./.github/actions/upload
     

@@ -4,18 +4,16 @@ on:
 
 # Global Settings
 env:
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes
   EM_VERSION: 3.1.18
   EM_CACHE_FOLDER: "emsdk-cache"
 
 jobs:
   web:
     runs-on: ubuntu-20.04
-    name: Web Build ${{ matrix.target }} ${{ matrix.arch }}
+    name: Web Build ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-        target: [template_debug, template_release]
         arch: [wasm32]
 
     steps:
@@ -33,14 +31,12 @@ jobs:
         run: |
           emcc -v
 
-      - name: Build ${{ matrix.target }} ${{ matrix.arch }}
+      - name: Build ${{ matrix.arch }}
         uses: ./.github/actions/build
         with:
-          sconsflags: ${{ env.SCONSFLAGS }}
           arch: ${{ matrix.arch }}
           platform: javascript
-          target: ${{ matrix.target }}
 
-      - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
+      - name: Upload ${{ matrix.arch }}
         uses: ./.github/actions/upload
     
