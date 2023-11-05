@@ -1,6 +1,8 @@
 #ifndef BOX2D_WRAPPER_H
 #define BOX2D_WRAPPER_H
 
+#include "../b2_user_settings.h"
+
 #include <godot_cpp/core/defs.hpp>
 #include <box2d/box2d.h>
 #include <stdio.h>
@@ -19,7 +21,7 @@ struct Material {
 };
 
 struct ShapeInfo {
-	b2Fixture* handle;
+	b2Shape* handle;
 	b2Vec2 position;
 	real_t rotation;
 	b2Vec2 scale;
@@ -28,7 +30,7 @@ struct ShapeInfo {
 struct QueryExcludedInfo {
 	uint32_t query_collision_layer_mask;
 	uint64_t query_canvas_instance_id;
-	b2Fixture* query_exclude;
+	b2Fixture** query_exclude;
 	uint32_t query_exclude_size;
 	int64_t query_exclude_body;
 };
@@ -47,7 +49,7 @@ struct PointHitInfo {
 
 using QueryHandleExcludedCallback = bool (*)(b2World* world_handle,
 		b2Fixture* collider_handle,
-		const b2FixtureUserData user_data,
+		b2FixtureUserData user_data,
 		const QueryExcludedInfo *handle_excluded_info);
 
 struct RayHitInfo {
@@ -83,7 +85,7 @@ struct ActiveBodyInfo {
 	b2BodyUserData body_user_data;
 };
 
-using ActiveBodyCallback = void (*)(b2World* world_handle, const ActiveBodyInfo *active_body_info);
+using ActiveBodyCallback = void (*)(const ActiveBodyInfo &active_body_info);
 
 struct CollisionFilterInfo {
 	b2FixtureUserData user_data1;
@@ -284,13 +286,13 @@ void body_wake_up(b2World* world_handle, b2Body* body_handle, bool strong);
 b2Fixture* collider_create_sensor(b2World* world_handle,
 		b2Shape* shape_handle,
 		b2Body* body_handle,
-		const b2FixtureUserData user_data);
+		b2FixtureUserData user_data);
 
 b2Fixture* collider_create_solid(b2World* world_handle,
 		b2Shape* shape_handle,
 		const Material *mat,
 		b2Body* body_handle,
-		const b2FixtureUserData user_data);
+		b2FixtureUserData user_data);
 
 void collider_destroy(b2World* world_handle, b2Fixture* handle);
 
@@ -437,9 +439,6 @@ size_t world_get_active_objects_count(b2World* world_handle);
 
 void world_set_active_body_callback(b2World* world_handle, ActiveBodyCallback callback);
 
-void world_set_body_collision_filter_callback(b2World* world_handle,
-		CollisionFilterCallback callback);
-
 void world_set_collision_event_callback(b2World* world_handle, CollisionEventCallback callback);
 
 void world_set_contact_force_event_callback(b2World* world_handle,
@@ -448,10 +447,10 @@ void world_set_contact_force_event_callback(b2World* world_handle,
 void world_set_contact_point_callback(b2World* world_handle, ContactPointCallback callback);
 
 void world_set_modify_contacts_callback(b2World* world_handle,
-		CollisionModifyContactsCallback callback);
+		const CollisionModifyContactsCallback callback);
 
-void world_set_sensor_collision_filter_callback(b2World* world_handle,
-		CollisionFilterCallback callback);
+void world_set_collision_filter_callback(b2World* world_handle,
+		b2ContactFilter *callback);
 
 void world_step(b2World* world_handle, const SimulationSettings *settings);
 

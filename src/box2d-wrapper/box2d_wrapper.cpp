@@ -1,5 +1,4 @@
 #include "box2d_wrapper.h"
-#include "box2d_helper.h"
 #include "../b2_user_settings.h"
 #include <box2d/box2d.h>
 #include <godot_cpp/templates/hash_set.hpp>
@@ -10,6 +9,11 @@ enum class ShapeType {
 	Circle = 0,
 	Segment,
 	Polygon,
+};
+
+struct Box2DHolder {
+	godot::HashMap<b2Fixture*, b2Transform*> fixture_transforms;
+	godot::HashMap<b2World*, ActiveBodyCallback> active_body_callbacks;
 };
 
 Box2DHolder holder;
@@ -188,7 +192,7 @@ void box2d::body_wake_up(b2World* world_handle, b2Body* body_handle, bool strong
 b2Fixture* box2d::collider_create_sensor(b2World* world_handle,
 		b2Shape* shape_handle,
 		b2Body* body_handle,
-		const b2FixtureUserData user_data) {
+		b2FixtureUserData user_data) {
 	b2FixtureDef fixture_def;
 	fixture_def.shape = shape_handle;
 	fixture_def.density = 1.0f;
@@ -201,7 +205,7 @@ b2Fixture* box2d::collider_create_solid(b2World* world_handle,
 		b2Shape* shape_handle,
 		const Material *mat,
 		b2Body* body_handle,
-		const b2FixtureUserData user_data) {
+		b2FixtureUserData user_data) {
 	b2FixtureDef fixture_def;
 	fixture_def.shape = shape_handle;
 	fixture_def.density = 1.0f;
@@ -215,12 +219,12 @@ void box2d::collider_destroy(b2World* world_handle, b2Fixture* handle) {
 }
 
 real_t box2d::collider_get_angle(b2World* world_handle, b2Fixture* handle) {
-	b2Transform *transform = holder.handle_to_fixture_transform(handle);
+	b2Transform *transform = holder.fixture_transforms[handle];
 	return transform->q.GetAngle();
 }
 
 b2Vec2 box2d::collider_get_position(b2World* world_handle, b2Fixture* handle) {
-	b2Transform *transform = holder.handle_to_fixture_transform(handle);
+	b2Transform *transform = holder.fixture_transforms[handle];
 	return transform->p;
 }
 
@@ -231,7 +235,7 @@ void box2d::collider_set_contact_force_events_enabled(b2World* world_handle, b2F
 }
 
 void box2d::collider_set_transform(b2World* world_handle, b2Fixture* handle, ShapeInfo shape_info) {
-	b2Transform *transform = holder.handle_to_fixture_transform(handle);
+	//b2Transform *transform = holder.handle_to_fixture_transform(handle);
 	//return transform->p);
 	// TODO
 }
@@ -318,7 +322,7 @@ b2BodyUserData box2d::invalid_body_user_data() {
 	return b2BodyUserData{};
 }
 bool box2d::is_user_data_valid(b2FixtureUserData user_data) {
-	return user_data.shape != nullptr;
+	return user_data.collision_object != nullptr;
 }
 bool box2d::is_user_data_valid(b2BodyUserData user_data) {
 	return user_data.collision_object != nullptr;
@@ -395,8 +399,8 @@ ShapeCastResult box2d::shape_collide(const b2Vec2 motion1,
 
 b2Shape* box2d::shape_create_box(const b2Vec2 size) {
 	b2PolygonShape *shape = memnew(b2PolygonShape);
-	shape->SetAsBox(size.x, size.y);
-	return shape
+	shape->SetAsBox(size.x * 0.5, size.y * 0.5);
+	return shape;
 }
 
 b2Shape* box2d::shape_create_capsule(real_t half_height, real_t radius) {
@@ -414,7 +418,17 @@ b2Shape* box2d::shape_create_convave_polyline(const b2Vec2 *points, size_t point
 }
 
 b2Shape* box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t point_count) {
-	return nullptr;
+	b2PolygonShape *shape = memnew(b2PolygonShape);
+	b2Hull hull;
+	hull.count = point_count;
+	for (int i=0;i<point_count;i++) {
+		hull.points[i] = points[i];
+	}
+	if (!b2ValidateHull(hull)){
+		return nullptr;
+	}
+	shape->Set(hull);
+	return shape;
 }
 
 b2Shape* box2d::shape_create_halfspace(const b2Vec2 normal) {
@@ -445,10 +459,12 @@ size_t box2d::world_get_active_objects_count(b2World* world_handle) {
 }
 
 void box2d::world_set_active_body_callback(b2World* world_handle, ActiveBodyCallback callback) {
+	holder.active_body_callbacks[world_handle] = callback;
 }
 
-void box2d::world_set_body_collision_filter_callback(b2World* world_handle,
-		CollisionFilterCallback callback) {
+void box2d::world_set_collision_filter_callback(b2World* world_handle,
+		b2ContactFilter* callback) {
+	world_handle->SetContactFilter(callback);
 }
 
 void box2d::world_set_collision_event_callback(b2World* world_handle, CollisionEventCallback callback) {
@@ -465,11 +481,14 @@ void box2d::world_set_modify_contacts_callback(b2World* world_handle,
 		CollisionModifyContactsCallback callback) {
 }
 
-void box2d::world_set_sensor_collision_filter_callback(b2World* world_handle,
-		CollisionFilterCallback callback) {
-}
-
 void box2d::world_step(b2World* world_handle, const SimulationSettings *settings) {
 	world_handle->SetGravity(settings->gravity);
-	world_handle->Step(settings->dt, settings->max_velocity_iterations, 3);
+	world_handle->Step(settings->dt, 8, 3);
+	if (holder.active_body_callbacks.has(world_handle)) {
+		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
+		for (b2Body* body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
+			ActiveBodyInfo info{body, body->GetUserData()};
+			callback(info);
+		}
+	}
 }

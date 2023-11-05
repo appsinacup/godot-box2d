@@ -31,7 +31,6 @@ void Box2DBody2D::_apply_mass_properties(bool force_update) {
 
 	b2World* space_handle = get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
 	// Force update means local properties will be re-calculated internally,

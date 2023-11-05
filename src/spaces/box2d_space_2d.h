@@ -20,7 +20,7 @@ using namespace godot;
 class Box2DSpace2D;
 class Box2DDirectSpaceState2D;
 
-class Box2DSpace2D {
+class Box2DSpace2D : b2ContactFilter{
 	Box2DDirectSpaceState2D *direct_access = nullptr;
 	RID rid;
 
@@ -75,7 +75,7 @@ class Box2DSpace2D {
 
 	friend class Box2DDirectSpaceState2D;
 
-	static void active_body_callback(b2World* world_handle, const box2d::ActiveBodyInfo *active_body_info);
+	static void active_body_callback(const box2d::ActiveBodyInfo &active_body_info);
 
 	struct CollidersInfo {
 		uint32_t shape1 = 0;
@@ -84,9 +84,10 @@ class Box2DSpace2D {
 		Box2DCollisionObject2D *object2 = nullptr;
 	};
 
+	/// Return true if contact calculations should be performed between these two shapes.
+	/// @warning for performance reasons this is only called when the AABBs begin to overlap.
+	virtual bool ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB) override;
 	static bool collision_filter_common_callback(b2World* world_handle, const box2d::CollisionFilterInfo *filter_info, CollidersInfo &r_colliders_info);
-	static bool collision_filter_body_callback(b2World* world_handle, const box2d::CollisionFilterInfo *filter_info);
-	static bool collision_filter_sensor_callback(b2World* world_handle, const box2d::CollisionFilterInfo *filter_info);
 	static box2d::OneWayDirection collision_modify_contacts_callback(b2World* world_handle, const box2d::CollisionFilterInfo *filter_info);
 
 	static void collision_event_callback(b2World* world_handle, const box2d::CollisionEventInfo *event_info);
@@ -94,7 +95,7 @@ class Box2DSpace2D {
 	static bool contact_force_event_callback(b2World* world_handle, const box2d::ContactForceEventInfo *event_info);
 	static bool contact_point_callback(b2World* world_handle, const box2d::ContactPointInfo *contact_info, const box2d::ContactForceEventInfo *event_info);
 
-	static bool _is_handle_excluded_callback(const b2World* world_handle, const b2Fixture* collider_handle, const b2FixtureUserData *collider, const box2d::QueryExcludedInfo *handle_excluded_info);
+	static bool _is_handle_excluded_callback(b2World* world_handle, b2Fixture* collider_handle, b2FixtureUserData collider, const box2d::QueryExcludedInfo *handle_excluded_info);
 
 	static Object *_get_object_instance_hack(uint64_t p_object_id) {
 		return reinterpret_cast<Object *>((GodotObject *)(internal::gdextension_interface_object_get_instance_from_id(p_object_id)));

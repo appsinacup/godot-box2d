@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../godot"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"vector": "cpp",
+			"chrono": "cpp",
+			"*.inc": "cpp"
+		}
+	}
+}
