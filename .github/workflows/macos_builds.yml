@@ -32,7 +32,7 @@ jobs:
           APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
           APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
           APPLE_DEV_APP_ID: ${{ secrets.PROD_MACOS_APPLE_DEV_APP_ID }}
-        run: ./scripts/ci-sign-macos.ps1 dist/addons/godot-box2d/bin/libgodot-box2d.macos.template_debug.framework
+        run: ./scripts/ci-sign-macos.ps1 bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_debug.framework
         if: ${{ env.APPLE_DEV_ID }}
       
       - name: Sign frameworks Release
@@ -44,7 +44,7 @@ jobs:
           APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
           APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
           APPLE_DEV_APP_ID: ${{ secrets.PROD_MACOS_APPLE_DEV_APP_ID }}
-        run: ./scripts/ci-sign-macos.ps1 dist/addons/godot-box2d/bin/libgodot-box2d.macos.template_release.framework
+        run: ./scripts/ci-sign-macos.ps1 bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_release.framework
         if: ${{ env.APPLE_DEV_ID }}
 
       - name: Upload ${{ matrix.arch }}
