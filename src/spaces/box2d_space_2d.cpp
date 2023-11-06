@@ -189,32 +189,26 @@ void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
 	Vector2 allowed_local_n1 = transform_a.columns[1].normalized();
 	Vector2 allowed_local_n2 = transform_b.columns[1].normalized();
 	bool contact_is_pass_through = false;
-	real_t dist = 0.0;
 	b2WorldManifold worldManifold;
-	/*
 	contact->GetWorldManifold(&worldManifold);
-	worldManifold.
-	if (worldManifold.normal.y < -0.5f)
-	{
+	real_t dist = MIN(worldManifold.separations[0], worldManifold.separations[1]);
+	b2Body *body1 = contact->GetFixtureA()->GetBody();
+	b2Body *body2 = contact->GetFixtureB()->GetBody();
+
+	if (one_way_dir.body1) {
+		Vector2 linvel = box2d::b2Vec2_to_Vector2(body2->GetLinearVelocity());
+		real_t motion_len = linvel.length();
+		real_t max_allowed = motion_len * MAX(linvel.normalized().dot(allowed_local_n1), 0.0) + one_way_dir.body1_margin;
+		contact_is_pass_through = linvel.dot(allowed_local_n1) <= CMP_EPSILON * 10.0 || dist < -max_allowed;
+	} else if (one_way_dir.body2) {
+		Vector2 linvel = box2d::b2Vec2_to_Vector2(body1->GetLinearVelocity());
+		real_t motion_len = linvel.length();
+		real_t max_allowed = motion_len * MAX(linvel.normalized().dot(allowed_local_n2), 0.0) + one_way_dir.body2_margin;
+		contact_is_pass_through = linvel.dot(allowed_local_n2) <= CMP_EPSILON * 10.0 || dist < -max_allowed;
+	}
+	if (contact_is_pass_through) {
 		contact->SetEnabled(false);
 	}
-	if let Some(contact) = context.manifold.find_deepest_contact() {
-		dist = contact.dist;
-	}
-
-	if one_way_direction.body1 {
-		let motion_len = body2.linvel().magnitude();
-		let max_allowed = motion_len * Real::max(body2.linvel().normalize().dot(&allowed_local_n1), 0.0) + one_way_direction.body1_margin;
-		contact_is_pass_through = body2.linvel().dot(&allowed_local_n1) <= DEFAULT_EPSILON * 10.0 || dist < -max_allowed;
-	} else if one_way_direction.body2 {
-		let motion_len = body1.linvel().magnitude();
-		let max_allowed = motion_len * Real::max(body1.linvel().normalize().dot(&allowed_local_n2), 0.0) + one_way_direction.body2_margin;
-		contact_is_pass_through = body1.linvel().dot(&allowed_local_n2) <= DEFAULT_EPSILON * 10.0 || dist < -max_allowed;
-	}
-	if contact_is_pass_through {
-		context.solver_contacts.clear();
-	}
-	*/
 }
 void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) {
 	box2d::ContactForceEventInfo force_info = force_info_from_contact(contact);
