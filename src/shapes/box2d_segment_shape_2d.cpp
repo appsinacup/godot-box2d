@@ -5,12 +5,12 @@ b2Shape *Box2DSegmentShape2D::create_box2d_shape() const {
 	direction.normalize();
 
 	Vector2 perpendicular = Vector2(-direction.y, direction.x);
-	double height = 0.1;
+	double height = 1;
 
-	Vector2 p1 = a + perpendicular * height / 2.0;
-	Vector2 p2 = a - perpendicular * height / 2.0;
-	Vector2 p3 = b + perpendicular * height / 2.0;
-	Vector2 p4 = b - perpendicular * height / 2.0;
+	Vector2 p1 = a + perpendicular * height;
+	Vector2 p2 = a - perpendicular * height;
+	Vector2 p3 = b + perpendicular * height;
+	Vector2 p4 = b - perpendicular * height;
 
 	b2Vec2 box2d_points[4];
 	box2d_points[0] = b2Vec2{ p1.x, p1.y };

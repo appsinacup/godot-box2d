@@ -493,7 +493,7 @@ void Box2DBody2D::_init_collider(b2Fixture *collider_handle) const {
 		// Only send contacts if contact monitor is enabled
 		bool send_contacts = can_report_contacts();
 #endif
-		box2d::collider_set_contact_force_events_enabled(space_handle, collider_handle, send_contacts);
+		//box2d::collider_set_contact_force_events_enabled(space_handle, collider_handle, send_contacts);
 	}
 }
 

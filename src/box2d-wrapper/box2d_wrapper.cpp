@@ -216,10 +216,15 @@ b2Fixture *box2d::collider_create_solid(b2World *world_handle,
 }
 
 void box2d::collider_destroy(b2World *world_handle, b2Fixture *handle) {
-	handle->GetBody()->DestroyFixture(handle);
-}
-
-void box2d::collider_set_contact_force_events_enabled(b2World *world_handle, b2Fixture *handle, bool enable) {
+	if (!handle->GetBody()) {
+		// already destroyed
+		return;
+	}
+	for (b2Fixture *fixture = handle->GetBody()->GetFixtureList(); fixture != nullptr; fixture = fixture->GetNext()) {
+		if (fixture == handle) {
+			handle->GetBody()->DestroyFixture(fixture);
+		}
+	}
 }
 
 b2Vec2 Vector2_to_b2Vec2(Vector2 vec) {
@@ -230,11 +235,12 @@ Vector2 b2Vec2_to_Vector2(b2Vec2 vec) {
 	return Vector2(vec.x, vec.y);
 }
 
-b2Vec2 xform_b2Vec2(b2Vec2 &vec, Transform2D transform) {
+void xform_b2Vec2(b2Vec2 &vec, Transform2D transform) {
 	vec = Vector2_to_b2Vec2(transform.xform(b2Vec2_to_Vector2(vec)));
 }
 
 void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, ShapeInfo shape_info) {
+	ERR_PRINT("update transform");
 	holder.fixture_transforms[handle] = shape_info.transform;
 	b2Shape *shape = handle->GetShape();
 	ERR_FAIL_COND(!shape);
@@ -384,6 +390,11 @@ void box2d::joint_change_revolute_params(b2World *world_handle,
 		bool angular_limit_enabled,
 		real_t motor_target_velocity,
 		bool motor_enabled) {
+	b2RevoluteJoint *joint = (b2RevoluteJoint *)joint_handle;
+	joint->SetLimits(angular_limit_lower, angular_limit_upper);
+	joint->EnableLimit(angular_limit_enabled);
+	joint->SetMotorSpeed(motor_target_velocity);
+	joint->EnableMotor(motor_enabled);
 }
 
 b2Joint *box2d::joint_create_prismatic(b2World *world_handle,
@@ -393,7 +404,14 @@ b2Joint *box2d::joint_create_prismatic(b2World *world_handle,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
 		const b2Vec2 limits) {
-	return nullptr;
+	b2PrismaticJointDef joint_def;
+	joint_def.bodyA = body_handle_1;
+	joint_def.bodyB = body_handle_2;
+	joint_def.localAnchorA = anchor_1;
+	joint_def.localAnchorB = anchor_2;
+	joint_def.lowerTranslation = limits.x;
+	joint_def.upperTranslation = limits.y;
+	return world_handle->CreateJoint(&joint_def);
 }
 
 b2Joint *box2d::joint_create_revolute(b2World *world_handle,
@@ -406,7 +424,18 @@ b2Joint *box2d::joint_create_revolute(b2World *world_handle,
 		bool angular_limit_enabled,
 		real_t motor_target_velocity,
 		bool motor_enabled) {
-	return nullptr;
+	b2RevoluteJointDef joint_def;
+	joint_def.bodyA = body_handle_1;
+	joint_def.bodyB = body_handle_2;
+	joint_def.localAnchorA = anchor_1;
+	joint_def.localAnchorB = anchor_2;
+	joint_def.enableLimit = angular_limit_enabled;
+	joint_def.enableMotor = motor_enabled;
+	joint_def.lowerAngle = angular_limit_lower;
+	joint_def.upperAngle = angular_limit_upper;
+	joint_def.motorSpeed = motor_target_velocity;
+	joint_def.maxMotorTorque = 100000.0;
+	return world_handle->CreateJoint(&joint_def);
 }
 
 void box2d::joint_destroy(b2World *world_handle, b2Joint *joint_handle) {

@@ -220,7 +220,6 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 
 	b2World *space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape.collider_handle));
 

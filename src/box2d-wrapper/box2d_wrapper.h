@@ -296,8 +296,6 @@ b2Fixture *collider_create_solid(b2World *world_handle,
 
 void collider_destroy(b2World *world_handle, b2Fixture *handle);
 
-void collider_set_contact_force_events_enabled(b2World *world_handle, b2Fixture *handle, bool enable);
-
 void collider_set_transform(b2World *world_handle, b2Fixture *handle, ShapeInfo shape_info);
 
 godot::Transform2D collider_get_transform(b2World *world_handle, b2Fixture *handle);
