@@ -19,6 +19,9 @@ void Box2DShape2D::destroy_box2d_shape() {
 b2Shape *Box2DShape2D::get_box2d_shape() {
 	if (!box2d::is_handle_valid(shape_handle)) {
 		shape_handle = create_box2d_shape();
+		if (!box2d::is_handle_valid(shape_handle)) {
+			ERR_PRINT("Error creating the shape");
+		}
 	}
 
 	return shape_handle;

@@ -15,6 +15,8 @@ enum class ShapeType {
 struct Box2DHolder {
 	HashMap<b2Fixture *, Transform2D> fixture_transforms;
 	HashMap<b2World *, ActiveBodyCallback> active_body_callbacks;
+	HashMap<b2Body *, b2Vec2> constant_force;
+	HashMap<b2Body *, real_t> constant_torque;
 	HashMap<b2World *, int> active_objects;
 };
 
@@ -37,18 +39,26 @@ bool box2d::are_handles_equal(b2Joint *handle1, b2Joint *handle2) {
 }
 
 void box2d::body_add_force(b2World *world_handle, b2Body *body_handle, const b2Vec2 force) {
-	body_handle->ApplyForceToCenter(force, true);
+	if (holder.constant_force.has(body_handle)) {
+		holder.constant_force[body_handle] = holder.constant_force[body_handle] + force;
+	} else {
+		holder.constant_force[body_handle] = force;
+	}
 }
 
 void box2d::body_add_force_at_point(b2World *world_handle,
 		b2Body *body_handle,
 		const b2Vec2 force,
 		const b2Vec2 point) {
-	body_handle->ApplyForce(force, point, true);
+	// TODO2 constant force at point
 }
 
 void box2d::body_add_torque(b2World *world_handle, b2Body *body_handle, real_t torque) {
-	body_handle->ApplyTorque(torque, true);
+	if (holder.constant_torque.has(body_handle)) {
+		holder.constant_torque[body_handle] = holder.constant_torque[body_handle] + torque;
+	} else {
+		holder.constant_torque[body_handle] = torque;
+	}
 }
 
 void box2d::body_apply_impulse(b2World *world_handle, b2Body *body_handle, const b2Vec2 impulse) {
@@ -100,10 +110,16 @@ real_t box2d::body_get_angular_velocity(b2World *world_handle, b2Body *body_hand
 }
 
 b2Vec2 box2d::body_get_constant_force(b2World *world_handle, b2Body *body_handle) {
+	if (holder.constant_force.has(body_handle)) {
+		return holder.constant_force[body_handle];
+	}
 	return b2Vec2();
 }
 
 real_t box2d::body_get_constant_torque(b2World *world_handle, b2Body *body_handle) {
+	if (holder.constant_torque.has(body_handle)) {
+		return holder.constant_torque[body_handle];
+	}
 	return 0.0;
 }
 
@@ -120,9 +136,11 @@ bool box2d::body_is_ccd_enabled(b2World *world_handle, b2Body *body_handle) {
 }
 
 void box2d::body_reset_forces(b2World *world_handle, b2Body *body_handle) {
+	holder.constant_force[body_handle] = b2Vec2_zero;
 }
 
 void box2d::body_reset_torques(b2World *world_handle, b2Body *body_handle) {
+	holder.constant_torque[body_handle] = 0.0;
 }
 
 void box2d::body_set_angular_damping(b2World *world_handle, b2Body *body_handle, real_t angular_damping) {
@@ -313,6 +331,36 @@ WorldSettings box2d::default_world_settings() {
 	return WorldSettings{};
 }
 
+class AABBQueryCallback : public b2QueryCallback {
+public:
+	int count = 0;
+	b2World *world;
+	bool collide_with_body;
+	bool collide_with_area;
+	PointHitInfo *hit_info_array;
+	size_t hit_info_length;
+	QueryHandleExcludedCallback handle_excluded_callback;
+	const QueryExcludedInfo *handle_excluded_info;
+
+	/// Called for each fixture found in the query AABB.
+	/// @return false to terminate the query.
+	virtual bool ReportFixture(b2Fixture *fixture) override {
+		if (fixture->IsSensor() && !collide_with_area) {
+			return true;
+		}
+		if (!fixture->IsSensor() && !collide_with_body) {
+			return true;
+		}
+		if (!handle_excluded_callback(world, fixture, fixture->GetUserData(), handle_excluded_info)) {
+			hit_info_array[count++] = PointHitInfo{
+				fixture,
+				fixture->GetUserData()
+			};
+		}
+		return count < hit_info_length;
+	}
+};
+
 size_t box2d::intersect_aabb(b2World *world_handle,
 		const b2Vec2 aabb_min,
 		const b2Vec2 aabb_max,
@@ -322,7 +370,16 @@ size_t box2d::intersect_aabb(b2World *world_handle,
 		size_t hit_info_length,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
-	return 0;
+	AABBQueryCallback callback;
+	callback.world = world_handle;
+	callback.collide_with_body = collide_with_body;
+	callback.collide_with_area = collide_with_area;
+	callback.hit_info_array = hit_info_array;
+	callback.hit_info_length = hit_info_length;
+	callback.handle_excluded_callback = handle_excluded_callback;
+	callback.handle_excluded_info = handle_excluded_info;
+	world_handle->QueryAABB(&callback, b2AABB{ aabb_min, aabb_max });
+	return callback.count;
 }
 
 size_t box2d::intersect_point(b2World *world_handle,
@@ -333,8 +390,60 @@ size_t box2d::intersect_point(b2World *world_handle,
 		size_t hit_info_length,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
-	return 0;
+	AABBQueryCallback callback;
+	callback.world = world_handle;
+	callback.collide_with_body = collide_with_body;
+	callback.collide_with_area = collide_with_area;
+	callback.hit_info_array = hit_info_array;
+	callback.hit_info_length = hit_info_length;
+	callback.handle_excluded_callback = handle_excluded_callback;
+	callback.handle_excluded_info = handle_excluded_info;
+	world_handle->QueryAABB(&callback, b2AABB{ position - b2Vec2(0.1, 0.1), position + b2Vec2(0.1, 0.1) });
+	return callback.count;
 }
+
+class RayCastQueryCallback : public b2RayCastCallback {
+public:
+	int count = 0;
+	b2World *world;
+	bool collide_with_body;
+	bool collide_with_area;
+	bool hit_from_inside;
+	RayHitInfo *hit_info_array;
+	QueryHandleExcludedCallback handle_excluded_callback;
+	const QueryExcludedInfo *handle_excluded_info;
+
+	/// Called for each fixture found in the query. You control how the ray cast
+	/// proceeds by returning a float:
+	/// return -1: ignore this fixture and continue
+	/// return 0: terminate the ray cast
+	/// return fraction: clip the ray to this point
+	/// return 1: don't clip the ray and continue
+	/// @param fixture the fixture hit by the ray
+	/// @param point the point of initial intersection
+	/// @param normal the normal vector at the point of intersection
+	/// @param fraction the fraction along the ray at the point of intersection
+	/// @return -1 to filter, 0 to terminate, fraction to clip the ray for
+	/// closest hit, 1 to continue
+	virtual float ReportFixture(b2Fixture *fixture, const b2Vec2 &point,
+			const b2Vec2 &normal, float fraction) override {
+		if (fixture->IsSensor() && !collide_with_area) {
+			return -1;
+		}
+		if (!fixture->IsSensor() && !collide_with_body) {
+			return -1;
+		}
+		if (!handle_excluded_callback(world, fixture, fixture->GetUserData(), handle_excluded_info)) {
+			hit_info_array[count++] = RayHitInfo{
+				point,
+				normal,
+				fixture,
+				fixture->GetUserData()
+			};
+		}
+		return 1;
+	}
+};
 
 bool box2d::intersect_ray(b2World *world_handle,
 		const b2Vec2 from,
@@ -346,7 +455,16 @@ bool box2d::intersect_ray(b2World *world_handle,
 		RayHitInfo *hit_info,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
-	return false;
+	RayCastQueryCallback callback;
+	callback.world = world_handle;
+	callback.collide_with_body = collide_with_body;
+	callback.collide_with_area = collide_with_area;
+	callback.hit_from_inside = hit_from_inside;
+	callback.hit_info_array = hit_info;
+	callback.handle_excluded_callback = handle_excluded_callback;
+	callback.handle_excluded_info = handle_excluded_info;
+	world_handle->RayCast(&callback, from, from + length * dir);
+	return callback.count;
 }
 
 size_t box2d::intersect_shape(b2World *world_handle,
@@ -357,6 +475,7 @@ size_t box2d::intersect_shape(b2World *world_handle,
 		size_t hit_info_length,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
+	// TODO1 missing
 	return 0;
 }
 
@@ -471,6 +590,7 @@ ShapeCastResult box2d::shape_casting(b2World *world_handle,
 		bool collide_with_area,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
+	// TODO1 missing
 	return ShapeCastResult{};
 }
 
@@ -478,6 +598,7 @@ ShapeCastResult box2d::shape_collide(const b2Vec2 motion1,
 		ShapeInfo shape_info1,
 		const b2Vec2 motion2,
 		ShapeInfo shape_info2) {
+	// TODO1 missing
 	return ShapeCastResult{};
 }
 
@@ -490,6 +611,7 @@ b2Shape *box2d::shape_create_box(const b2Vec2 size) {
 }
 
 b2Shape *box2d::shape_create_capsule(real_t half_height, real_t radius) {
+	// TODO1 missing
 	/*
 	ERR_FAIL_COND(radius < CMP_EPSILON);
 	ERR_FAIL_COND(half_height < CMP_EPSILON);
@@ -555,6 +677,7 @@ ContactResult box2d::shapes_contact(b2World *world_handle,
 		ShapeInfo shape_info1,
 		ShapeInfo shape_info2,
 		real_t margin) {
+	// TODO1 missing
 	return ContactResult{};
 }
 
@@ -591,6 +714,13 @@ void box2d::world_step(b2World *world_handle, const SimulationSettings *settings
 	if (holder.active_body_callbacks.has(world_handle)) {
 		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
 		for (b2Body *body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
+			if (holder.constant_force.has(body)) {
+				body->ApplyForceToCenter(holder.constant_force[body], true);
+				//body->ApplyLinearImpulse(holder.constant_force[body], b2Vec2_zero, true);
+			}
+			if (holder.constant_torque.has(body)) {
+				body->ApplyTorque(holder.constant_torque[body], true);
+			}
 			if (body->IsAwake()) {
 				active_objects++;
 				ActiveBodyInfo info{ body, body->GetUserData() };
