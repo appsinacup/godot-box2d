@@ -168,7 +168,7 @@ void box2d::body_set_mass_properties(b2World *world_handle,
 		local_com,
 		inertia
 	};
-	body_handle->SetMassData(&mass_data);
+	//body_handle->SetMassData(&mass_data);
 }
 
 void box2d::body_set_transform(b2World *world_handle,

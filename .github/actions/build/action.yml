@@ -45,15 +45,11 @@ runs:
         cd godot-cpp && \
         scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes && \
         scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes
-    - name: Build Box2D
-      shell: sh
-      run: |
-        ./scripts/build-box2d.sh
     - name: Build Physics Server Box2D
       shell: sh
       env:
         SCONS_CACHE: .scons-cache
         SCONS_CACHE_DIR: .scons-cache
       run: |
-        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no
-        scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no
+        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
+        scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
