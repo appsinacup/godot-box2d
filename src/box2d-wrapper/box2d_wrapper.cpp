@@ -243,7 +243,7 @@ Vector2 b2Vec2_to_Vector2(b2Vec2 vec) {
 }
 
 b2Vec2 xform_b2Vec2(b2Vec2 vec, Transform2D transform) {
-	return Vector2_to_b2Vec2(transform.xform(b2Vec2_to_Vector2(vec)));
+	return box2d::Vector2_to_b2Vec2(transform.xform(box2d::b2Vec2_to_Vector2(vec)));
 }
 
 void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, ShapeInfo shape_info) {
