@@ -277,7 +277,8 @@ void body_set_transform(b2World *world_handle,
 		b2Body *body_handle,
 		const b2Vec2 pos,
 		real_t rot,
-		bool wake_up);
+		bool wake_up,
+		real_t step);
 
 void body_update_material(b2World *world_handle, b2Body *body_handle, const Material *mat);
 

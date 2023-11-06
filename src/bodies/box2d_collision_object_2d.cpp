@@ -177,7 +177,7 @@ void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool 
 		const Vector2 &origin = transform.get_origin();
 		b2Vec2 position = { origin.x, origin.y };
 		real_t rotation = transform.get_rotation();
-		box2d::body_set_transform(space_handle, body_handle, position, rotation, wake_up);
+		box2d::body_set_transform(space_handle, body_handle, position, rotation, wake_up, space->get_last_step());
 	}
 }
 

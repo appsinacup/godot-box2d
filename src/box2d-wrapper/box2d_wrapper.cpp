@@ -168,15 +168,22 @@ void box2d::body_set_mass_properties(b2World *world_handle,
 		local_com,
 		inertia
 	};
-	//body_handle->SetMassData(&mass_data);
+	body_handle->SetMassData(&mass_data);
 }
 
 void box2d::body_set_transform(b2World *world_handle,
 		b2Body *body_handle,
 		const b2Vec2 pos,
 		real_t rot,
-		bool wake_up) {
-	body_handle->SetTransform(pos, rot);
+		bool wake_up,
+		real_t step) {
+	if (body_handle->GetType() == b2BodyType::b2_kinematicBody) {
+		body_handle->SetLinearVelocity((1.0 / step) * (pos - body_handle->GetPosition()));
+		body_handle->SetAngularVelocity((1.0 / step) * (rot - body_handle->GetAngle()));
+	} else {
+		body_handle->SetTransform(pos, rot);
+		body_handle->SetAwake(wake_up);
+	}
 }
 
 void box2d::body_update_material(b2World *world_handle, b2Body *body_handle, const Material *mat) {
@@ -240,7 +247,6 @@ void xform_b2Vec2(b2Vec2 &vec, Transform2D transform) {
 }
 
 void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, ShapeInfo shape_info) {
-	ERR_PRINT("update transform");
 	holder.fixture_transforms[handle] = shape_info.transform;
 	b2Shape *shape = handle->GetShape();
 	ERR_FAIL_COND(!shape);
@@ -256,16 +262,28 @@ void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, Sha
 		} break;
 		case b2Shape::Type::e_chain: {
 			b2ChainShape *chain_shape = (b2ChainShape *)shape;
-			xform_b2Vec2(chain_shape->m_prevVertex, transform);
-			xform_b2Vec2(chain_shape->m_nextVertex, transform);
+			b2Vec2 new_vertices[chain_shape->m_count];
 			for (int i = 0; i < chain_shape->m_count; i++) {
-				xform_b2Vec2(chain_shape->m_vertices[i], transform);
+				new_vertices[i] = chain_shape->m_vertices[i];
+				xform_b2Vec2(new_vertices[i], transform);
+			}
+			int count = chain_shape->m_count;
+			chain_shape->m_count = 0;
+			chain_shape->CreateLoop(new_vertices, chain_shape->m_count);
+			if (!chain_shape->m_count) {
+				chain_shape->m_count = count;
+				ERR_FAIL_MSG("Cannot update vertices");
 			}
 		} break;
 		case b2Shape::Type::e_polygon: {
 			b2PolygonShape *polygon_shape = (b2PolygonShape *)shape;
+			b2Vec2 new_vertices[polygon_shape->m_count];
 			for (int i = 0; i < polygon_shape->m_count; i++) {
-				xform_b2Vec2(polygon_shape->m_vertices[i], transform);
+				new_vertices[i] = polygon_shape->m_vertices[i];
+				xform_b2Vec2(new_vertices[i], transform);
+			}
+			if (!polygon_shape->Set(new_vertices, polygon_shape->m_count)) {
+				ERR_FAIL_MSG("Cannot update vertices");
 			}
 		} break;
 		default: {
