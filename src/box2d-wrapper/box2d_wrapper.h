@@ -442,8 +442,6 @@ size_t world_get_active_objects_count(b2World *world_handle);
 
 void world_set_active_body_callback(b2World *world_handle, ActiveBodyCallback callback);
 
-void world_set_collision_event_callback(b2World *world_handle, CollisionEventCallback callback);
-
 void world_set_collision_filter_callback(b2World *world_handle,
 		b2ContactFilter *callback);
 

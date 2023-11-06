@@ -3,7 +3,6 @@ import os
 import sys
 
 env = SConscript("godot-cpp/SConstruct")
-
 box2d_folder = "box2d/"
 box2d_include = [
 	"include/",

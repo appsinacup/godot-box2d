@@ -121,6 +121,7 @@ bool Box2DSpace2D::ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB) {
 }
 box2d::CollisionEventInfo event_info_from_contact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info;
+	event_info.is_sensor = false;
 	event_info.is_valid = false;
 	event_info.collider1 = contact->GetFixtureA();
 	event_info.collider2 = contact->GetFixtureB();
@@ -131,7 +132,7 @@ box2d::CollisionEventInfo event_info_from_contact(b2Contact *contact) {
 	ERR_FAIL_COND_V(!box2d::is_user_data_valid(event_info.user_data1), event_info);
 	ERR_FAIL_COND_V(!box2d::is_user_data_valid(event_info.user_data2), event_info);
 	event_info.is_sensor = event_info.collider1->IsSensor() || event_info.collider2->IsSensor();
-	event_info.is_valid = true;
+	event_info.is_valid = event_info.is_sensor;
 	return event_info;
 }
 box2d::CollisionFilterInfo filter_info_from_contact(b2Contact *contact) {
@@ -162,20 +163,26 @@ box2d::ContactForceEventInfo force_info_from_contact(b2Contact *contact) {
 }
 void Box2DSpace2D::BeginContact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info = event_info_from_contact(contact);
-	ERR_FAIL_COND(!event_info.is_valid);
+	if (!event_info.is_valid) {
+		return;
+	}
 	event_info.is_started = true;
 	collision_event_callback(handle, &event_info);
 }
 
 void Box2DSpace2D::EndContact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info = event_info_from_contact(contact);
-	ERR_FAIL_COND(!event_info.is_valid);
+	if (!event_info.is_valid) {
+		return;
+	}
 	event_info.is_started = false;
 	collision_event_callback(handle, &event_info);
 }
 void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
 	box2d::CollisionFilterInfo filter_info = filter_info_from_contact(contact);
-	ERR_FAIL_COND(!filter_info.is_valid);
+	if (!filter_info.is_valid) {
+		return;
+	}
 	box2d::OneWayDirection one_way_dir = collision_modify_contacts_callback(handle, &filter_info);
 	Transform2D transform_a = box2d::collider_get_transform(handle, contact->GetFixtureA());
 	Transform2D transform_b = box2d::collider_get_transform(handle, contact->GetFixtureA());
@@ -211,7 +218,9 @@ void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
 }
 void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) {
 	box2d::ContactForceEventInfo force_info = force_info_from_contact(contact);
-	ERR_FAIL_COND(!force_info.is_valid);
+	if (!force_info.is_valid) {
+		return;
+	}
 	bool send_contacts = contact_force_event_callback(handle, &force_info);
 	if (send_contacts) {
 		box2d::ContactPointInfo point_info;
@@ -225,8 +234,8 @@ void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse
 		point_info.impulse_2 = impulse->normalImpulses[1];
 		point_info.tangent_impulse_1 = impulse->tangentImpulses[0];
 		point_info.tangent_impulse_2 = impulse->tangentImpulses[1];
-		point_info.local_pos_1 = contact->GetManifold()->points[0].localPoint;
-		point_info.local_pos_2 = contact->GetManifold()->points[1].localPoint;
+		point_info.local_pos_1 = worldManifold.points[0];
+		point_info.local_pos_2 = worldManifold.points[1];
 		point_info.velocity_pos_1 = contact->GetFixtureA()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_1);
 		point_info.velocity_pos_2 = contact->GetFixtureB()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_2);
 		contact_point_callback(handle, &point_info, &force_info);
@@ -759,6 +768,7 @@ Box2DSpace2D::Box2DSpace2D() {
 
 	box2d::world_set_active_body_callback(handle, active_body_callback);
 	box2d::world_set_collision_filter_callback(handle, this);
+	box2d::world_set_contact_listener(handle, this);
 }
 
 Box2DSpace2D::~Box2DSpace2D() {
