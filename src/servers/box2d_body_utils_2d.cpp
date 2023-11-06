@@ -186,7 +186,7 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 			Transform2D const &col_shape_transform = collision_body->get_transform() * collision_body->get_shape_transform(shape_index);
 			box2d::ShapeInfo col_shape_info = box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), col_shape_transform);
 			// stuck logic, check if body collides in place
-			body_shape_info.position = { (body_shape_transform.get_origin()).x, (body_shape_transform.get_origin()).y };
+			body_shape_info.transform.set_origin(body_shape_transform.get_origin());
 			box2d::ContactResult step_contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
 			if (step_contact.collided && !step_contact.within_margin) {
 				if (body_shape->allows_one_way_collision() && collision_body->is_shape_set_as_one_way_collision(shape_index)) {
@@ -209,8 +209,7 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 			for (int k = 0; k < 8; k++) {
 				real_t fraction = low + (hi - low) * fraction_coeff;
 
-				body_shape_info.position = b2Vec2{ (body_shape_transform.get_origin() + p_motion * fraction).x,
-					(body_shape_transform.get_origin() + p_motion * fraction).y };
+				body_shape_info.transform.set_origin(body_shape_transform.get_origin() + p_motion * fraction);
 				box2d::ContactResult step_contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
 				if (step_contact.collided && !step_contact.within_margin) {
 					hi = fraction;
@@ -236,9 +235,7 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 					}
 				}
 			}
-			body_shape_info.position =
-					b2Vec2{ (body_shape_transform.get_origin() + p_motion * (hi + contact_max_allowed_penetration)).x,
-						(body_shape_transform.get_origin() + p_motion * (hi + contact_max_allowed_penetration)).y };
+			body_shape_info.transform.set_origin(body_shape_transform.get_origin() + p_motion * (hi + contact_max_allowed_penetration));
 			box2d::ContactResult contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
 			if (should_skip_collision_one_dir(contact, body_shape, collision_body, shape_index, col_shape_transform, p_margin, p_space.get_last_step(), p_motion)) {
 				continue;

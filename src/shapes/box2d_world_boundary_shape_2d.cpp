@@ -1,13 +1,8 @@
 #include "box2d_world_boundary_shape_2d.h"
 
-b2Shape* Box2DWorldBoundaryShape2D::create_box2d_shape() const {
+b2Shape *Box2DWorldBoundaryShape2D::create_box2d_shape() const {
 	b2Vec2 v = { normal.x, normal.y };
-	return box2d::shape_create_halfspace(v);
-}
-
-void Box2DWorldBoundaryShape2D::apply_box2d_transform(b2Vec2 &position, real_t &angle) const {
-	position.x += normal.x * d;
-	position.y += normal.y * d;
+	return box2d::shape_create_halfspace(v, d);
 }
 
 void Box2DWorldBoundaryShape2D::set_data(const Variant &p_data) {

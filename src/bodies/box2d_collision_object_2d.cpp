@@ -150,7 +150,7 @@ void Box2DCollisionObject2D::_update_transform() {
 		return;
 	}
 
-	b2World* space_handle = space->get_handle();
+	b2World *space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -169,7 +169,7 @@ void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool 
 	inv_transform = transform.affine_inverse();
 
 	if (space) {
-		b2World* space_handle = space->get_handle();
+		b2World *space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -186,7 +186,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 		return;
 	}
 
-	b2World* space_handle = space->get_handle();
+	b2World *space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(box2d::is_handle_valid(shape.collider_handle));
@@ -194,7 +194,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 	box2d::Material mat = box2d::default_material();
 	_init_material(mat);
 
-	b2Shape* shape_handle = shape.shape->get_box2d_shape();
+	b2Shape *shape_handle = shape.shape->get_box2d_shape();
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape_handle));
 
 	b2FixtureUserData user_data;
@@ -218,7 +218,7 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 		return;
 	}
 
-	b2World* space_handle = space->get_handle();
+	b2World *space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
@@ -238,11 +238,7 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 		return;
 	}
 
-	b2World* space_handle = space->get_handle();
-
-	const Vector2 &origin = shape.xform.get_origin();
-	b2Vec2 position = { origin.x, origin.y };
-	real_t angle = shape.xform.get_rotation();
+	b2World *space_handle = space->get_handle();
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
@@ -250,16 +246,14 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape.shape->get_box2d_shape()));
 	box2d::ShapeInfo shape_info{
 		shape.shape->get_box2d_shape(),
-		position,
-		angle,
-		b2Vec2{ shape.xform.get_scale().x, shape.xform.get_scale().y }
+		shape.xform,
 	};
 	box2d::collider_set_transform(space_handle, shape.collider_handle, shape_info);
 }
 
 void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	if (space) {
-		b2World* space_handle = space->get_handle();
+		b2World *space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -284,7 +278,7 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	space = p_space;
 
 	if (space) {
-		b2World* space_handle = space->get_handle();
+		b2World *space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(box2d::is_handle_valid(body_handle));
