@@ -1,6 +1,6 @@
 #include "box2d_convex_polygon_shape_2d.h"
 
-b2Shape* Box2DConvexPolygonShape2D::create_box2d_shape() const {
+b2Shape *Box2DConvexPolygonShape2D::create_box2d_shape() const {
 	ERR_FAIL_COND_V(point_count < 3, box2d::invalid_shape_handle());
 	b2Vec2 *box2d_points = (b2Vec2 *)alloca(point_count * sizeof(b2Vec2));
 	for (int i = 0; i < point_count; i++) {

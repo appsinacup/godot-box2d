@@ -9,7 +9,7 @@ class Box2DSegmentShape2D : public Box2DShape2D {
 	Vector2 n;
 
 protected:
-	virtual b2Shape* create_box2d_shape() const override;
+	virtual b2Shape *create_box2d_shape() const override;
 
 public:
 	_FORCE_INLINE_ const Vector2 &get_a() const { return a; }

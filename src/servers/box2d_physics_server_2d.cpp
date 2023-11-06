@@ -128,8 +128,8 @@ bool Box2DPhysicsServer2D::_shape_collide(const RID &p_shape_A, const Transform2
 	Box2DShape2D *shape_B = shape_owner.get_or_null(p_shape_B);
 	ERR_FAIL_COND_V(!shape_B, false);
 
-	b2Shape* shape_A_handle = shape_A->get_box2d_shape();
-	b2Shape* shape_B_handle = shape_B->get_box2d_shape();
+	b2Shape *shape_A_handle = shape_A->get_box2d_shape();
+	b2Shape *shape_B_handle = shape_B->get_box2d_shape();
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_A_handle), false);
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_B_handle), false);
 	box2d::ShapeInfo shape_A_info = box2d::shape_info_from_body_shape(shape_A_handle, p_xform_A);

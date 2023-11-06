@@ -23,7 +23,7 @@ public:
 	~Box2DConvexPolygonShape2D();
 
 protected:
-	virtual b2Shape* create_box2d_shape() const override;
+	virtual b2Shape *create_box2d_shape() const override;
 };
 
 #endif // BOX2D_CONVEX_POLYGON_SHAPE_2D_H
