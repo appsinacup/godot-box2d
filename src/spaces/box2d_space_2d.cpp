@@ -134,6 +134,32 @@ box2d::CollisionEventInfo event_info_from_contact(b2Contact *contact) {
 	event_info.is_valid = true;
 	return event_info;
 }
+box2d::CollisionFilterInfo filter_info_from_contact(b2Contact *contact) {
+	box2d::CollisionFilterInfo event_info;
+	event_info.is_valid = false;
+	ERR_FAIL_COND_V(!box2d::is_handle_valid(contact->GetFixtureA()), event_info);
+	ERR_FAIL_COND_V(!box2d::is_handle_valid(contact->GetFixtureB()), event_info);
+	event_info.user_data1 = contact->GetFixtureA()->GetUserData();
+	event_info.user_data2 = contact->GetFixtureB()->GetUserData();
+	ERR_FAIL_COND_V(!box2d::is_user_data_valid(event_info.user_data1), event_info);
+	ERR_FAIL_COND_V(!box2d::is_user_data_valid(event_info.user_data2), event_info);
+	event_info.is_valid = true;
+	return event_info;
+}
+box2d::ContactForceEventInfo force_info_from_contact(b2Contact *contact) {
+	box2d::ContactForceEventInfo event_info;
+	event_info.is_valid = false;
+	event_info.collider1 = contact->GetFixtureA();
+	event_info.collider2 = contact->GetFixtureB();
+	ERR_FAIL_COND_V(!box2d::is_handle_valid(event_info.collider1), event_info);
+	ERR_FAIL_COND_V(!box2d::is_handle_valid(event_info.collider2), event_info);
+	event_info.user_data1 = event_info.collider1->GetUserData();
+	event_info.user_data2 = event_info.collider2->GetUserData();
+	ERR_FAIL_COND_V(!box2d::is_user_data_valid(event_info.user_data1), event_info);
+	ERR_FAIL_COND_V(!box2d::is_user_data_valid(event_info.user_data2), event_info);
+	event_info.is_valid = true;
+	return event_info;
+}
 void Box2DSpace2D::BeginContact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info = event_info_from_contact(contact);
 	ERR_FAIL_COND(!event_info.is_valid);
@@ -148,12 +174,8 @@ void Box2DSpace2D::EndContact(b2Contact *contact) {
 	collision_event_callback(handle, &event_info);
 }
 void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
-	box2d::CollisionEventInfo event_info = event_info_from_contact(contact);
-	ERR_FAIL_COND(!event_info.is_valid);
-	box2d::CollisionFilterInfo filter_info;
-	filter_info.user_data1 = event_info.user_data1;
-	filter_info.user_data2 = event_info.user_data2;
-	event_info.is_started = false;
+	box2d::CollisionFilterInfo filter_info = filter_info_from_contact(contact);
+	ERR_FAIL_COND(!filter_info.is_valid);
 	box2d::OneWayDirection one_way_dir = collision_modify_contacts_callback(handle, &filter_info);
 	Transform2D transform_a = box2d::collider_get_transform(handle, contact->GetFixtureA());
 	Transform2D transform_b = box2d::collider_get_transform(handle, contact->GetFixtureA());
@@ -188,6 +210,27 @@ void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
 	*/
 }
 void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) {
+	box2d::ContactForceEventInfo force_info = force_info_from_contact(contact);
+	ERR_FAIL_COND(!force_info.is_valid);
+	bool send_contacts = contact_force_event_callback(handle, &force_info);
+	if (send_contacts) {
+		box2d::ContactPointInfo point_info;
+		b2WorldManifold worldManifold;
+		contact->GetWorldManifold(&worldManifold);
+		point_info.distance_1 = worldManifold.separations[0];
+		point_info.distance_2 = worldManifold.separations[1];
+		point_info.normal_1 = -worldManifold.normal;
+		point_info.normal_2 = worldManifold.normal;
+		point_info.impulse_1 = impulse->normalImpulses[0];
+		point_info.impulse_2 = impulse->normalImpulses[1];
+		point_info.tangent_impulse_1 = impulse->tangentImpulses[0];
+		point_info.tangent_impulse_2 = impulse->tangentImpulses[1];
+		point_info.local_pos_1 = contact->GetManifold()->points[0].localPoint;
+		point_info.local_pos_2 = contact->GetManifold()->points[1].localPoint;
+		point_info.velocity_pos_1 = contact->GetFixtureA()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_1);
+		point_info.velocity_pos_2 = contact->GetFixtureB()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_2);
+		contact_point_callback(handle, &point_info, &force_info);
+	}
 }
 
 box2d::OneWayDirection Box2DSpace2D::collision_modify_contacts_callback(b2World *world_handle, const box2d::CollisionFilterInfo *filter_info) {
@@ -441,22 +484,26 @@ bool Box2DSpace2D::contact_point_callback(b2World *world_handle, const box2d::Co
 	ERR_FAIL_COND_V(!pObject2, false);
 	Box2DBody2D *body2 = static_cast<Box2DBody2D *>(pObject2);
 
-	real_t depth = MAX(0.0, -contact_info->distance); // negative distance means penetration
+	real_t depth_1 = MAX(0.0, -contact_info->distance_1); // negative distance means penetration
+	real_t depth_2 = MAX(0.0, -contact_info->distance_2); // negative distance means penetration
 
-	Vector2 normal(contact_info->normal.x, contact_info->normal.y);
-	Vector2 tangent = normal.orthogonal();
-	Vector2 impulse = contact_info->impulse * normal + contact_info->tangent_impulse * tangent;
+	Vector2 normal_1(contact_info->normal_1.x, contact_info->normal_1.y);
+	Vector2 normal_2(contact_info->normal_2.x, contact_info->normal_2.y);
+	Vector2 tangent_1 = normal_1.orthogonal();
+	Vector2 tangent_2 = normal_2.orthogonal();
+	Vector2 impulse_1 = contact_info->impulse_1 * normal_1 + contact_info->tangent_impulse_1 * tangent_1;
+	Vector2 impulse_2 = contact_info->impulse_2 * normal_2 + contact_info->tangent_impulse_2 * tangent_2;
 
 	if (body1->can_report_contacts()) {
 		keep_sending_contacts = true;
 		Vector2 vel_pos2(contact_info->velocity_pos_2.x, contact_info->velocity_pos_2.y);
-		body1->add_contact(pos1, -normal, depth, (int)shape1, pos2, (int)shape2, body2->get_instance_id(), body2->get_rid(), vel_pos2, impulse);
+		body1->add_contact(pos1, normal_1, depth_1, (int)shape1, pos2, (int)shape2, body2->get_instance_id(), body2->get_rid(), vel_pos2, impulse_1);
 	}
 
 	if (body2->can_report_contacts()) {
 		keep_sending_contacts = true;
 		Vector2 vel_pos1(contact_info->velocity_pos_1.x, contact_info->velocity_pos_1.y);
-		body2->add_contact(pos2, normal, depth, (int)shape2, pos1, (int)shape1, body1->get_instance_id(), body1->get_rid(), vel_pos1, impulse);
+		body2->add_contact(pos2, normal_2, depth_1, (int)shape2, pos1, (int)shape1, body1->get_instance_id(), body1->get_rid(), vel_pos1, impulse_2);
 	}
 
 	return keep_sending_contacts;

@@ -265,7 +265,7 @@ void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, Sha
 		case b2Shape::Type::e_chain: {
 			b2ChainShape *chain_shape_template = (b2ChainShape *)shape_template;
 			b2ChainShape *chain_shape = (b2ChainShape *)shape;
-			b2Vec2 new_vertices[chain_shape->m_count];
+			b2Vec2 new_vertices[b2_maxPolygonVertices];
 			for (int i = 0; i < chain_shape->m_count; i++) {
 				new_vertices[i] = chain_shape_template->m_vertices[i];
 				new_vertices[i] = xform_b2Vec2(new_vertices[i], transform);
@@ -281,7 +281,7 @@ void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, Sha
 		case b2Shape::Type::e_polygon: {
 			b2PolygonShape *polygon_shape_template = (b2PolygonShape *)shape_template;
 			b2PolygonShape *polygon_shape = (b2PolygonShape *)shape;
-			b2Vec2 new_vertices[polygon_shape->m_count];
+			b2Vec2 new_vertices[b2_maxPolygonVertices];
 			for (int i = 0; i < polygon_shape->m_count; i++) {
 				new_vertices[i] = polygon_shape_template->m_vertices[i];
 				new_vertices[i] = xform_b2Vec2(new_vertices[i], transform);

@@ -43,7 +43,6 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 - Missing thread-safety. (WIP)
 - Missing double precision builds. (WIP)
 - Missing cross platform determinism. (WIP)
-- Missing webgl builds. (WIP)
 
 ## Supported Platforms
 
@@ -52,7 +51,7 @@ Curently the Godot Box2d addon builds for:
 - Windows (x86_64, x86_32)
 - macOS (x86-64 + arm64 Universal)
 - Linux (x86_64)
-- Android (x86_64, arm64)
+- Android (arm64, arm32, x86_64, x86_32)
 - iOS (arm64)
 - Web (wasm32)
 

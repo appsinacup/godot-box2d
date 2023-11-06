@@ -89,6 +89,7 @@ using ActiveBodyCallback = void (*)(const ActiveBodyInfo &active_body_info);
 struct CollisionFilterInfo {
 	b2FixtureUserData user_data1;
 	b2FixtureUserData user_data2;
+	bool is_valid;
 };
 
 using CollisionFilterCallback = bool (*)(b2World *world_handle, const CollisionFilterInfo *filter_info);
@@ -111,6 +112,7 @@ struct ContactForceEventInfo {
 	b2Fixture *collider2;
 	b2FixtureUserData user_data1;
 	b2FixtureUserData user_data2;
+	bool is_valid;
 };
 
 using ContactForceEventCallback = bool (*)(b2World *world_handle,
@@ -121,10 +123,14 @@ struct ContactPointInfo {
 	b2Vec2 local_pos_2;
 	b2Vec2 velocity_pos_1;
 	b2Vec2 velocity_pos_2;
-	b2Vec2 normal;
-	real_t distance;
-	real_t impulse;
-	real_t tangent_impulse;
+	b2Vec2 normal_1;
+	b2Vec2 normal_2;
+	real_t distance_1;
+	real_t distance_2;
+	real_t impulse_1;
+	real_t tangent_impulse_1;
+	real_t impulse_2;
+	real_t tangent_impulse_2;
 };
 
 using ContactPointCallback = bool (*)(b2World *world_handle,
@@ -193,6 +199,9 @@ struct SimulationSettings {
 	size_t max_ccd_substeps;
 	b2Vec2 gravity;
 };
+
+b2Vec2 Vector2_to_b2Vec2(godot::Vector2 vec);
+godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
 bool are_handles_equal(b2World *handle1, b2World *handle2);
 bool are_handles_equal(b2Body *handle1, b2Body *handle2);
