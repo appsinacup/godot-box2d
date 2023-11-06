@@ -43,8 +43,8 @@ runs:
         SCONS_CACHE_DIR: .scons-cache
       run: |
         cd godot-cpp && \
-        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes && \
-        scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes
+        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes && \
+        scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes
     - name: Build Physics Server Box2D
       shell: sh
       env:
