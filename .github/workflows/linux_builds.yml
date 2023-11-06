@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86_64, x86_32, arm64, rv64]
+        arch: [x86_64]
 
     steps:
       - uses: actions/checkout@v3

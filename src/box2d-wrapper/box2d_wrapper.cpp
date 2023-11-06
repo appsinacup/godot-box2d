@@ -242,30 +242,33 @@ Vector2 b2Vec2_to_Vector2(b2Vec2 vec) {
 	return Vector2(vec.x, vec.y);
 }
 
-void xform_b2Vec2(b2Vec2 &vec, Transform2D transform) {
-	vec = Vector2_to_b2Vec2(transform.xform(b2Vec2_to_Vector2(vec)));
+b2Vec2 xform_b2Vec2(b2Vec2 vec, Transform2D transform) {
+	return Vector2_to_b2Vec2(transform.xform(b2Vec2_to_Vector2(vec)));
 }
 
 void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, ShapeInfo shape_info) {
 	holder.fixture_transforms[handle] = shape_info.transform;
+	b2Shape *shape_template = shape_info.handle;
 	b2Shape *shape = handle->GetShape();
 	ERR_FAIL_COND(!shape);
 	b2Shape::Type shape_type = shape->GetType();
 	Transform2D transform = shape_info.transform;
 	switch (shape_type) {
 		case b2Shape::Type::e_circle: {
+			b2CircleShape *circle_shape_template = (b2CircleShape *)shape_template;
 			b2CircleShape *circle_shape = (b2CircleShape *)shape;
-			xform_b2Vec2(circle_shape->m_p, transform);
+			circle_shape->m_p = xform_b2Vec2(circle_shape_template->m_p, transform);
 			if (transform.get_scale().x == transform.get_scale().y) {
-				circle_shape->m_radius = transform.get_scale().x * circle_shape->m_radius;
+				circle_shape->m_radius = transform.get_scale().x * circle_shape_template->m_radius;
 			}
 		} break;
 		case b2Shape::Type::e_chain: {
+			b2ChainShape *chain_shape_template = (b2ChainShape *)shape_template;
 			b2ChainShape *chain_shape = (b2ChainShape *)shape;
 			b2Vec2 new_vertices[chain_shape->m_count];
 			for (int i = 0; i < chain_shape->m_count; i++) {
-				new_vertices[i] = chain_shape->m_vertices[i];
-				xform_b2Vec2(new_vertices[i], transform);
+				new_vertices[i] = chain_shape_template->m_vertices[i];
+				new_vertices[i] = xform_b2Vec2(new_vertices[i], transform);
 			}
 			int count = chain_shape->m_count;
 			chain_shape->m_count = 0;
@@ -276,11 +279,12 @@ void box2d::collider_set_transform(b2World *world_handle, b2Fixture *handle, Sha
 			}
 		} break;
 		case b2Shape::Type::e_polygon: {
+			b2PolygonShape *polygon_shape_template = (b2PolygonShape *)shape_template;
 			b2PolygonShape *polygon_shape = (b2PolygonShape *)shape;
 			b2Vec2 new_vertices[polygon_shape->m_count];
 			for (int i = 0; i < polygon_shape->m_count; i++) {
-				new_vertices[i] = polygon_shape->m_vertices[i];
-				xform_b2Vec2(new_vertices[i], transform);
+				new_vertices[i] = polygon_shape_template->m_vertices[i];
+				new_vertices[i] = xform_b2Vec2(new_vertices[i], transform);
 			}
 			if (!polygon_shape->Set(new_vertices, polygon_shape->m_count)) {
 				ERR_FAIL_MSG("Cannot update vertices");
