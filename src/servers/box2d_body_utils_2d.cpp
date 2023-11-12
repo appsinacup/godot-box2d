@@ -6,11 +6,12 @@
 
 #define TEST_MOTION_MIN_CONTACT_DEPTH_FACTOR 0.05
 #define BODY_MOTION_RECOVER_ATTEMPTS 4
+#define BODY_MOTION_CAST_COUNT 8
 #define BODY_MOTION_RECOVER_RATIO 0.4
 
 bool should_skip_collision_one_dir(box2d::ContactResult contact, Box2DShape2D *body_shape, Box2DBody2D *collision_body, int shape_index, const Transform2D &col_shape_transform, real_t p_margin, real_t last_step, Vector2 p_motion) {
 	real_t dist = contact.distance;
-	if (!contact.within_margin && body_shape->allows_one_way_collision() && collision_body->is_shape_set_as_one_way_collision(shape_index)) {
+	if (contact.collided && !contact.within_margin && body_shape->allows_one_way_collision() && collision_body->is_shape_set_as_one_way_collision(shape_index)) {
 		real_t valid_depth = 10e20;
 		Vector2 valid_dir = col_shape_transform.columns[1].normalized();
 
@@ -71,9 +72,9 @@ bool Box2DBodyUtils2D::body_motion_recover(
 			}
 
 			Box2DShape2D *body_shape = p_body.get_shape(body_shape_idx);
-			Transform2D const &body_shape_transform = p_transform * p_body.get_shape_transform(body_shape_idx);
+			Transform2D const &body_shape_transform = p_body.get_shape_transform(body_shape_idx);
 			box2d::ShapeInfo body_shape_info =
-					box2d::shape_info_from_body_shape(body_shape->get_box2d_shape(), body_shape_transform);
+					box2d::shape_info_from_body_shape(body_shape->get_box2d_shape(), p_transform, body_shape_transform);
 
 			for (int result_idx = 0; result_idx < result_count; ++result_idx) {
 				box2d::PointHitInfo &result = results[result_idx];
@@ -86,12 +87,11 @@ bool Box2DBodyUtils2D::body_motion_recover(
 
 				Box2DShape2D *col_shape = collision_body->get_shape(shape_index);
 
-				Transform2D const &col_shape_transform = collision_body->get_transform() * collision_body->get_shape_transform(shape_index);
+				Transform2D const &col_shape_transform = collision_body->get_shape_transform(shape_index);
 				box2d::ShapeInfo col_shape_info =
-						box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), col_shape_transform);
+						box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), collision_body->get_transform(), col_shape_transform);
 
 				box2d::ContactResult contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, p_margin);
-
 				if (!contact.collided) {
 					continue;
 				}
@@ -104,12 +104,17 @@ bool Box2DBodyUtils2D::body_motion_recover(
 				recovered = true;
 
 				// Compute plane on b towards a.
-				Vector2 n = Vector2(contact.normal1.x, contact.normal1.y);
+				Vector2 n = -Vector2(contact.normal1.x, contact.normal1.y);
+				n = -(b - a).normalized();
 				// Move it outside as to fit the margin
 				real_t d = n.dot(b);
 
 				// Compute depth on recovered motion.
 				real_t depth = n.dot(a + recover_step) - d;
+				ERR_PRINT("step1 a " + rtos(a.x) + " " + rtos(a.y));
+				ERR_PRINT("step1 b " + rtos(b.x) + " " + rtos(b.y));
+				ERR_PRINT("step1 n " + rtos(n.x) + " " + rtos(n.y));
+				ERR_PRINT("step1 depth " + rtos(depth));
 				if (depth > min_contact_depth + CMP_EPSILON) {
 					// Only recover if there is penetration.
 					recover_step -= n * (depth - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
@@ -124,6 +129,7 @@ bool Box2DBodyUtils2D::body_motion_recover(
 			p_recover_motion += recover_step;
 			p_transform.columns[2] += recover_step;
 		}
+		ERR_PRINT("step1 recover " + rtos(recover_step.length()));
 		recover_attempts--;
 	} while (recover_attempts);
 
@@ -155,8 +161,8 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 		}
 
 		Box2DShape2D *body_shape = p_body.get_shape(body_shape_idx);
-		Transform2D const &body_shape_transform = p_transform * p_body.get_shape_transform(body_shape_idx);
-		box2d::ShapeInfo body_shape_info = box2d::shape_info_from_body_shape(body_shape->get_box2d_shape(), body_shape_transform);
+		Transform2D const &body_shape_transform = p_body.get_shape_transform(body_shape_idx);
+		box2d::ShapeInfo body_shape_info = box2d::shape_info_from_body_shape(body_shape->get_box2d_shape(), p_transform, body_shape_transform);
 
 		// Colliding separation rays allows to properly snap to the ground,
 		// otherwise it's not needed in regular motion.
@@ -183,12 +189,12 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 			ERR_CONTINUE(shape_col_object->get_type() != Box2DCollisionObject2D::TYPE_BODY);
 			Box2DBody2D *collision_body = static_cast<Box2DBody2D *>(shape_col_object);
 			Box2DShape2D *col_shape = collision_body->get_shape(shape_index);
-			Transform2D const &col_shape_transform = collision_body->get_transform() * collision_body->get_shape_transform(shape_index);
-			box2d::ShapeInfo col_shape_info = box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), col_shape_transform);
+			Transform2D const &col_shape_transform = collision_body->get_shape_transform(shape_index);
+			box2d::ShapeInfo col_shape_info = box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), collision_body->get_transform(), col_shape_transform);
 			// stuck logic, check if body collides in place
 			body_shape_info.transform.set_origin(body_shape_transform.get_origin());
 			box2d::ContactResult step_contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
-			if (step_contact.collided && !step_contact.within_margin) {
+			if (step_contact.collided) {
 				if (body_shape->allows_one_way_collision() && collision_body->is_shape_set_as_one_way_collision(shape_index)) {
 					Vector2 direction = col_shape_transform.columns[1].normalized();
 					if (p_motion.normalized().dot(direction) < 0) {
@@ -200,18 +206,26 @@ void Box2DBodyUtils2D::cast_motion(const Box2DSpace2D &p_space, Box2DBody2D &p_b
 				p_best_body_shape = body_shape_idx; //sadly it's the best
 				break;
 			}
+			{
+				body_shape_info.transform.set_origin(body_shape_transform.get_origin() + p_motion);
+				box2d::ContactResult step_contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
+				//test initial overlap, does it collide if going all the way?
+				if (!step_contact.collided) {
+					continue;
+				}
+			}
 
 			//just do kinematic solving
 			real_t low = 0.0;
 			real_t hi = 1.0;
 			real_t fraction_coeff = 0.5;
 
-			for (int k = 0; k < 8; k++) {
+			for (int k = 0; k < BODY_MOTION_CAST_COUNT; k++) {
 				real_t fraction = low + (hi - low) * fraction_coeff;
 
 				body_shape_info.transform.set_origin(body_shape_transform.get_origin() + p_motion * fraction);
 				box2d::ContactResult step_contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, 0.0);
-				if (step_contact.collided && !step_contact.within_margin) {
+				if (step_contact.collided) {
 					hi = fraction;
 					if ((k == 0) || (low > 0.0)) { // Did it not collide before?
 						// When alternating or first iteration, use dichotomy.
@@ -292,8 +306,8 @@ bool Box2DBodyUtils2D::body_motion_collide(const Box2DSpace2D &p_space, Box2DBod
 		}
 
 		Box2DShape2D *body_shape = p_body.get_shape(body_shape_idx);
-		Transform2D const &body_shape_transform = p_transform * p_body.get_shape_transform(body_shape_idx);
-		box2d::ShapeInfo body_shape_info = box2d::shape_info_from_body_shape(body_shape->get_box2d_shape(), body_shape_transform);
+		Transform2D const &body_shape_transform = p_body.get_shape_transform(body_shape_idx);
+		box2d::ShapeInfo body_shape_info = box2d::shape_info_from_body_shape(body_shape->get_box2d_shape(), p_transform, body_shape_transform);
 
 		for (int result_idx = 0; result_idx < result_count; ++result_idx) {
 			box2d::PointHitInfo &result = results[result_idx];
@@ -307,16 +321,13 @@ bool Box2DBodyUtils2D::body_motion_collide(const Box2DSpace2D &p_space, Box2DBod
 			Box2DBody2D *collision_body = static_cast<Box2DBody2D *>(shape_col_object);
 
 			Box2DShape2D *col_shape = collision_body->get_shape(shape_index);
-			Transform2D const &col_shape_transform = collision_body->get_transform() * collision_body->get_shape_transform(shape_index);
-			box2d::ShapeInfo col_shape_info = box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), col_shape_transform);
+			Transform2D const &col_shape_transform = collision_body->get_shape_transform(shape_index);
+			box2d::ShapeInfo col_shape_info = box2d::shape_info_from_body_shape(col_shape->get_box2d_shape(), collision_body->get_transform(), col_shape_transform);
 
 			box2d::ContactResult contact = box2d::shapes_contact(p_space.get_handle(), body_shape_info, col_shape_info, p_margin);
 			if (!contact.collided) {
 				continue;
 			}
-
-			Vector2 a(contact.point1.x, contact.point1.y);
-			Vector2 b(contact.point2.x, contact.point2.y);
 
 			if (should_skip_collision_one_dir(contact, body_shape, collision_body, shape_index, col_shape_transform, p_margin, p_space.get_last_step(), p_motion)) {
 				continue;
@@ -343,9 +354,9 @@ bool Box2DBodyUtils2D::body_motion_collide(const Box2DSpace2D &p_space, Box2DBod
 			// World position from the moving body to get the contact point
 			p_result->collision_point = Vector2(best_contact.point1.x, best_contact.point1.y);
 			// Normal from the collided object to get the contact normal
-			p_result->collision_normal = Vector2(best_contact.normal2.x, best_contact.normal2.y);
+			p_result->collision_normal = -Vector2(best_contact.normal2.x, best_contact.normal2.y);
 			// compute distance without sign
-			p_result->collision_depth = p_margin - best_contact.distance;
+			p_result->collision_depth = best_contact.distance;
 
 			Vector2 local_position = p_result->collision_point - best_collision_body->get_transform().get_origin();
 			p_result->collider_velocity = best_collision_body->get_velocity_at_local_point(local_position);

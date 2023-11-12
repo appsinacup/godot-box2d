@@ -1,6 +1,6 @@
 #include "box2d_circle_shape_2d.h"
 
-b2Shape *Box2DCircleShape2D::create_box2d_shape() const {
+box2d::ShapeHandle Box2DCircleShape2D::create_box2d_shape() const {
 	return box2d::shape_create_circle(radius);
 }
 

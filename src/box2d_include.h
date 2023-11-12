@@ -33,9 +33,10 @@ inline uint64_t handle_pair_hash(b2Fixture *handle1, b2Fixture *handle2) {
 	return hash1 + (hash2 << 32);
 }
 
-inline ShapeInfo shape_info_from_body_shape(b2Shape *shape_handle, const Transform2D &transform) {
+inline ShapeInfo shape_info_from_body_shape(box2d::ShapeHandle shape_handle, const Transform2D &body_transform, const Transform2D &transform) {
 	return ShapeInfo{
 		shape_handle,
+		body_transform,
 		transform,
 	};
 }

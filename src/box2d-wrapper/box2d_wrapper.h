@@ -21,8 +21,19 @@ struct Material {
 	real_t restitution;
 };
 
+struct ShapeHandle {
+	b2Shape **handles;
+	int count;
+};
+
+struct FixtureHandle {
+	b2Fixture **handles;
+	int count;
+};
+
 struct ShapeInfo {
-	b2Shape *handle;
+	ShapeHandle handle;
+	godot::Transform2D body_transform;
 	godot::Transform2D transform;
 };
 
@@ -56,6 +67,12 @@ struct RayHitInfo {
 	b2Vec2 normal;
 	b2Fixture *collider;
 	b2FixtureUserData user_data;
+};
+
+struct ShapeCollideResult {
+	bool collided;
+	b2Vec2 witness1;
+	b2Vec2 witness2;
 };
 
 struct ShapeCastResult {
@@ -205,16 +222,12 @@ godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
 bool are_handles_equal(b2World *handle1, b2World *handle2);
 bool are_handles_equal(b2Body *handle1, b2Body *handle2);
-bool are_handles_equal(b2Fixture *handle1, b2Fixture *handle2);
-bool are_handles_equal(b2Shape *handle1, b2Shape *handle2);
+bool are_handles_equal(FixtureHandle handle1, FixtureHandle handle2);
+bool are_handles_equal(ShapeHandle handle1, ShapeHandle handle2);
 bool are_handles_equal(b2Joint *handle1, b2Joint *handle2);
+bool are_handles_equal(b2Fixture *handle1, b2Fixture *handle2);
 
 void body_add_force(b2World *world_handle, b2Body *body_handle, const b2Vec2 force);
-
-void body_add_force_at_point(b2World *world_handle,
-		b2Body *body_handle,
-		const b2Vec2 force,
-		const b2Vec2 point);
 
 void body_add_torque(b2World *world_handle, b2Body *body_handle, real_t torque);
 
@@ -293,21 +306,22 @@ void body_update_material(b2World *world_handle, b2Body *body_handle, const Mate
 
 void body_wake_up(b2World *world_handle, b2Body *body_handle, bool strong);
 
-b2Fixture *collider_create_sensor(b2World *world_handle,
-		b2Shape *shape_handle,
+FixtureHandle collider_create_sensor(b2World *world_handle,
+		ShapeHandle shape_handle,
 		b2Body *body_handle,
 		b2FixtureUserData user_data);
 
-b2Fixture *collider_create_solid(b2World *world_handle,
-		b2Shape *shape_handle,
+FixtureHandle collider_create_solid(b2World *world_handle,
+		ShapeHandle shape_handle,
 		const Material *mat,
 		b2Body *body_handle,
 		b2FixtureUserData user_data);
 
-void collider_destroy(b2World *world_handle, b2Fixture *handle);
+void collider_destroy(b2World *world_handle, FixtureHandle handle);
 
-void collider_set_transform(b2World *world_handle, b2Fixture *handle, ShapeInfo shape_info);
+void collider_set_transform(b2World *world_handle, FixtureHandle handle, ShapeInfo shape_info);
 
+godot::Transform2D collider_get_transform(b2World *world_handle, FixtureHandle handle);
 godot::Transform2D collider_get_transform(b2World *world_handle, b2Fixture *handle);
 
 Material default_material();
@@ -353,22 +367,24 @@ size_t intersect_shape(b2World *world_handle,
 		PointHitInfo *hit_info_array,
 		size_t hit_info_length,
 		QueryHandleExcludedCallback handle_excluded_callback,
-		const QueryExcludedInfo *handle_excluded_info);
+		const QueryExcludedInfo *handle_excluded_info,
+		double margin);
 
 b2World *invalid_world_handle();
-b2Fixture *invalid_fixture_handle();
+FixtureHandle invalid_fixture_handle();
 b2Body *invalid_body_handle();
-b2Shape *invalid_shape_handle();
+ShapeHandle invalid_shape_handle();
 b2Joint *invalid_joint_handle();
 
 b2FixtureUserData invalid_fixture_user_data();
 b2BodyUserData invalid_body_user_data();
 
-bool is_handle_valid(b2Fixture *handle);
+bool is_handle_valid(FixtureHandle handle);
 bool is_handle_valid(b2World *handle);
-bool is_handle_valid(b2Shape *handle);
+bool is_handle_valid(ShapeHandle handle);
 bool is_handle_valid(b2Body *handle);
 bool is_handle_valid(b2Joint *handle);
+bool is_handle_valid(b2Fixture *handle);
 
 bool is_user_data_valid(b2FixtureUserData user_data);
 bool is_user_data_valid(b2BodyUserData user_data);
@@ -408,26 +424,27 @@ ShapeCastResult shape_casting(b2World *world_handle,
 		bool collide_with_body,
 		bool collide_with_area,
 		QueryHandleExcludedCallback handle_excluded_callback,
-		const QueryExcludedInfo *handle_excluded_info);
+		const QueryExcludedInfo *handle_excluded_info,
+		double margin);
 
-ShapeCastResult shape_collide(const b2Vec2 motion1,
+ShapeCollideResult shape_collide(const b2Vec2 motion1,
 		ShapeInfo shape_info1,
 		const b2Vec2 motion2,
 		ShapeInfo shape_info2);
 
-b2Shape *shape_create_box(const b2Vec2 size);
+ShapeHandle shape_create_box(const b2Vec2 size);
 
-b2Shape *shape_create_capsule(real_t half_height, real_t radius);
+ShapeHandle shape_create_capsule(real_t half_height, real_t radius);
 
-b2Shape *shape_create_circle(real_t radius, b2Vec2 = b2Vec2_zero);
+ShapeHandle shape_create_circle(real_t radius, b2Vec2 = b2Vec2_zero);
 
-b2Shape *shape_create_concave_polyline(const b2Vec2 *points, size_t point_count);
+ShapeHandle shape_create_concave_polyline(const b2Vec2 *points, size_t point_count);
 
-b2Shape *shape_create_convex_polyline(const b2Vec2 *points, size_t point_count);
+ShapeHandle shape_create_convex_polyline(const b2Vec2 *points, size_t point_count);
 
-b2Shape *shape_create_halfspace(const b2Vec2 normal, real_t distance);
+ShapeHandle shape_create_halfspace(const b2Vec2 normal, real_t distance);
 
-void shape_destroy(b2Shape *shape_handle);
+void shape_destroy(ShapeHandle shape_handle);
 
 ContactResult shapes_contact(b2World *world_handle,
 		ShapeInfo shape_info1,

@@ -1,6 +1,6 @@
 #include "box2d_world_boundary_shape_2d.h"
 
-b2Shape *Box2DWorldBoundaryShape2D::create_box2d_shape() const {
+box2d::ShapeHandle Box2DWorldBoundaryShape2D::create_box2d_shape() const {
 	b2Vec2 v = { normal.x, normal.y };
 	return box2d::shape_create_halfspace(v, d);
 }

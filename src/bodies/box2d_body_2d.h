@@ -122,7 +122,7 @@ class Box2DBody2D : public Box2DCollisionObject2D {
 
 protected:
 	virtual void _init_material(box2d::Material &mat) const override;
-	virtual void _init_collider(b2Fixture *collider_handle) const override;
+	virtual void _init_collider(box2d::FixtureHandle collider_handle) const override;
 
 public:
 	_FORCE_INLINE_ void to_add_static_constant_linear_velocity(const Vector2 &linear_velocity) { to_add_linear_velocity = linear_velocity; }

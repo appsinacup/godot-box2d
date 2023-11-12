@@ -1,6 +1,6 @@
 #include "box2d_rectangle_shape_2d.h"
 
-b2Shape *Box2DRectangleShape2D::create_box2d_shape() const {
+box2d::ShapeHandle Box2DRectangleShape2D::create_box2d_shape() const {
 	b2Vec2 v = { half_extents.x * 2.0f, half_extents.y * 2.0f };
 	return box2d::shape_create_box(v);
 }

@@ -194,7 +194,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 	box2d::Material mat = box2d::default_material();
 	_init_material(mat);
 
-	b2Shape *shape_handle = shape.shape->get_box2d_shape();
+	box2d::ShapeHandle shape_handle = shape.shape->get_box2d_shape();
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape_handle));
 
 	b2FixtureUserData user_data;
@@ -225,9 +225,10 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 
 	if (area_detection_counter > 0) {
 		// Keep track of body information for delayed removal
-		space->add_removed_collider(shape.collider_handle, this, p_shape_index);
+		for (int i = 0; i < shape.collider_handle.count; i++) {
+			space->add_removed_collider(shape.collider_handle.handles[i], this, p_shape_index);
+		}
 	}
-
 	box2d::collider_destroy(space_handle, shape.collider_handle);
 	shape.collider_handle = box2d::invalid_fixture_handle(); // collider_handle = box2d ID
 }
@@ -241,10 +242,9 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
-	ERR_FAIL_COND(!box2d::is_handle_valid(shape.collider_handle));
-	ERR_FAIL_COND(!box2d::is_handle_valid(shape.shape->get_box2d_shape()));
 	box2d::ShapeInfo shape_info{
 		shape.shape->get_box2d_shape(),
+		transform,
 		shape.xform,
 	};
 	box2d::collider_set_transform(space_handle, shape.collider_handle, shape_info);

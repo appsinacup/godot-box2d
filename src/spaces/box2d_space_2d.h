@@ -175,8 +175,6 @@ public:
 
 	bool test_body_motion(Box2DBody2D *p_body, const Transform2D &p_from, const Vector2 &p_motion, double p_margin, bool p_collide_separation_ray, bool p_recovery_as_collision, PhysicsServer2DExtensionMotionResult *r_result) const;
 
-	bool box2d_shape_cast(b2Shape *p_shape_handle, const Transform2D &p_transform, const Vector2 &p_motion, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, box2d::ShapeCastResult *p_results, int32_t p_max_results, int32_t *p_result_count) const;
-	int box2d_intersect_shape(b2Shape *p_shape_handle, const Transform2D &p_transform, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, box2d::PointHitInfo *p_results, int32_t p_max_results, int32_t *p_result_count, RID p_exclude_body) const;
 	int box2d_intersect_aabb(Rect2 p_aabb, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas, box2d::PointHitInfo *p_results, int32_t p_max_results, int32_t *p_result_count, RID p_exclude_body) const;
 	Box2DSpace2D();
 	~Box2DSpace2D();

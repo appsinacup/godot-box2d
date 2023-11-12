@@ -1,6 +1,6 @@
 #include "box2d_concave_polygon_shape_2d.h"
 
-b2Shape *Box2DConcavePolygonShape2D::create_box2d_shape() const {
+box2d::ShapeHandle Box2DConcavePolygonShape2D::create_box2d_shape() const {
 	int point_count = points.size();
 	ERR_FAIL_COND_V(point_count < 3, box2d::invalid_shape_handle());
 	b2Vec2 *box2d_points = (b2Vec2 *)alloca(point_count * sizeof(b2Vec2));

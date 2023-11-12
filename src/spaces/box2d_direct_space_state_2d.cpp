@@ -92,15 +92,15 @@ bool Box2DDirectSpaceState2D::_intersect_ray(const Vector2 &from, const Vector2 
 bool Box2DDirectSpaceState2D::_cast_motion(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, float *p_closest_safe, float *p_closest_unsafe) {
 	Box2DShape2D *shape = space->get_shape_from_rid(shape_rid);
 	ERR_FAIL_COND_V(!shape, false);
-	b2Shape *shape_handle = shape->get_box2d_shape();
+	box2d::ShapeHandle shape_handle = shape->get_box2d_shape();
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_handle), false);
 
 	b2Vec2 box2d_motion = { motion.x, motion.y };
-	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, transform);
+	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, Transform2D(), transform);
 
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
-	real_t hit = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info).toi;
+	real_t hit = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info, margin).toi;
 	*p_closest_safe = hit;
 	*p_closest_unsafe = hit;
 	return true;
@@ -109,13 +109,13 @@ bool Box2DDirectSpaceState2D::_cast_motion(const RID &shape_rid, const Transform
 bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, void *results, int32_t max_results, int32_t *result_count) {
 	Box2DShape2D *shape = space->get_shape_from_rid(shape_rid);
 	ERR_FAIL_COND_V(!shape, false);
-	b2Shape *shape_handle = shape->get_box2d_shape();
+	box2d::ShapeHandle shape_handle = shape->get_box2d_shape();
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_handle), false);
 
 	b2Vec2 box2d_motion{ motion.x, motion.y };
 
 	Vector2 *results_out = static_cast<Vector2 *>(results);
-	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, transform);
+	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, Transform2D(), transform);
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
 	query_excluded_info.query_exclude = (b2Fixture **)alloca((max_results) * sizeof(b2Fixture *));
@@ -124,7 +124,7 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 	int cpt = 0;
 	int array_idx = 0;
 	do {
-		box2d::ShapeCastResult result = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info);
+		box2d::ShapeCastResult result = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info, margin);
 		if (!result.collided) {
 			break;
 		}
@@ -143,11 +143,11 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeResult *r_results, int32_t p_result_max) {
 	Box2DShape2D *shape = space->get_shape_from_rid(shape_rid);
 	ERR_FAIL_COND_V(!shape, false);
-	b2Shape *shape_handle = shape->get_box2d_shape();
+	box2d::ShapeHandle shape_handle = shape->get_box2d_shape();
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_handle), false);
 
 	b2Vec2 box2d_motion{ motion.x, motion.y };
-	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, transform);
+	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, Transform2D(), transform);
 
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
@@ -156,7 +156,7 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 
 	int cpt = 0;
 	do {
-		box2d::ShapeCastResult result = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info);
+		box2d::ShapeCastResult result = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info, margin);
 		if (!result.collided) {
 			break;
 		}
@@ -187,15 +187,15 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 bool Box2DDirectSpaceState2D::_rest_info(const RID &shape_rid, const Transform2D &transform, const Vector2 &motion, double margin, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, PhysicsServer2DExtensionShapeRestInfo *r_info) {
 	Box2DShape2D *shape = space->get_shape_from_rid(shape_rid);
 	ERR_FAIL_COND_V(!shape, false);
-	b2Shape *shape_handle = shape->get_box2d_shape();
+	box2d::ShapeHandle shape_handle = shape->get_box2d_shape();
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_handle), false);
 
 	b2Vec2 box2d_motion{ motion.x, motion.y };
-	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, transform);
+	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, Transform2D(), transform);
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
 
-	box2d::ShapeCastResult result = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info);
+	box2d::ShapeCastResult result = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info, margin);
 	if (!result.collided) {
 		return false;
 	}

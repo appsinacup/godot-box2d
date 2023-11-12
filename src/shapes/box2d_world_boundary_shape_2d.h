@@ -8,7 +8,7 @@ class Box2DWorldBoundaryShape2D : public Box2DShape2D {
 	real_t d = 0.0;
 
 protected:
-	virtual b2Shape *create_box2d_shape() const override;
+	virtual box2d::ShapeHandle create_box2d_shape() const override;
 
 public:
 	virtual PhysicsServer2D::ShapeType get_type() const override { return PhysicsServer2D::SHAPE_WORLD_BOUNDARY; }

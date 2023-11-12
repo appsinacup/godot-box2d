@@ -49,7 +49,6 @@ RID Box2DPhysicsServer2D::_shape_create(ShapeType p_shape) {
 		} break;
 		case SHAPE_CUSTOM: {
 			ERR_FAIL_V_MSG(RID(), "Unsupported shape");
-
 		} break;
 		default:
 			ERR_FAIL_V_MSG(RID(), "Unsupported shape");
@@ -128,12 +127,12 @@ bool Box2DPhysicsServer2D::_shape_collide(const RID &p_shape_A, const Transform2
 	Box2DShape2D *shape_B = shape_owner.get_or_null(p_shape_B);
 	ERR_FAIL_COND_V(!shape_B, false);
 
-	b2Shape *shape_A_handle = shape_A->get_box2d_shape();
-	b2Shape *shape_B_handle = shape_B->get_box2d_shape();
+	box2d::ShapeHandle shape_A_handle = shape_A->get_box2d_shape();
+	box2d::ShapeHandle shape_B_handle = shape_B->get_box2d_shape();
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_A_handle), false);
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(shape_B_handle), false);
-	box2d::ShapeInfo shape_A_info = box2d::shape_info_from_body_shape(shape_A_handle, p_xform_A);
-	box2d::ShapeInfo shape_B_info = box2d::shape_info_from_body_shape(shape_B_handle, p_xform_B);
+	box2d::ShapeInfo shape_A_info = box2d::shape_info_from_body_shape(shape_A_handle, Transform2D(), p_xform_A);
+	box2d::ShapeInfo shape_B_info = box2d::shape_info_from_body_shape(shape_B_handle, Transform2D(), p_xform_B);
 	b2Vec2 box2d_A_motion{ p_motion_A.x, p_motion_A.y };
 	b2Vec2 box2d_B_motion{ p_motion_B.x, p_motion_B.y };
 
@@ -142,7 +141,7 @@ bool Box2DPhysicsServer2D::_shape_collide(const RID &p_shape_A, const Transform2
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 
 	int array_idx = 0;
-	box2d::ShapeCastResult result = box2d::shape_collide(box2d_A_motion, shape_A_info, box2d_A_motion, shape_A_info);
+	box2d::ShapeCollideResult result = box2d::shape_collide(box2d_A_motion, shape_A_info, box2d_A_motion, shape_A_info);
 	if (!result.collided) {
 		return false;
 	}

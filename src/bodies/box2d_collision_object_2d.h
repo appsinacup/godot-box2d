@@ -32,7 +32,7 @@ private:
 		bool disabled = false;
 		bool one_way_collision = false;
 		real_t one_way_collision_margin = 0.0;
-		b2Fixture *collider_handle = box2d::invalid_fixture_handle();
+		box2d::FixtureHandle collider_handle = box2d::invalid_fixture_handle();
 	};
 
 	LocalVector<Shape> shapes;
@@ -57,7 +57,7 @@ protected:
 	void _update_transform();
 
 	virtual void _init_material(box2d::Material &mat) const {}
-	virtual void _init_collider(b2Fixture *collider_handle) const {}
+	virtual void _init_collider(box2d::FixtureHandle collider_handle) const {}
 
 	virtual void _shapes_changed() = 0;
 	void _set_space(Box2DSpace2D *p_space);

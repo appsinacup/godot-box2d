@@ -480,7 +480,7 @@ void Box2DBody2D::_init_material(box2d::Material &mat) const {
 	mat.restitution = bounce;
 }
 
-void Box2DBody2D::_init_collider(b2Fixture *collider_handle) const {
+void Box2DBody2D::_init_collider(box2d::FixtureHandle collider_handle) const {
 	b2World *space_handle = get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
@@ -786,7 +786,8 @@ void Box2DBody2D::add_constant_force(const Vector2 &p_force, const Vector2 &p_po
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 	b2Vec2 force = { p_force.x, p_force.y };
 	b2Vec2 pos = { p_position.x, p_position.y };
-	box2d::body_add_force_at_point(space_handle, body_handle, force, pos);
+	box2d::body_add_force(space_handle, body_handle, force);
+	box2d::body_add_torque(space_handle, body_handle, (p_position - get_center_of_mass()).cross(p_force));
 }
 
 void Box2DBody2D::add_constant_torque(real_t p_torque) {

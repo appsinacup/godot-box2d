@@ -7,7 +7,7 @@ class Box2DRectangleShape2D : public Box2DShape2D {
 	Vector2 half_extents;
 
 protected:
-	virtual b2Shape *create_box2d_shape() const override;
+	virtual box2d::ShapeHandle create_box2d_shape() const override;
 
 public:
 	_FORCE_INLINE_ const Vector2 &get_half_extents() const { return half_extents; }

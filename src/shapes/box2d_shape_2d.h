@@ -26,12 +26,12 @@ class Box2DShape2D {
 
 	HashMap<Box2DShapeOwner2D *, int> owners;
 
-	b2Shape *shape_handle = box2d::invalid_shape_handle();
+	box2d::ShapeHandle shape_handle = box2d::invalid_shape_handle();
 
 protected:
 	void configure(const Rect2 &p_aabb);
 
-	virtual b2Shape *create_box2d_shape() const = 0;
+	virtual box2d::ShapeHandle create_box2d_shape() const = 0;
 	void destroy_box2d_shape();
 
 public:
@@ -42,7 +42,7 @@ public:
 
 	virtual bool allows_one_way_collision() const { return true; }
 
-	b2Shape *get_box2d_shape();
+	box2d::ShapeHandle get_box2d_shape();
 
 	_FORCE_INLINE_ Rect2 get_aabb(Vector2 origin = Vector2()) const {
 		Rect2 aabb_clone = aabb;

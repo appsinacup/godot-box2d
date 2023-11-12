@@ -1,6 +1,6 @@
 #include "box2d_segment_shape_2d.h"
 
-b2Shape *Box2DSegmentShape2D::create_box2d_shape() const {
+box2d::ShapeHandle Box2DSegmentShape2D::create_box2d_shape() const {
 	Vector2 direction = b - a;
 	direction.normalize();
 

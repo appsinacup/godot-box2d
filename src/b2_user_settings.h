@@ -16,7 +16,7 @@
 
 // The maximum number of vertices on a convex polygon. You cannot increase
 // this too much because b2BlockAllocator has a maximum object size.
-#define b2_maxPolygonVertices 256
+#define b2_maxPolygonVertices 64
 
 class Box2DCollisionObject2D;
 class Box2DShape2D;
