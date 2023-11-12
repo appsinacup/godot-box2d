@@ -416,6 +416,21 @@ b2Joint *joint_create_revolute(b2World *world_handle,
 		real_t motor_target_velocity,
 		bool motor_enabled);
 
+b2Joint *joint_create_distance_joint(b2World *world_handle,
+		b2Body *body_handle_1,
+		b2Body *body_handle_2,
+		const b2Vec2 anchor_1,
+		const b2Vec2 anchor_2,
+		real_t rest_length,
+		real_t stiffness,
+		real_t damping);
+
+void joint_change_distance_joint(b2World *world_handle,
+		b2Joint *joint_handle,
+		real_t rest_length,
+		real_t stiffness,
+		real_t damping);
+
 void joint_destroy(b2World *world_handle, b2Joint *joint_handle);
 
 ShapeCastResult shape_casting(b2World *world_handle,

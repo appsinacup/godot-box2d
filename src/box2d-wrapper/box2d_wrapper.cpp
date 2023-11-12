@@ -831,6 +831,36 @@ b2Joint *box2d::joint_create_revolute(b2World *world_handle,
 	return world_handle->CreateJoint(&joint_def);
 }
 
+void box2d::joint_change_distance_joint(b2World *world_handle,
+		b2Joint *joint_handle,
+		real_t rest_length,
+		real_t stiffness,
+		real_t damping) {
+	b2DistanceJoint *joint = (b2DistanceJoint *)joint_handle;
+	joint->SetDamping(damping);
+	joint->SetStiffness(stiffness);
+	joint->SetLength(rest_length);
+}
+
+b2Joint *box2d::joint_create_distance_joint(b2World *world_handle,
+		b2Body *body_handle_1,
+		b2Body *body_handle_2,
+		const b2Vec2 anchor_1,
+		const b2Vec2 anchor_2,
+		real_t rest_length,
+		real_t stiffness,
+		real_t damping) {
+	b2DistanceJointDef joint_def;
+	joint_def.bodyA = body_handle_1;
+	joint_def.bodyB = body_handle_2;
+	joint_def.localAnchorA = anchor_1;
+	joint_def.localAnchorB = anchor_2;
+	joint_def.length = rest_length;
+	joint_def.stiffness = stiffness;
+	joint_def.damping = damping;
+	return world_handle->CreateJoint(&joint_def);
+}
+
 void box2d::joint_destroy(b2World *world_handle, b2Joint *joint_handle) {
 	world_handle->DestroyJoint(joint_handle);
 }
