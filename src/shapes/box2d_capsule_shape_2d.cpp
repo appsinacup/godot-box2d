@@ -1,7 +1,7 @@
 #include "box2d_capsule_shape_2d.h"
 
 box2d::ShapeHandle Box2DCapsuleShape2D::create_box2d_shape() const {
-	return box2d::shape_create_capsule((height / 2.0) - radius, radius);
+	return box2d::shape_create_capsule(height / 2.0, radius);
 }
 
 void Box2DCapsuleShape2D::set_data(const Variant &p_data) {

@@ -7,7 +7,7 @@ int Box2DDirectSpaceState2D::_intersect_point(const Vector2 &position, uint64_t 
 
 	b2Vec2 box2d_pos = { position.x, position.y };
 
-	box2d::PointHitInfo *hit_info_array = (box2d::PointHitInfo *)alloca(p_result_max * sizeof(box2d::PointHitInfo));
+	box2d::PointHitInfo *hit_info_array = (box2d::PointHitInfo *)memalloc(p_result_max * sizeof(box2d::PointHitInfo));
 
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_canvas_instance_id = canvas_instance_id;
@@ -118,7 +118,7 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, Transform2D(), transform);
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
-	query_excluded_info.query_exclude = (b2Fixture **)alloca((max_results) * sizeof(b2Fixture *));
+	query_excluded_info.query_exclude = (b2Fixture **)memalloc((max_results) * sizeof(b2Fixture *));
 	query_excluded_info.query_exclude_size = 0;
 
 	int cpt = 0;
@@ -151,7 +151,7 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
-	query_excluded_info.query_exclude = (b2Fixture **)alloca((p_result_max) * sizeof(b2Fixture *));
+	query_excluded_info.query_exclude = (b2Fixture **)memalloc((p_result_max) * sizeof(b2Fixture *));
 	query_excluded_info.query_exclude_size = 0;
 
 	int cpt = 0;

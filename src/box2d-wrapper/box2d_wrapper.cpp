@@ -417,15 +417,18 @@ FixtureHandle box2d::collider_create_sensor(b2World *world_handle,
 		ShapeHandle shape_handle,
 		b2Body *body_handle,
 		b2FixtureUserData user_data) {
-	FixtureHandle fixture_handle;
-	fixture_handle.handles = (b2Fixture **)alloca((shape_handle.count) * sizeof(b2Fixture *));
+	FixtureHandle fixture_handle{
+		(b2Fixture **)memalloc((shape_handle.count) * sizeof(b2Fixture *)),
+		shape_handle.count
+	};
 	for (int i = 0; i < shape_handle.count; i++) {
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
 		fixture_def.density = 1.0f;
 		fixture_def.isSensor = true;
 		fixture_def.userData = user_data;
-		fixture_handle.handles[i] = body_handle->CreateFixture(&fixture_def);
+		b2Fixture *fixture = body_handle->CreateFixture(&fixture_def);
+		fixture_handle.handles[i] = fixture;
 	}
 	return fixture_handle;
 }
@@ -435,15 +438,18 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 		const Material *mat,
 		b2Body *body_handle,
 		b2FixtureUserData user_data) {
-	FixtureHandle fixture_handle;
-	fixture_handle.handles = (b2Fixture **)alloca((shape_handle.count) * sizeof(b2Fixture *));
+	FixtureHandle fixture_handle{
+		(b2Fixture **)memalloc((shape_handle.count) * sizeof(b2Fixture *)),
+		shape_handle.count
+	};
 	for (int i = 0; i < shape_handle.count; i++) {
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
 		fixture_def.density = 1.0f;
 		fixture_def.isSensor = false;
 		fixture_def.userData = user_data;
-		fixture_handle.handles[i] = body_handle->CreateFixture(&fixture_def);
+		b2Fixture *fixture = body_handle->CreateFixture(&fixture_def);
+		fixture_handle.handles[i] = fixture;
 	}
 	return fixture_handle;
 }
@@ -451,7 +457,10 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 void box2d::collider_destroy(b2World *world_handle, FixtureHandle handle) {
 	ERR_FAIL_COND(!is_handle_valid(handle));
 	b2Body *body = handle.handles[0]->GetBody();
-	ERR_FAIL_COND(!is_handle_valid(body));
+	if (!is_handle_valid(body)) {
+		// already destroyed
+		return;
+	}
 	for (b2Fixture *fixture = body->GetFixtureList(); fixture != nullptr; fixture = fixture->GetNext()) {
 		for (int i = 0; i < handle.count; i++) {
 			if (fixture == handle.handles[i]) {
@@ -749,7 +758,7 @@ bool box2d::is_user_data_valid(b2BodyUserData user_data) {
 }
 
 bool box2d::is_handle_valid(FixtureHandle handle) {
-	return !handle.count || handle.handles != nullptr;
+	return handle.count > 0 || handle.handles != nullptr;
 }
 bool box2d::is_handle_valid(b2World *handle) {
 	return handle != nullptr;
@@ -758,7 +767,7 @@ bool box2d::is_handle_valid(b2Fixture *handle) {
 	return handle != nullptr;
 }
 bool box2d::is_handle_valid(ShapeHandle handle) {
-	return !handle.count || handle.handles != nullptr;
+	return handle.count > 0 || handle.handles != nullptr;
 }
 bool box2d::is_handle_valid(b2Body *handle) {
 	return handle != nullptr;
@@ -931,9 +940,10 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 ShapeHandle box2d::shape_create_box(const b2Vec2 size) {
 	ERR_FAIL_COND_V(size.x < CMP_EPSILON, invalid_shape_handle());
 	ERR_FAIL_COND_V(size.y < CMP_EPSILON, invalid_shape_handle());
-	b2Shape **shapes = (b2Shape **)alloca((1) * sizeof(b2Shape *));
-	b2PolygonShape *shape = (b2PolygonShape *)shapes[0];
+	b2Shape **shapes = (b2Shape **)memalloc((1) * sizeof(b2Shape *));
+	b2PolygonShape *shape = memnew(b2PolygonShape);
 	shape->SetAsBox(size.x * 0.5, size.y * 0.5);
+	shapes[0] = shape;
 	return ShapeHandle{
 		shapes,
 		1
@@ -944,17 +954,17 @@ ShapeHandle box2d::shape_create_capsule(real_t half_height, real_t radius) {
 	ERR_FAIL_COND_V(radius < CMP_EPSILON, invalid_shape_handle());
 	ERR_FAIL_COND_V(half_height < CMP_EPSILON, invalid_shape_handle());
 	ERR_FAIL_COND_V(half_height < radius + CMP_EPSILON, invalid_shape_handle());
-	ShapeHandle top_circle = shape_create_circle(radius, { 0.0, -half_height });
+	ShapeHandle top_circle = shape_create_circle(radius, { 0.0, -half_height * real_t(0.5) });
 	ERR_FAIL_COND_V(!is_handle_valid(top_circle), invalid_shape_handle());
-	ShapeHandle bottom_circle = shape_create_circle(radius, { 0.0, half_height });
+	ShapeHandle bottom_circle = shape_create_circle(radius, { 0.0, half_height * real_t(0.5) });
 	ERR_FAIL_COND_V(!is_handle_valid(bottom_circle), invalid_shape_handle());
 	ShapeHandle square = shape_create_box({ radius, half_height - radius });
 	ERR_FAIL_COND_V(!is_handle_valid(square), invalid_shape_handle());
 	b2Shape **shapes = (b2Shape **)memalloc((3) * sizeof(b2Shape *));
 	// TODO fix this leak.
 	shapes[0] = top_circle.handles[0];
-	shapes[1] = top_circle.handles[1];
-	shapes[2] = top_circle.handles[2];
+	shapes[1] = bottom_circle.handles[0];
+	shapes[2] = square.handles[0];
 	return ShapeHandle{
 		shapes,
 		3
@@ -964,9 +974,10 @@ ShapeHandle box2d::shape_create_capsule(real_t half_height, real_t radius) {
 ShapeHandle box2d::shape_create_circle(real_t radius, b2Vec2 pos) {
 	ERR_FAIL_COND_V(radius < CMP_EPSILON, invalid_shape_handle());
 	b2Shape **shapes = (b2Shape **)memalloc((1) * sizeof(b2Shape *));
-	b2CircleShape *shape = (b2CircleShape *)shapes[0];
+	b2CircleShape *shape = memnew(b2CircleShape);
 	shape->m_radius = radius;
 	shape->m_p = pos;
+	shapes[0] = shape;
 	return ShapeHandle{
 		shapes,
 		1
@@ -975,8 +986,9 @@ ShapeHandle box2d::shape_create_circle(real_t radius, b2Vec2 pos) {
 
 ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t point_count) {
 	b2Shape **shapes = (b2Shape **)memalloc((1) * sizeof(b2Shape *));
-	b2ChainShape *shape = (b2ChainShape *)shapes[0];
+	b2ChainShape *shape = memnew(b2ChainShape);
 	shape->CreateLoop(points, point_count);
+	shapes[0] = shape;
 	ERR_FAIL_COND_V(!shape->m_count, invalid_shape_handle());
 	return ShapeHandle{
 		shapes,
@@ -986,11 +998,12 @@ ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t po
 
 ShapeHandle box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t point_count) {
 	b2Shape **shapes = (b2Shape **)memalloc((1) * sizeof(b2Shape *));
-	b2PolygonShape *shape = (b2PolygonShape *)shapes[0];
+	b2PolygonShape *shape = memnew(b2PolygonShape);
 	shape->Set(points, point_count);
 	if (shape->m_count == 0) {
 		ERR_FAIL_V(invalid_shape_handle());
 	}
+	shapes[0] = shape;
 	return ShapeHandle{
 		shapes,
 		1
@@ -1000,7 +1013,7 @@ ShapeHandle box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t poi
 ShapeHandle box2d::shape_create_halfspace(const b2Vec2 normal, real_t distance) {
 	real_t world_size = 1000000.0;
 	b2Shape **shapes = (b2Shape **)memalloc((1) * sizeof(b2Shape *));
-	b2PolygonShape *shape = (b2PolygonShape *)shapes[0];
+	b2PolygonShape *shape = memnew(b2PolygonShape);
 	b2Vec2 points[4];
 	b2Vec2 right(normal.y, -normal.x);
 	b2Vec2 left(-right);
@@ -1013,6 +1026,8 @@ ShapeHandle box2d::shape_create_halfspace(const b2Vec2 normal, real_t distance) 
 	points[2] = right - world_size * normal;
 	points[3] = right - world_size * normal;
 	bool result = shape->Set(points, 4);
+	shapes[0] = shape;
+	ERR_FAIL_COND_V(!result, invalid_shape_handle());
 	return ShapeHandle{
 		shapes,
 		1

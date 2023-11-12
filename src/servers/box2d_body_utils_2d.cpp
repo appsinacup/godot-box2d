@@ -111,10 +111,6 @@ bool Box2DBodyUtils2D::body_motion_recover(
 
 				// Compute depth on recovered motion.
 				real_t depth = n.dot(a + recover_step) - d;
-				ERR_PRINT("step1 a " + rtos(a.x) + " " + rtos(a.y));
-				ERR_PRINT("step1 b " + rtos(b.x) + " " + rtos(b.y));
-				ERR_PRINT("step1 n " + rtos(n.x) + " " + rtos(n.y));
-				ERR_PRINT("step1 depth " + rtos(depth));
 				if (depth > min_contact_depth + CMP_EPSILON) {
 					// Only recover if there is penetration.
 					recover_step -= n * (depth - min_contact_depth) * BODY_MOTION_RECOVER_RATIO;
@@ -129,7 +125,6 @@ bool Box2DBodyUtils2D::body_motion_recover(
 			p_recover_motion += recover_step;
 			p_transform.columns[2] += recover_step;
 		}
-		ERR_PRINT("step1 recover " + rtos(recover_step.length()));
 		recover_attempts--;
 	} while (recover_attempts);
 

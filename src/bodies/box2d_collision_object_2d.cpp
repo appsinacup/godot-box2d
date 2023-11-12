@@ -257,10 +257,6 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
-		// This call also destroys the colliders
-		box2d::body_destroy(space_handle, body_handle);
-		body_handle = box2d::invalid_body_handle();
-
 		for (uint32_t i = 0; i < shapes.size(); i++) {
 			Shape &shape = shapes[i];
 			if (shape.disabled) {
@@ -269,6 +265,9 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 
 			_destroy_shape(shape, i);
 		}
+		// This call also destroys the colliders
+		box2d::body_destroy(space_handle, body_handle);
+		body_handle = box2d::invalid_body_handle();
 
 		// Reset area detection counter to keep it consistent for new detections
 		area_detection_counter = 0;

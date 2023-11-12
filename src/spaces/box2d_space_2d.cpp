@@ -760,8 +760,6 @@ bool Box2DSpace2D::test_body_motion(Box2DBody2D *p_body, const Transform2D &p_fr
 	if (r_result) {
 		r_result->travel = Vector2();
 	}
-	static int count = 0;
-	ERR_PRINT("step0 " + rtos(count++));
 	Transform2D body_transform = p_from; // Because body_transform needs to be modified during recovery
 	// Step 1: recover motion.
 	// Expand the body colliders by the margin (grow) and check if now it collides with a collider,
@@ -777,7 +775,6 @@ bool Box2DSpace2D::test_body_motion(Box2DBody2D *p_body, const Transform2D &p_fr
 	int best_body_shape = -1;
 	Box2DBodyUtils2D::cast_motion(*this, *p_body, body_transform, p_motion, p_collide_separation_ray, contact_max_allowed_penetration, margin, best_safe, best_unsafe, best_body_shape);
 
-	ERR_PRINT("step2 safe " + rtos(best_safe) + " " + rtos(best_unsafe));
 	// Step 3: Rest Info
 	// Apply the motion and fill the collision information
 	bool collided = false;
@@ -807,7 +804,6 @@ bool Box2DSpace2D::test_body_motion(Box2DBody2D *p_body, const Transform2D &p_fr
 			r_result->collision_unsafe_fraction = 1.0f;
 		}
 	}
-	ERR_PRINT("step3 col " + rtos(collided) + " " + rtos(r_result->collision_normal.x) + " " + rtos(r_result->collision_normal.y));
 
 	return collided;
 }
@@ -818,7 +814,7 @@ int Box2DSpace2D::box2d_intersect_aabb(Rect2 p_aabb, uint32_t p_collision_mask, 
 	b2Vec2 rect_begin{ p_aabb.position.x, p_aabb.position.y };
 	b2Vec2 rect_end{ p_aabb.get_end().x, p_aabb.get_end().y };
 	box2d::QueryExcludedInfo handle_excluded_info = box2d::default_query_excluded_info();
-	handle_excluded_info.query_exclude = (b2Fixture **)alloca((p_max_results) * sizeof(b2Fixture *));
+	handle_excluded_info.query_exclude = (b2Fixture **)memalloc((p_max_results) * sizeof(b2Fixture *));
 	handle_excluded_info.query_collision_layer_mask = p_collision_mask;
 	handle_excluded_info.query_exclude_size = 0;
 	handle_excluded_info.query_exclude_body = p_exclude_body.get_id();
