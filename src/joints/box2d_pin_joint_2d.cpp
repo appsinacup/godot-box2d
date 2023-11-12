@@ -79,6 +79,6 @@ Box2DPinJoint2D::Box2DPinJoint2D(const Vector2 &p_pos, Box2DBody2D *p_body_a, Bo
 	ERR_FAIL_COND(p_body_a->get_space() != p_body_b->get_space());
 	space_handle = p_body_a->get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-	handle = box2d::joint_create_revolute(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), box2d_anchor_A, box2d_anchor_B, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
+	handle = box2d::joint_create_revolute(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), box2d_anchor_A, box2d_anchor_B, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled, is_disabled_collisions_between_bodies());
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
 }

@@ -776,6 +776,10 @@ bool box2d::is_handle_valid(b2Joint *handle) {
 	return handle != nullptr;
 }
 
+void box2d::joint_set_disable_collision(b2Joint *joint_handle,
+		bool disable_collision) {
+}
+
 void box2d::joint_change_revolute_params(b2World *world_handle,
 		b2Joint *joint_handle,
 		real_t angular_limit_lower,
@@ -796,14 +800,17 @@ b2Joint *box2d::joint_create_prismatic(b2World *world_handle,
 		const b2Vec2 axis,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
-		const b2Vec2 limits) {
+		const b2Vec2 limits,
+		bool disable_collision) {
 	b2PrismaticJointDef joint_def;
-	joint_def.bodyA = body_handle_1;
-	joint_def.bodyB = body_handle_2;
+	joint_def.Initialize(body_handle_1, body_handle_2, anchor_1, axis);
 	joint_def.localAnchorA = anchor_1;
 	joint_def.localAnchorB = anchor_2;
-	joint_def.lowerTranslation = limits.x;
-	joint_def.upperTranslation = limits.y;
+	joint_def.localAxisA = axis;
+	joint_def.lowerTranslation = 0;
+	joint_def.upperTranslation = limits.x + limits.y * 2;
+	joint_def.enableLimit = true;
+	joint_def.collideConnected = !disable_collision;
 	return world_handle->CreateJoint(&joint_def);
 }
 
@@ -816,10 +823,10 @@ b2Joint *box2d::joint_create_revolute(b2World *world_handle,
 		real_t angular_limit_upper,
 		bool angular_limit_enabled,
 		real_t motor_target_velocity,
-		bool motor_enabled) {
+		bool motor_enabled,
+		bool disable_collision) {
 	b2RevoluteJointDef joint_def;
-	joint_def.bodyA = body_handle_1;
-	joint_def.bodyB = body_handle_2;
+	joint_def.Initialize(body_handle_1, body_handle_2, anchor_1);
 	joint_def.localAnchorA = anchor_1;
 	joint_def.localAnchorB = anchor_2;
 	joint_def.enableLimit = angular_limit_enabled;
@@ -828,6 +835,8 @@ b2Joint *box2d::joint_create_revolute(b2World *world_handle,
 	joint_def.upperAngle = angular_limit_upper;
 	joint_def.motorSpeed = motor_target_velocity;
 	joint_def.maxMotorTorque = 100000.0;
+	joint_def.collideConnected = true;
+	joint_def.collideConnected = !disable_collision;
 	return world_handle->CreateJoint(&joint_def);
 }
 
@@ -849,7 +858,8 @@ b2Joint *box2d::joint_create_distance_joint(b2World *world_handle,
 		const b2Vec2 anchor_2,
 		real_t rest_length,
 		real_t stiffness,
-		real_t damping) {
+		real_t damping,
+		bool disable_collision) {
 	b2DistanceJointDef joint_def;
 	joint_def.bodyA = body_handle_1;
 	joint_def.bodyB = body_handle_2;
@@ -858,6 +868,7 @@ b2Joint *box2d::joint_create_distance_joint(b2World *world_handle,
 	joint_def.length = rest_length;
 	joint_def.stiffness = stiffness;
 	joint_def.damping = damping;
+	joint_def.collideConnected = !disable_collision;
 	return world_handle->CreateJoint(&joint_def);
 }
 

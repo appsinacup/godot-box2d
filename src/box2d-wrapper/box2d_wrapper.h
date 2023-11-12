@@ -389,6 +389,9 @@ bool is_handle_valid(b2Fixture *handle);
 bool is_user_data_valid(b2FixtureUserData user_data);
 bool is_user_data_valid(b2BodyUserData user_data);
 
+void joint_set_disable_collision(b2Joint *joint_handle,
+		bool disable_collision);
+
 void joint_change_revolute_params(b2World *world_handle,
 		b2Joint *joint_handle,
 		real_t angular_limit_lower,
@@ -403,7 +406,8 @@ b2Joint *joint_create_prismatic(b2World *world_handle,
 		const b2Vec2 axis,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
-		const b2Vec2 limits);
+		const b2Vec2 limits,
+		bool disable_collision);
 
 b2Joint *joint_create_revolute(b2World *world_handle,
 		b2Body *body_handle_1,
@@ -414,7 +418,8 @@ b2Joint *joint_create_revolute(b2World *world_handle,
 		real_t angular_limit_upper,
 		bool angular_limit_enabled,
 		real_t motor_target_velocity,
-		bool motor_enabled);
+		bool motor_enabled,
+		bool disable_collision);
 
 b2Joint *joint_create_distance_joint(b2World *world_handle,
 		b2Body *body_handle_1,
@@ -423,7 +428,8 @@ b2Joint *joint_create_distance_joint(b2World *world_handle,
 		const b2Vec2 anchor_2,
 		real_t rest_length,
 		real_t stiffness,
-		real_t damping);
+		real_t damping,
+		bool disable_collision);
 
 void joint_change_distance_joint(b2World *world_handle,
 		b2Joint *joint_handle,

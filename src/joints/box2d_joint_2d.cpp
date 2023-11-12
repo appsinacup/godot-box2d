@@ -14,6 +14,13 @@ void Box2DJoint2D::copy_settings_from(Box2DJoint2D *p_joint) {
 	disable_collisions_between_bodies(p_joint->is_disabled_collisions_between_bodies());
 }
 
+void Box2DJoint2D::disable_collisions_between_bodies(const bool p_disabled) {
+	disabled_collisions_between_bodies = p_disabled;
+	if (box2d::is_handle_valid(handle)) {
+		box2d::joint_set_disable_collision(handle, disabled_collisions_between_bodies);
+	}
+}
+
 Box2DJoint2D::~Box2DJoint2D() {
 	if (box2d::is_handle_valid(handle)) {
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
