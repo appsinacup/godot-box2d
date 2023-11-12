@@ -449,10 +449,9 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 }
 
 void box2d::collider_destroy(b2World *world_handle, FixtureHandle handle) {
+	ERR_FAIL_COND(!is_handle_valid(handle));
 	b2Body *body = handle.handles[0]->GetBody();
-	if (!is_handle_valid(handle) || !body) {
-		return;
-	}
+	ERR_FAIL_COND(!is_handle_valid(body));
 	for (b2Fixture *fixture = body->GetFixtureList(); fixture != nullptr; fixture = fixture->GetNext()) {
 		for (int i = 0; i < handle.count; i++) {
 			if (fixture == handle.handles[i]) {
