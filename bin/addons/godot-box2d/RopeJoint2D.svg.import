@@ -1,19 +1,3 @@
-[remap]
-
-importer="texture"
-type="CompressedTexture2D"
-uid="uid://c3iv5htvpolwh"
-path="res://.godot/imported/RopeJoint2D.svg-324cde9198a9a75d95b60c97aa26293c.ctex"
-metadata={
-"has_editor_variant": true,
-"vram_texture": false
-}
-
-[deps]
-
-source_file="res://addons/godot-box2d/RopeJoint2D.svg"
-dest_files=["res://.godot/imported/RopeJoint2D.svg-324cde9198a9a75d95b60c97aa26293c.ctex"]
-
 [params]
 
 compress/mode=0
