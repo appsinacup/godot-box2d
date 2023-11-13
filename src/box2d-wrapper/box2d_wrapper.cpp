@@ -446,6 +446,8 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
 		fixture_def.density = 1.0f;
+		fixture_def.restitution = mat->restitution;
+		fixture_def.friction = mat->friction;
 		fixture_def.isSensor = false;
 		fixture_def.userData = user_data;
 		b2Fixture *fixture = body_handle->CreateFixture(&fixture_def);
@@ -534,11 +536,15 @@ void box2d::collider_set_transform(b2World *world_handle, FixtureHandle handles,
 				b2PolygonShape *polygon_shape_template = (b2PolygonShape *)shape_template;
 				b2PolygonShape *polygon_shape = (b2PolygonShape *)shape;
 				b2Vec2 new_vertices[b2_maxPolygonVertices];
+				b2Hull hull;
 				for (int i = 0; i < polygon_shape->m_count; i++) {
 					new_vertices[i] = polygon_shape_template->m_vertices[i];
 					new_vertices[i] = xform_b2Vec2(new_vertices[i], transform);
+					hull.points[i] = new_vertices[i];
 				}
-				if (!polygon_shape->Set(new_vertices, polygon_shape->m_count)) {
+				hull.count = polygon_shape->m_count;
+				polygon_shape->Set(hull);
+				if (!polygon_shape->m_count) {
 					ERR_FAIL_MSG("Cannot update vertices");
 				}
 			} break;
@@ -1170,7 +1176,7 @@ void box2d::world_set_contact_listener(b2World *world_handle,
 
 void box2d::world_step(b2World *world_handle, const SimulationSettings *settings) {
 	world_handle->SetGravity(settings->gravity);
-	world_handle->Step(settings->dt, 8, 3);
+	world_handle->Step(settings->dt, settings->max_velocity_iterations, settings->max_position_iterations);
 	int active_objects = 0;
 	if (holder.active_body_callbacks.has(world_handle)) {
 		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];

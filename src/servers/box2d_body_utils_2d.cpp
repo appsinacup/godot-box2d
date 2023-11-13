@@ -11,7 +11,7 @@
 
 bool should_skip_collision_one_dir(box2d::ContactResult contact, Box2DShape2D *body_shape, Box2DBody2D *collision_body, int shape_index, const Transform2D &col_shape_transform, real_t p_margin, real_t last_step, Vector2 p_motion) {
 	real_t dist = contact.distance;
-	if (contact.collided && !contact.within_margin && body_shape->allows_one_way_collision() && collision_body->is_shape_set_as_one_way_collision(shape_index)) {
+	if (contact.collided && body_shape->allows_one_way_collision() && collision_body->is_shape_set_as_one_way_collision(shape_index)) {
 		real_t valid_depth = 10e20;
 		Vector2 valid_dir = col_shape_transform.columns[1].normalized();
 
@@ -34,7 +34,7 @@ bool should_skip_collision_one_dir(box2d::ContactResult contact, Box2DShape2D *b
 		Vector2 motion = p_motion;
 		real_t motion_len = motion.length();
 		valid_depth += motion_len * MAX(motion.normalized().dot(valid_dir), 0.0);
-		if ((dist < -valid_depth) || (p_motion.normalized().dot(valid_dir) < CMP_EPSILON * 10.0)) {
+		if ((dist > valid_depth) || (p_motion.normalized().dot(valid_dir) < CMP_EPSILON * 10.0)) {
 			return true;
 		}
 	}

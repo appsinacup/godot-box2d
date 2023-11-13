@@ -703,6 +703,12 @@ void Box2DPhysicsServer2D::_body_set_state(const RID &p_body, BodyState p_state,
 
 Variant Box2DPhysicsServer2D::_body_get_state(const RID &p_body, BodyState p_state) const {
 	Box2DBody2D *body = body_owner.get_or_null(p_body);
+	if (!body) {
+		Box2DArea2D *area = area_owner.get_or_null(p_body);
+		if (p_state == BodyState::BODY_STATE_TRANSFORM) {
+			return area->get_transform();
+		}
+	}
 	ERR_FAIL_COND_V(!body, Variant());
 
 	return body->get_state(p_state);

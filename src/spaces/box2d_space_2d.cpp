@@ -533,6 +533,8 @@ void Box2DSpace2D::step(real_t p_step) {
 
 	box2d::SimulationSettings settings;
 	settings.dt = p_step;
+	settings.max_position_iterations = Box2DProjectSettings::get_position_iterations();
+	settings.max_velocity_iterations = Box2DProjectSettings::get_velocity_iterations();
 	settings.gravity.x = default_gravity_dir.x * default_gravity_value;
 	settings.gravity.y = default_gravity_dir.y * default_gravity_value;
 

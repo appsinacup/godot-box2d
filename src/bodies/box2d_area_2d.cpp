@@ -443,7 +443,7 @@ Box2DArea2D::Box2DArea2D() :
 		Box2DCollisionObject2D(TYPE_AREA),
 		monitor_query_list(this),
 		area_override_update_list(this) {
-	mode = PhysicsServer2D::BODY_MODE_STATIC;
+	mode = PhysicsServer2D::BODY_MODE_RIGID;
 }
 
 Box2DArea2D::~Box2DArea2D() {
