@@ -1,36 +1,29 @@
 name: 🍎 macOS Builds
 on:
   workflow_call:
-    
-
-# Global Settings
-env:
-  SCONSFLAGS: verbose=yes warnings=extra werror=yes
 
 jobs:
   macos:
     runs-on: "macos-latest"
-    name: macOS Build ${{ matrix.target }} ${{ matrix.arch }}
+    name: macOS Build ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-        target: [template_debug, template_release]
         arch: [universal]
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
+          fetch-depth: 0
     
-      - name: Build ${{ matrix.target }} ${{ matrix.arch }}
+      - name: Build ${{ matrix.arch }}
         uses: ./.github/actions/build
         with:
-          sconsflags: ${{ env.SCONSFLAGS }}
           arch: ${{ matrix.arch }}
           platform: macos
-          target: ${{ matrix.target }}
       
-      - name: Sign frameworks
+      - name: Sign frameworks Debug
         shell: pwsh
         env:
           APPLE_CERT_BASE64: ${{ secrets.PROD_MACOS_CERTIFICATE }}
@@ -39,8 +32,20 @@ jobs:
           APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
           APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
           APPLE_DEV_APP_ID: ${{ secrets.PROD_MACOS_APPLE_DEV_APP_ID }}
-        run: ./scripts/ci-sign-macos.ps1 dist/addons/godot-box2d/bin/libgodot-box2d.macos.${{ matrix.target }}.framework
+        run: ./scripts/ci-sign-macos.ps1 bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_debug.framework
+        if: ${{ env.APPLE_DEV_ID }}
+      
+      - name: Sign frameworks Release
+        shell: pwsh
+        env:
+          APPLE_CERT_BASE64: ${{ secrets.PROD_MACOS_CERTIFICATE }}
+          APPLE_CERT_PASSWORD: ${{ secrets.PROD_MACOS_CERTIFICATE_PWD }}
+          APPLE_DEV_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
+          APPLE_DEV_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
+          APPLE_DEV_PASSWORD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
+          APPLE_DEV_APP_ID: ${{ secrets.PROD_MACOS_APPLE_DEV_APP_ID }}
+        run: ./scripts/ci-sign-macos.ps1 bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_release.framework
         if: ${{ env.APPLE_DEV_ID }}
 
-      - name: Upload ${{ matrix.target }} ${{ matrix.arch }}
+      - name: Upload ${{ matrix.arch }}
         uses: ./.github/actions/upload

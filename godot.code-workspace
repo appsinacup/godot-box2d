@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "../godot"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"vector": "cpp",
+			"chrono": "cpp",
+			"*.inc": "cpp",
+			"__bit_reference": "cpp",
+			"bitset": "cpp",
+			"map": "cpp",
+			"set": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"algorithm": "cpp",
+			"__locale": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"__config": "cpp"
+		}
+	}
+}

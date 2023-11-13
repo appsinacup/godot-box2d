@@ -8,12 +8,6 @@ inputs:
   arch:
     default: ''
     description: Target architecture.
-  target:
-    required: true
-    description: Build target (editor, template_release, template_debug).
-  sconsflags:
-    required: true
-    description: Extra flags
 
 runs:
   using: composite
@@ -24,7 +18,17 @@ runs:
         path: |
           ${{ github.workspace }}/.scons-cache/
           ${{ github.workspace }}/godot-cpp/.scons-cache/
-        key: ${{ inputs.platform }}_${{ inputs.arch }}_${{ inputs.target }}_cache
+        key: ${{ inputs.platform }}_${{ inputs.arch }}_cache
+    - uses: paulhatch/semantic-version@v5.3.0
+      id: version
+      with:
+        bump_each_commit: true
+        tag_prefix: "v"
+        debug: true
+    - name: Print version
+      shell: sh
+      run:
+        echo v${{ steps.version.outputs.version }} > bin/addons/godot-box2d/VERSION.txt
     - name: Setup python and scons
       uses: ./.github/actions/deps
     - name: Lint
@@ -38,11 +42,14 @@ runs:
         SCONS_CACHE: .scons-cache
         SCONS_CACHE_DIR: .scons-cache
       run: |
-        cd godot-cpp && scons target=${{ inputs.target }} platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes ${{ inputs.sconsflags }}
+        cd godot-cpp && \
+        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes && \
+        scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes
     - name: Build Physics Server Box2D
       shell: sh
       env:
         SCONS_CACHE: .scons-cache
         SCONS_CACHE_DIR: .scons-cache
       run: |
-        scons target=${{ inputs.target }} platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no ${{ inputs.sconsflags }}
+        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
+        scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes

@@ -9,5 +9,5 @@ runs:
       with:
         name: Godot Box2D
         path: |
-          ${{ github.workspace }}/dist/**
+          ${{ github.workspace }}/bin/**
         retention-days: 14

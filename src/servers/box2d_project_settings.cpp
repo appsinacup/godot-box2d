@@ -4,17 +4,10 @@
 
 using namespace godot;
 
-constexpr char DEFAULT_LINEAR_DAMP[] = "physics/2d/default_linear_damp";
-constexpr char DEFAULT_ANGULAR_DAMP[] = "physics/2d/default_angular_damp";
-constexpr char DEFAULT_GRAVITY_VECTOR[] = "physics/2d/default_gravity_vector";
-constexpr char DEFAULT_GRAVITY[] = "physics/2d/default_gravity";
-
-constexpr char PHYSICS_FPS[] = "physics/common/physics_ticks_per_second";
 constexpr char RUN_ON_SEPARATE_THREAD[] = "physics/2d/run_on_separate_thread";
 constexpr char MAX_THREADS[] = "threading/worker_pool/max_threads";
 constexpr char POSITION_ITERATIONS[] = "physics/box_2d/solver/position_iterations";
 constexpr char VELOCITY_ITERATIONS[] = "physics/box_2d/solver/velocity_iterations";
-constexpr char SCALING_FACTOR[] = "physics/box_2d/scaling_factor";
 
 void register_setting(
 		const String &p_name,
@@ -73,7 +66,6 @@ void register_setting_ranged(
 void Box2DProjectSettings::register_settings() {
 	register_setting_ranged(VELOCITY_ITERATIONS, 8, U"2,16,or_greater");
 	register_setting_ranged(POSITION_ITERATIONS, 3, U"1,16,or_greater");
-	register_setting_ranged(SCALING_FACTOR, 100.0f, U"1,100,or_greater");
 }
 
 template <typename TType>
@@ -102,25 +94,4 @@ int Box2DProjectSettings::get_position_iterations() {
 
 int Box2DProjectSettings::get_velocity_iterations() {
 	return get_setting<int>(VELOCITY_ITERATIONS);
-}
-
-float Box2DProjectSettings::get_scaling_factor() {
-	return get_setting<float>(SCALING_FACTOR);
-}
-
-int Box2DProjectSettings::get_physics_fps() {
-	return get_setting<int>(PHYSICS_FPS);
-}
-
-float Box2DProjectSettings::get_default_linear_damp() {
-	return get_setting<float>(DEFAULT_LINEAR_DAMP);
-}
-float Box2DProjectSettings::get_default_angular_damp() {
-	return get_setting<float>(DEFAULT_ANGULAR_DAMP);
-}
-float Box2DProjectSettings::get_default_gravity() {
-	return get_setting<float>(DEFAULT_GRAVITY);
-}
-Vector2 Box2DProjectSettings::get_default_gravity_vector() {
-	return get_setting<Vector2>(DEFAULT_GRAVITY_VECTOR);
 }
