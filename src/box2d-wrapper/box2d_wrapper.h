@@ -195,7 +195,7 @@ void body_apply_impulse_at_point(b2World *world_handle,
 
 void body_apply_torque_impulse(b2World *world_handle, b2Body *body_handle, real_t torque_impulse);
 
-void body_change_mode(b2World *world_handle, b2Body *body_handle, b2BodyType body_type, bool wakeup);
+void body_change_mode(b2World *world_handle, b2Body *body_handle, b2BodyType body_type, bool wakeup, bool fixed_rotation);
 
 b2Body *body_create(b2World *world_handle,
 		const b2Vec2 pos,

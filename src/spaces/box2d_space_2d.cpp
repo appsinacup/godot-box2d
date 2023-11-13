@@ -106,15 +106,13 @@ bool Box2DSpace2D::ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB) {
 	if (!collision_filter_common_callback(handle, &filter_info, colliders_info)) {
 		return false;
 	}
-	if (colliders_info.object1->get_type() != Box2DCollisionObject2D::TYPE_BODY ||
-			colliders_info.object2->get_type() != Box2DCollisionObject2D::TYPE_BODY) {
-		return false;
-	}
-
-	const Box2DBody2D *body1 = static_cast<const Box2DBody2D *>(colliders_info.object1);
-	const Box2DBody2D *body2 = static_cast<const Box2DBody2D *>(colliders_info.object2);
-	if (body1->has_exception(body2->get_rid()) || body2->has_exception(body1->get_rid())) {
-		return false;
+	if (colliders_info.object1->get_type() == Box2DCollisionObject2D::TYPE_BODY &&
+			colliders_info.object2->get_type() == Box2DCollisionObject2D::TYPE_BODY) {
+		const Box2DBody2D *body1 = static_cast<const Box2DBody2D *>(colliders_info.object1);
+		const Box2DBody2D *body2 = static_cast<const Box2DBody2D *>(colliders_info.object2);
+		if (body1->has_exception(body2->get_rid()) || body2->has_exception(body1->get_rid())) {
+			return false;
+		}
 	}
 
 	return true;
@@ -339,36 +337,32 @@ void Box2DSpace2D::collision_event_callback(b2World *world_handle, const box2d::
 		}
 
 		Box2DArea2D *pArea = static_cast<Box2DArea2D *>(pObject1);
-		uint32_t area_shape = shape1;
-		uint32_t other_shape = shape2;
-		RID other_rid = rid2;
-		ObjectID other_instance_id = instanceId2;
 		if (type2 == Box2DCollisionObject2D::TYPE_AREA) {
 			Box2DArea2D *pArea2 = static_cast<Box2DArea2D *>(pObject2);
 			if (event_info->is_started) {
 				ERR_FAIL_COND(!pArea);
 				ERR_FAIL_COND(!pArea2);
-				pArea->on_area_enter(collider_handle2, pArea2, other_shape, other_rid, other_instance_id, collider_handle1, area_shape);
-				pArea2->on_area_enter(collider_handle1, pArea, area_shape, other_rid, other_instance_id, collider_handle2, other_shape);
+				pArea->on_area_enter(collider_handle2, pArea2, shape2, rid2, instanceId2, collider_handle1, shape1);
+				pArea2->on_area_enter(collider_handle1, pArea, shape1, rid1, instanceId1, collider_handle2, shape2);
 			} else {
 				if (pArea) {
-					pArea->on_area_exit(collider_handle2, pArea2, other_shape, other_rid, other_instance_id, collider_handle1, area_shape);
+					pArea->on_area_exit(collider_handle2, pArea2, shape2, rid2, instanceId2, collider_handle1, shape1);
 				} else {
 					// Try to retrieve area if not destroyed yet
 					pArea = space->get_area_from_rid(rid1);
 					if (pArea) {
 						// Use invalid area case to keep counters consistent for already removed collider
-						pArea->on_area_exit(collider_handle2, nullptr, other_shape, other_rid, other_instance_id, collider_handle1, area_shape);
+						pArea->on_area_exit(collider_handle2, nullptr, shape2, rid2, instanceId2, collider_handle1, shape1);
 					}
 				}
 				if (pArea2) {
-					pArea2->on_area_exit(collider_handle1, pArea, area_shape, other_rid, other_instance_id, collider_handle2, other_shape);
+					pArea2->on_area_exit(collider_handle1, pArea, shape1, rid1, instanceId1, collider_handle2, shape2);
 				} else {
 					// Try to retrieve area if not destroyed yet
 					pArea2 = space->get_area_from_rid(rid2);
 					if (pArea2) {
 						// Use invalid area case to keep counters consistent for already removed collider
-						pArea2->on_area_exit(collider_handle1, nullptr, area_shape, other_rid, other_instance_id, collider_handle2, other_shape);
+						pArea2->on_area_exit(collider_handle1, nullptr, shape1, rid1, instanceId1, collider_handle2, shape2);
 					}
 				}
 			}
@@ -376,15 +370,15 @@ void Box2DSpace2D::collision_event_callback(b2World *world_handle, const box2d::
 			Box2DBody2D *pBody = static_cast<Box2DBody2D *>(pObject2);
 			if (event_info->is_started) {
 				ERR_FAIL_COND(!pArea);
-				pArea->on_body_enter(collider_handle2, pBody, other_shape, other_rid, other_instance_id, collider_handle1, area_shape);
+				pArea->on_body_enter(collider_handle2, pBody, shape2, rid2, instanceId2, collider_handle1, shape1);
 			} else if (pArea) {
-				pArea->on_body_exit(collider_handle2, pBody, other_shape, other_rid, other_instance_id, collider_handle1, area_shape);
+				pArea->on_body_exit(collider_handle2, pBody, shape2, rid2, instanceId2, collider_handle1, shape1);
 			} else {
 				// Try to retrieve area if not destroyed yet
 				pArea = space->get_area_from_rid(rid1);
 				if (pArea) {
 					// Use invalid body case to keep counters consistent for already removed collider
-					pArea->on_body_exit(collider_handle2, nullptr, other_shape, other_rid, other_instance_id, collider_handle1, area_shape, false);
+					pArea->on_body_exit(collider_handle2, nullptr, shape2, rid2, instanceId2, collider_handle1, shape1, false);
 				}
 			}
 		}

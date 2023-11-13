@@ -287,11 +287,15 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 		b2Vec2 position = { transform.get_origin().x, transform.get_origin().y };
 		real_t angle = transform.get_rotation();
 		if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
-			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_staticBody);
+			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_kinematicBody);
 		} else if (mode == PhysicsServer2D::BODY_MODE_KINEMATIC) {
 			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_kinematicBody);
 		} else {
 			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_dynamicBody);
+		}
+		if (type == TYPE_AREA) {
+			box2d::body_set_can_sleep(space_handle, body_handle, false);
+			box2d::body_set_gravity_scale(space_handle, body_handle, 0.0, true);
 		}
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {

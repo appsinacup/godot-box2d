@@ -32,14 +32,9 @@ struct B2_API b2BodyUserData {
 // You can define this to inject whatever data you want in b2Fixture
 struct B2_API b2FixtureUserData {
 	b2FixtureUserData() :
-			shape_idx(-1), box2d_fixture_idx(0), shape(nullptr), one_way_collision(false), one_way_collision_direction_x(0), one_way_collision_direction_y(-1) {}
+			shape_idx(-1), collision_object(nullptr) {}
 
-	bool one_way_collision;
-	float one_way_collision_direction_x;
-	float one_way_collision_direction_y;
 	int shape_idx;
-	int box2d_fixture_idx;
-	Box2DShape2D *shape;
 	Box2DCollisionObject2D *collision_object;
 };
 

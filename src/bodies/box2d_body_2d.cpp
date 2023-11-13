@@ -345,14 +345,14 @@ void Box2DBody2D::set_mode(PhysicsServer2D::BodyMode p_mode) {
 	if (get_space()) {
 		switch (p_mode) {
 			case PhysicsServer2D::BODY_MODE_KINEMATIC: {
-				box2d::body_change_mode(get_space()->get_handle(), get_body_handle(), b2BodyType::b2_kinematicBody, true);
+				box2d::body_change_mode(get_space()->get_handle(), get_body_handle(), b2BodyType::b2_kinematicBody, true, false);
 			} break;
 			case PhysicsServer2D::BODY_MODE_STATIC: {
-				box2d::body_change_mode(get_space()->get_handle(), get_body_handle(), b2BodyType::b2_staticBody, true);
+				box2d::body_change_mode(get_space()->get_handle(), get_body_handle(), b2BodyType::b2_staticBody, true, false);
 			} break;
 			case PhysicsServer2D::BODY_MODE_RIGID:
 			case PhysicsServer2D::BODY_MODE_RIGID_LINEAR: {
-				box2d::body_change_mode(get_space()->get_handle(), get_body_handle(), b2BodyType::b2_dynamicBody, true);
+				box2d::body_change_mode(get_space()->get_handle(), get_body_handle(), b2BodyType::b2_dynamicBody, true, p_mode == PhysicsServer2D::BODY_MODE_RIGID_LINEAR);
 			} break;
 		}
 	}

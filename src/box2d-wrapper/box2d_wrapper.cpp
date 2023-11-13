@@ -1,5 +1,6 @@
 #include "box2d_wrapper.h"
 #include "../b2_user_settings.h"
+#include "../bodies/box2d_collision_object_2d.h"
 #include <box2d/b2_distance.h>
 #include <box2d/b2_time_of_impact.h>
 #include <box2d/box2d.h>
@@ -273,8 +274,9 @@ void box2d::body_apply_torque_impulse(b2World *world_handle, b2Body *body_handle
 	body_handle->ApplyAngularImpulse(torque_impulse, true);
 }
 
-void box2d::body_change_mode(b2World *world_handle, b2Body *body_handle, b2BodyType body_type, bool wakeup) {
+void box2d::body_change_mode(b2World *world_handle, b2Body *body_handle, b2BodyType body_type, bool wakeup, bool fixed_rotation) {
 	body_handle->SetType(body_type);
+	body_handle->SetFixedRotation(fixed_rotation);
 }
 
 b2Body *box2d::body_create(b2World *world_handle,
@@ -295,7 +297,9 @@ void box2d::body_destroy(b2World *world_handle, b2Body *body_handle) {
 }
 
 void box2d::body_force_sleep(b2World *world_handle, b2Body *body_handle) {
-	body_handle->SetAwake(false);
+	if (body_handle->IsSleepingAllowed()) {
+		body_handle->SetAwake(false);
+	}
 }
 
 real_t box2d::body_get_angle(b2World *world_handle, b2Body *body_handle) {
@@ -397,7 +401,11 @@ void box2d::body_set_transform(b2World *world_handle,
 		body_handle->SetAngularVelocity((1.0 / step) * (rot - body_handle->GetAngle()));
 	} else {
 		body_handle->SetTransform(pos, rot);
-		body_handle->SetAwake(wake_up);
+		if (body_handle->IsSleepingAllowed()) {
+			body_handle->SetAwake(wake_up);
+		} else {
+			body_handle->SetAwake(true);
+		}
 	}
 	// also update collider transform with new values
 }
@@ -424,7 +432,7 @@ FixtureHandle box2d::collider_create_sensor(b2World *world_handle,
 	for (int i = 0; i < shape_handle.count; i++) {
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
-		fixture_def.density = 1.0f;
+		fixture_def.density = 1.0;
 		fixture_def.isSensor = true;
 		fixture_def.userData = user_data;
 		b2Fixture *fixture = body_handle->CreateFixture(&fixture_def);
@@ -445,7 +453,7 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 	for (int i = 0; i < shape_handle.count; i++) {
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
-		fixture_def.density = 1.0f;
+		fixture_def.density = 1.0;
 		fixture_def.restitution = mat->restitution;
 		fixture_def.friction = mat->friction;
 		fixture_def.isSensor = false;
@@ -1187,7 +1195,7 @@ void box2d::world_step(b2World *world_handle, const SimulationSettings *settings
 			if (holder.constant_torque.has(body)) {
 				body->ApplyTorque(holder.constant_torque[body], true);
 			}
-			if (body->IsAwake()) {
+			if (body->IsAwake() && body->GetUserData().collision_object->get_type() == Box2DCollisionObject2D::Type::TYPE_BODY) {
 				active_objects++;
 				ActiveBodyInfo info{ body, body->GetUserData() };
 				callback(info);
