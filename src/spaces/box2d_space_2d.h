@@ -142,7 +142,6 @@ public:
 	void unlock();
 
 	real_t get_last_step() const { return last_step; }
-	void set_last_step(real_t p_step) { last_step = p_step; }
 
 	void set_param(PhysicsServer2D::SpaceParameter p_param, real_t p_value);
 	real_t get_param(PhysicsServer2D::SpaceParameter p_param) const;

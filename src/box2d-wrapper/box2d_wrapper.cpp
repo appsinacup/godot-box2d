@@ -372,7 +372,12 @@ void box2d::body_set_linear_damping(b2World *world_handle, b2Body *body_handle, 
 }
 
 void box2d::body_set_linear_velocity(b2World *world_handle, b2Body *body_handle, const b2Vec2 vel) {
-	body_handle->SetLinearVelocity(vel);
+	if (body_handle->GetType() == b2_kinematicBody) {
+		// for kinematic setting velocity is like moving the object, we want it to happen all the time
+		body_handle->SetLinearVelocity(vel + body_handle->GetLinearVelocity());
+	} else {
+		body_handle->SetLinearVelocity(vel);
+	}
 }
 
 void box2d::body_set_mass_properties(b2World *world_handle,
@@ -396,9 +401,13 @@ void box2d::body_set_transform(b2World *world_handle,
 		real_t rot,
 		bool wake_up,
 		real_t step) {
-	if (body_handle->GetType() == b2BodyType::b2_kinematicBody) {
-		body_handle->SetLinearVelocity((1.0 / step) * (pos - body_handle->GetPosition()));
-		body_handle->SetAngularVelocity((1.0 / step) * (rot - body_handle->GetAngle()));
+	b2Vec2 new_pos = (pos - body_handle->GetPosition());
+	new_pos.x /= step;
+	new_pos.y /= step;
+	if (body_handle->GetType() == b2BodyType::b2_kinematicBody && b2Dot(new_pos, new_pos) < b2_maxTranslationSquared) {
+		body_handle->SetLinearVelocity(new_pos);
+		body_handle->SetAngularVelocity((rot - body_handle->GetAngle()) / step);
+		body_handle->SetAwake(true);
 	} else {
 		body_handle->SetTransform(pos, rot);
 		if (body_handle->IsSleepingAllowed()) {
@@ -1118,7 +1127,7 @@ ContactResult box2d::shapes_contact(b2World *world_handle,
 			real_t dist = (normal).Length();
 			// manually compute normal
 			if (dist != 0) {
-				normal = (1.0 / dist) * normal;
+				normal = b2Vec2(normal.x / dist, normal.y / dist);
 			} else {
 				normal = (transform_A.p - transform_B.p);
 				normal.Normalize();
@@ -1129,7 +1138,6 @@ ContactResult box2d::shapes_contact(b2World *world_handle,
 				point_A = intersection_result.distance_output.pointA;
 				point_B = intersection_result.distance_output.pointB;
 				point_A -= margin * 1.1 * normal;
-				//dist = -dist;
 			} else {
 				point_A = intersection_result.distance_output.pointA;
 				point_B = intersection_result.distance_output.pointB;
@@ -1138,7 +1146,7 @@ ContactResult box2d::shapes_contact(b2World *world_handle,
 			normal = -point_A + point_B;
 			dist = (normal).Length();
 			if (dist != 0) {
-				normal = (1.0 / dist) * normal;
+				normal = b2Vec2(normal.x / dist, normal.y / dist);
 			} else {
 				normal = (transform_A.p - transform_B.p);
 				normal.Normalize();
@@ -1192,6 +1200,11 @@ void box2d::world_step(b2World *world_handle, const SimulationSettings *settings
 	if (holder.active_body_callbacks.has(world_handle)) {
 		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
 		for (b2Body *body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
+			if (body->GetType() == b2_kinematicBody) {
+				b2Vec2 pos = body->GetTransform().p;
+				body->SetLinearVelocity(b2Vec2_zero);
+				body->SetAngularVelocity(0);
+			}
 			if (holder.constant_force.has(body)) {
 				body->ApplyForceToCenter(holder.constant_force[body], true);
 			}
