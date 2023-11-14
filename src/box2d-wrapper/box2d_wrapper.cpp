@@ -871,6 +871,7 @@ b2Joint *box2d::joint_create_distance_joint(b2World *world_handle,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
 		real_t rest_length,
+		real_t max_length,
 		real_t stiffness,
 		real_t damping,
 		bool disable_collision) {
@@ -880,6 +881,8 @@ b2Joint *box2d::joint_create_distance_joint(b2World *world_handle,
 	joint_def.localAnchorA = anchor_1;
 	joint_def.localAnchorB = anchor_2;
 	joint_def.length = rest_length;
+	joint_def.maxLength = max_length;
+	joint_def.minLength = 0.0;
 	joint_def.stiffness = stiffness;
 	joint_def.damping = damping;
 	joint_def.collideConnected = !disable_collision;
