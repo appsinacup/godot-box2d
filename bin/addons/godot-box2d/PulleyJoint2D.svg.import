@@ -1,19 +1,3 @@
-[remap]
-
-importer="texture"
-type="CompressedTexture2D"
-uid="uid://cv5jsmfokgtfd"
-path="res://.godot/imported/PulleyJoint2D.svg-58b5716ddf26b9451cda935263ff2e8f.ctex"
-metadata={
-"has_editor_variant": true,
-"vram_texture": false
-}
-
-[deps]
-
-source_file="res://addons/godot-box2d/PulleyJoint2D.svg"
-dest_files=["res://.godot/imported/PulleyJoint2D.svg-58b5716ddf26b9451cda935263ff2e8f.ctex"]
-
 [params]
 
 compress/mode=0

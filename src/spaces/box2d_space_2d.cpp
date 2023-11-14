@@ -714,7 +714,7 @@ Box2DSpace2D::Box2DSpace2D() {
 
 	// Use the default physics step for force application on the first frame
 	int physics_fps = project_settings->get_setting_with_override("physics/common/physics_ticks_per_second");
-	last_step = physics_fps ? 1.0f / (real_t)physics_fps : 0.001f;
+	last_step = physics_fps != 0 ? 1.0 / ((real_t)physics_fps) : 0.001f;
 
 	body_linear_velocity_sleep_threshold = project_settings->get_setting_with_override("physics/2d/sleep_threshold_linear");
 	body_angular_velocity_sleep_threshold = project_settings->get_setting_with_override("physics/2d/sleep_threshold_angular");

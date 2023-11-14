@@ -382,6 +382,7 @@ b2Joint *joint_create_distance_joint(b2World *world_handle,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
 		real_t rest_length,
+		real_t max_length,
 		real_t stiffness,
 		real_t damping,
 		bool disable_collision);
