@@ -1,6 +1,8 @@
 #include "box2d_shape_2d.h"
 
 void Box2DShape2D::configure(const Rect2 &p_aabb) {
+	destroy_box2d_shape();
+	get_box2d_shape();
 	aabb = p_aabb;
 	configured = true;
 	for (const KeyValue<Box2DShapeOwner2D *, int> &E : owners) {
