@@ -147,7 +147,9 @@ public:
 	void update_area_override();
 
 	void update_gravity(real_t p_step);
-
+	_FORCE_INLINE_ void reset_contact_count() {
+		contact_count = 0;
+	}
 	_FORCE_INLINE_ void set_max_contacts_reported(int p_size) {
 		contacts.resize(p_size);
 		contact_count = 0;
@@ -268,7 +270,6 @@ void Box2DBody2D::add_contact(const Vector2 &p_local_pos, const Vector2 &p_local
 			return; //none less deep than this
 		}
 	}
-
 	c[idx].local_pos = p_local_pos;
 	c[idx].local_normal = p_local_normal;
 	c[idx].depth = p_depth;
