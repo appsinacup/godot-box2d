@@ -451,7 +451,6 @@ bool Box2DSpace2D::contact_point_callback(b2World *world_handle, const box2d::Co
 	}
 	ERR_FAIL_COND_V(!pObject1, false);
 	ERR_FAIL_COND_V(pObject1->get_type() != Box2DCollisionObject2D::TYPE_BODY, false);
-	ERR_FAIL_COND_V(!pObject1, false);
 	Box2DBody2D *body1 = static_cast<Box2DBody2D *>(pObject1);
 	// body and shape 2
 	uint32_t shape2 = 0;
@@ -461,7 +460,6 @@ bool Box2DSpace2D::contact_point_callback(b2World *world_handle, const box2d::Co
 	}
 	ERR_FAIL_COND_V(!pObject2, false);
 	ERR_FAIL_COND_V(pObject2->get_type() != Box2DCollisionObject2D::TYPE_BODY, false);
-	ERR_FAIL_COND_V(!pObject2, false);
 	Box2DBody2D *body2 = static_cast<Box2DBody2D *>(pObject2);
 
 	real_t depth_1 = MAX(0.0, -contact_info->distance_1); // negative distance means penetration
@@ -483,7 +481,7 @@ bool Box2DSpace2D::contact_point_callback(b2World *world_handle, const box2d::Co
 	if (body2->can_report_contacts()) {
 		keep_sending_contacts = true;
 		Vector2 vel_pos1(contact_info->velocity_pos_1.x, contact_info->velocity_pos_1.y);
-		body2->add_contact(pos2, normal_2, depth_1, (int)shape2, pos1, (int)shape1, body1->get_instance_id(), body1->get_rid(), vel_pos1, impulse_2);
+		body2->add_contact(pos2, normal_2, depth_2, (int)shape2, pos1, (int)shape1, body1->get_instance_id(), body1->get_rid(), vel_pos1, impulse_2);
 	}
 
 	return keep_sending_contacts;
@@ -491,6 +489,11 @@ bool Box2DSpace2D::contact_point_callback(b2World *world_handle, const box2d::Co
 
 void Box2DSpace2D::step(real_t p_step) {
 	last_step = p_step;
+	for (SelfList<Box2DBody2D> *body_iterator = active_list.first(); body_iterator;) {
+		Box2DBody2D *body = body_iterator->self();
+		body_iterator = body_iterator->next();
+		body->reset_contact_count();
+	}
 	contact_debug_count = 0;
 
 	ProjectSettings *project_settings = ProjectSettings::get_singleton();
