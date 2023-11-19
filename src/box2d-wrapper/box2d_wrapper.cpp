@@ -1032,7 +1032,7 @@ ShapeHandle box2d::shape_create_capsule(real_t half_height, real_t radius) {
 	if (half_height - radius == 0.0) {
 		return top_circle;
 	}
-	ShapeHandle bottom_circle = shape_create_circle(radius, { 0.0, half_height_circle});
+	ShapeHandle bottom_circle = shape_create_circle(radius, { 0.0, half_height_circle });
 	ERR_FAIL_COND_V(!is_handle_valid(bottom_circle), invalid_shape_handle());
 	ShapeHandle square = shape_create_box({ radius * 2, half_height * 2 - radius * 2 });
 	ERR_FAIL_COND_V(!is_handle_valid(square), invalid_shape_handle());
