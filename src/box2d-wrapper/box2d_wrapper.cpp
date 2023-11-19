@@ -410,9 +410,7 @@ void box2d::body_set_transform(b2World *world_handle,
 	if (ABS(new_rot2) < ABS(new_rot1)) {
 		new_rot = new_rot2;
 	}
-	if (body_handle->GetType() == b2BodyType::b2_kinematicBody
-		&& b2Dot(new_pos, new_pos) < b2_maxTranslationSquared
-		&& (new_rot * new_rot < b2_maxRotationSquared)) {
+	if (body_handle->GetType() == b2BodyType::b2_kinematicBody && b2Dot(new_pos, new_pos) < b2_maxTranslationSquared && (new_rot * new_rot < b2_maxRotationSquared)) {
 		body_handle->SetLinearVelocity(new_pos);
 		body_handle->SetAngularVelocity(new_rot);
 		body_handle->SetAwake(true);
