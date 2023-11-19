@@ -404,9 +404,17 @@ void box2d::body_set_transform(b2World *world_handle,
 	b2Vec2 new_pos = (pos - body_handle->GetPosition());
 	new_pos.x /= step;
 	new_pos.y /= step;
-	if (body_handle->GetType() == b2BodyType::b2_kinematicBody && b2Dot(new_pos, new_pos) < b2_maxTranslationSquared) {
+	real_t new_rot1 = (rot - body_handle->GetAngle()) / step;
+	real_t new_rot2 = (b2_pi + rot + body_handle->GetAngle()) / step;
+	real_t new_rot = new_rot1;
+	if (ABS(new_rot2) < ABS(new_rot1)) {
+		new_rot = new_rot2;
+	}
+	if (body_handle->GetType() == b2BodyType::b2_kinematicBody
+		&& b2Dot(new_pos, new_pos) < b2_maxTranslationSquared
+		&& (new_rot * new_rot < b2_maxRotationSquared)) {
 		body_handle->SetLinearVelocity(new_pos);
-		body_handle->SetAngularVelocity((rot - body_handle->GetAngle()) / step);
+		body_handle->SetAngularVelocity(new_rot);
 		body_handle->SetAwake(true);
 	} else {
 		body_handle->SetTransform(pos, rot);
@@ -858,7 +866,6 @@ b2Joint *box2d::joint_create_revolute(b2World *world_handle,
 	joint_def.upperAngle = angular_limit_upper;
 	joint_def.motorSpeed = motor_target_velocity;
 	joint_def.maxMotorTorque = 100000.0;
-	joint_def.collideConnected = true;
 	joint_def.collideConnected = !disable_collision;
 	return world_handle->CreateJoint(&joint_def);
 }
