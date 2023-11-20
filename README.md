@@ -28,11 +28,12 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 ## Table of Contents
 
 1. [Limitations](#limitations)
-2. [Supported Platforms](#supported-platforms)
-3. [Installation](#installation)
-4. [Features](#features)
-5. [Comparison](#comparison)
-6. [License](#license)
+2. [Differences](#differences)
+3. [Supported Platforms](#supported-platforms)
+4. [Installation](#installation)
+5. [Features](#features)
+6. [Comparison](#comparison)
+7. [License](#license)
 
 ## Limitations
 
@@ -40,6 +41,10 @@ A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](
 - Missing thread-safety.
 - Missing double precision builds.
 - Missing cross platform determinism.
+
+## Differences
+
+- Polygons have a small skin, which can result in differences from Godot Physics. [Collision shapes behave as if they are bigger than what it should be](https://github.com/appsinacup/godot-box2d/issues/72)
 
 ## Supported Platforms
 
