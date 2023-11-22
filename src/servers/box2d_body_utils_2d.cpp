@@ -359,6 +359,5 @@ bool Box2DBodyUtils2D::body_motion_collide(const Box2DSpace2D &p_space, Box2DBod
 
 		return true;
 	}
-
 	return false;
 }
