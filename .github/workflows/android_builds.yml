@@ -23,10 +23,10 @@ jobs:
           java-version: 11
 
       - name: Android dependencies
-          uses: nttld/setup-ndk@v1
-          with:
-            ndk-version: r23c
-            link-to-sdk: true
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r23c
+          link-to-sdk: true
 
       - name: Build ${{ matrix.arch }}
         uses: ./.github/actions/build
