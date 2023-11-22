@@ -16,10 +16,7 @@ enum class ShapeType {
 };
 
 struct Box2DHolder {
-	HashMap<b2Fixture *, Transform2D> fixture_transforms;
 	HashMap<b2World *, ActiveBodyCallback> active_body_callbacks;
-	HashMap<b2Body *, b2Vec2> constant_force;
-	HashMap<b2Body *, real_t> constant_torque;
 	HashMap<b2World *, int> active_objects;
 };
 
@@ -244,19 +241,11 @@ bool box2d::are_handles_equal(b2Fixture *handle1, b2Fixture *handle2) {
 }
 
 void box2d::body_add_force(b2World *world_handle, b2Body *body_handle, const b2Vec2 force) {
-	if (holder.constant_force.has(body_handle)) {
-		holder.constant_force[body_handle] = holder.constant_force[body_handle] + force;
-	} else {
-		holder.constant_force[body_handle] = force;
-	}
+	body_handle->GetUserData().constant_force += b2Vec2_to_Vector2(force);
 }
 
 void box2d::body_add_torque(b2World *world_handle, b2Body *body_handle, real_t torque) {
-	if (holder.constant_torque.has(body_handle)) {
-		holder.constant_torque[body_handle] = holder.constant_torque[body_handle] + torque;
-	} else {
-		holder.constant_torque[body_handle] = torque;
-	}
+	body_handle->GetUserData().constant_torque += torque;
 }
 
 void box2d::body_apply_impulse(b2World *world_handle, b2Body *body_handle, const b2Vec2 impulse) {
@@ -307,24 +296,24 @@ real_t box2d::body_get_angle(b2World *world_handle, b2Body *body_handle) {
 }
 
 real_t box2d::body_get_angular_velocity(b2World *world_handle, b2Body *body_handle) {
+	if (body_handle->GetType() == b2_kinematicBody) {
+		return body_handle->GetUserData().old_angular_velocity;
+	}
 	return body_handle->GetAngularVelocity();
 }
 
 b2Vec2 box2d::body_get_constant_force(b2World *world_handle, b2Body *body_handle) {
-	if (holder.constant_force.has(body_handle)) {
-		return holder.constant_force[body_handle];
-	}
-	return b2Vec2();
+	return Vector2_to_b2Vec2(body_handle->GetUserData().constant_force);
 }
 
 real_t box2d::body_get_constant_torque(b2World *world_handle, b2Body *body_handle) {
-	if (holder.constant_torque.has(body_handle)) {
-		return holder.constant_torque[body_handle];
-	}
-	return 0.0;
+	return body_handle->GetUserData().constant_torque;
 }
 
 b2Vec2 box2d::body_get_linear_velocity(b2World *world_handle, b2Body *body_handle) {
+	if (body_handle->GetType() == b2_kinematicBody) {
+		return Vector2_to_b2Vec2(body_handle->GetUserData().old_linear_velocity);
+	}
 	return body_handle->GetLinearVelocity();
 }
 
@@ -337,11 +326,11 @@ bool box2d::body_is_ccd_enabled(b2World *world_handle, b2Body *body_handle) {
 }
 
 void box2d::body_reset_forces(b2World *world_handle, b2Body *body_handle) {
-	holder.constant_force[body_handle] = b2Vec2_zero;
+	body_handle->GetUserData().constant_force = Vector2();
 }
 
 void box2d::body_reset_torques(b2World *world_handle, b2Body *body_handle) {
-	holder.constant_torque[body_handle] = 0.0;
+	body_handle->GetUserData().constant_torque = 0.0;
 }
 
 void box2d::body_set_angular_damping(b2World *world_handle, b2Body *body_handle, real_t angular_damping) {
@@ -404,16 +393,15 @@ void box2d::body_set_transform(b2World *world_handle,
 	b2Vec2 new_pos = (pos - body_handle->GetPosition());
 	new_pos.x /= step;
 	new_pos.y /= step;
-	real_t new_rot1 = (rot - body_handle->GetAngle()) / step;
-	real_t new_rot2 = (b2_pi + rot + body_handle->GetAngle()) / step;
-	real_t new_rot = new_rot1;
-	if (ABS(new_rot2) < ABS(new_rot1)) {
-		new_rot = new_rot2;
-	}
-	if (body_handle->GetType() == b2BodyType::b2_kinematicBody && b2Dot(new_pos, new_pos) < b2_maxTranslationSquared && (new_rot * new_rot < 180.0 * 180.0 * 0.5 * 0.5)) {
+	if (body_handle->GetType() == b2BodyType::b2_kinematicBody) {
+		real_t new_rot1 = (rot - body_handle->GetAngle()) / step;
+		real_t new_rot2 = (b2_pi + rot + body_handle->GetAngle()) / step;
+		real_t new_rot = new_rot1;
+		if (ABS(new_rot2) < ABS(new_rot1)) {
+			new_rot = new_rot2;
+		}
 		body_handle->SetLinearVelocity(new_pos);
 		body_handle->SetAngularVelocity(new_rot);
-		body_handle->SetAwake(true);
 	} else {
 		body_handle->SetTransform(pos, rot);
 		if (body_handle->IsSleepingAllowed()) {
@@ -518,7 +506,7 @@ b2Vec2 xform_b2Vec2(b2Vec2 vec, Transform2D transform) {
 void box2d::collider_set_transform(b2World *world_handle, FixtureHandle handles, ShapeInfo shape_info) {
 	for (int i = 0; i < handles.count; i++) {
 		b2Fixture *handle = handles.handles[i];
-		holder.fixture_transforms[handle] = shape_info.transform;
+		handle->GetUserData().transform = shape_info.transform;
 		ERR_FAIL_COND(!handle);
 		ERR_FAIL_COND(!is_handle_valid(shape_info.handle));
 		ERR_FAIL_COND(handles.count != shape_info.handle.count);
@@ -580,14 +568,11 @@ void box2d::collider_set_transform(b2World *world_handle, FixtureHandle handles,
 
 Transform2D box2d::collider_get_transform(b2World *world_handle, FixtureHandle handle) {
 	ERR_FAIL_COND_V(!is_handle_valid(handle), Transform2D());
-	ERR_FAIL_COND_V(!holder.fixture_transforms.has(handle.handles[0]), Transform2D());
-	return holder.fixture_transforms[handle.handles[0]];
+	return handle.handles[0]->GetUserData().transform;
 }
 
 Transform2D box2d::collider_get_transform(b2World *world_handle, b2Fixture *handle) {
-	ERR_FAIL_COND_V(!is_handle_valid(handle), Transform2D());
-	ERR_FAIL_COND_V(!holder.fixture_transforms.has(handle), Transform2D());
-	return holder.fixture_transforms[handle];
+	return handle->GetUserData().transform;
 }
 
 Material box2d::default_material() {
@@ -630,7 +615,7 @@ public:
 				fixture->GetUserData()
 			};
 		}
-		if (test_point && holder.fixture_transforms.has(fixture) && fixture->GetBody()) {
+		if (test_point && fixture->GetBody()) {
 			if (!fixture->GetShape()->TestPoint(fixture->GetBody()->GetTransform(), point)) {
 				return true;
 			}
@@ -1141,24 +1126,30 @@ ContactResult box2d::shapes_contact(b2World *world_handle,
 				normal = (transform_A.p - transform_B.p);
 				normal.Normalize();
 			}
+			//normal = -intersection_result.world_manifold.normal;
+
+			if (intersection_result.world_manifold.normal.x != 0.0 && intersection_result.world_manifold.normal.y != 0.0) {
+				//normal = -intersection_result.world_manifold.normal;
+				//normal.Normalize();
+			}
 			if (intersection_result.distance_output.distance <= 0.0) {
-				point_A = intersection_result.world_manifold.points[0] + intersection_result.world_manifold.separations[0] * 1 * normal;
-				point_B = intersection_result.world_manifold.points[0] - intersection_result.world_manifold.separations[0] * 0 * normal;
-				point_A = intersection_result.distance_output.pointA;
-				point_B = intersection_result.distance_output.pointB;
-				point_A -= margin * 1.1 * normal;
+				// Still not perfect, because of polygon skin
+				point_A -= margin * 1.07 * normal;
 			} else {
-				point_A = intersection_result.distance_output.pointA;
-				point_B = intersection_result.distance_output.pointB;
-				point_A += margin * 1.1 * normal;
+				point_A += margin * 1.07 * normal;
 			}
 			normal = -point_A + point_B;
-			dist = (normal).Length();
+			dist = normal.Length();
 			if (dist != 0) {
 				normal = b2Vec2(normal.x / dist, normal.y / dist);
 			} else {
-				normal = (transform_A.p - transform_B.p);
+				normal = transform_A.p - transform_B.p;
 				normal.Normalize();
+			}
+			//normal = -intersection_result.world_manifold.normal;
+			if (intersection_result.world_manifold.normal.x != 0.0 && intersection_result.world_manifold.normal.y != 0.0) {
+				//normal = -intersection_result.world_manifold.normal;
+				//normal.Normalize();
 			}
 			return ContactResult{
 				intersection_result.distance_output.distance <= margin,
@@ -1210,15 +1201,19 @@ void box2d::world_step(b2World *world_handle, const SimulationSettings *settings
 		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
 		for (b2Body *body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
 			if (body->GetType() == b2_kinematicBody) {
-				b2Vec2 pos = body->GetTransform().p;
+				b2BodyUserData &userData = body->GetUserData();
+				userData.old_angular_velocity = body->GetAngularVelocity();
+				userData.old_linear_velocity = b2Vec2_to_Vector2(body->GetLinearVelocity());
 				body->SetLinearVelocity(b2Vec2_zero);
 				body->SetAngularVelocity(0);
 			}
-			if (holder.constant_force.has(body)) {
-				body->ApplyForceToCenter(holder.constant_force[body], true);
+			Vector2 constant_force = body->GetUserData().constant_force;
+			if (constant_force != Vector2()) {
+				body->ApplyForceToCenter(Vector2_to_b2Vec2(constant_force), true);
 			}
-			if (holder.constant_torque.has(body)) {
-				body->ApplyTorque(holder.constant_torque[body], true);
+			real_t constant_torque = body->GetUserData().constant_torque;
+			if (constant_torque != 0.0) {
+				body->ApplyTorque(constant_torque, true);
 			}
 			if (body->IsAwake() && body->GetUserData().collision_object->get_type() == Box2DCollisionObject2D::Type::TYPE_BODY) {
 				active_objects++;

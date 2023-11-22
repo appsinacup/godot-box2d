@@ -4,7 +4,7 @@ on:
 
 # Global Settings
 env:
-  EM_VERSION: 3.1.18
+  EM_VERSION: 3.1.39
   EM_CACHE_FOLDER: "emsdk-cache"
 
 jobs:
