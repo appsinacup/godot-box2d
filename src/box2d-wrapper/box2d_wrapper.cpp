@@ -395,7 +395,7 @@ void box2d::body_set_transform(b2World *world_handle,
 	new_pos.y /= step;
 	if (body_handle->GetType() == b2BodyType::b2_kinematicBody) {
 		real_t new_rot1 = (rot - body_handle->GetAngle()) / step;
-		real_t new_rot2 = (b2_pi + rot + body_handle->GetAngle()) / step;
+		real_t new_rot2 = -(2.0 * b2_pi - rot + body_handle->GetAngle()) / step;
 		real_t new_rot = new_rot1;
 		if (ABS(new_rot2) < ABS(new_rot1)) {
 			new_rot = new_rot2;
