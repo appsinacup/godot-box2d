@@ -245,21 +245,19 @@ void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse
 		b2WorldManifold worldManifold;
 		contact->GetWorldManifold(&worldManifold);
 		for (int i = 0; i < contact->GetManifold()->pointCount; i++) {
-			if (worldManifold.separations[i] < 0.0) {
-				point_info.distance_1 = worldManifold.separations[i] * 0.5;
-				point_info.distance_2 = worldManifold.separations[i] * 0.5;
-				point_info.normal_1 = -worldManifold.normal;
-				point_info.normal_2 = worldManifold.normal;
-				point_info.impulse_1 = impulse->normalImpulses[i];
-				point_info.impulse_2 = impulse->normalImpulses[i];
-				point_info.tangent_impulse_1 = impulse->tangentImpulses[i];
-				point_info.tangent_impulse_2 = impulse->tangentImpulses[i];
-				point_info.local_pos_1 = worldManifold.points[i] - point_info.distance_1 * point_info.normal_1;
-				point_info.local_pos_2 = worldManifold.points[i] - point_info.distance_2 * point_info.normal_2;
-				point_info.velocity_pos_1 = contact->GetFixtureA()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_1);
-				point_info.velocity_pos_2 = contact->GetFixtureB()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_2);
-				contact_point_callback(handle, &point_info, &force_info);
-			}
+			point_info.distance_1 = worldManifold.separations[i] * 0.5;
+			point_info.distance_2 = worldManifold.separations[i] * 0.5;
+			point_info.normal_1 = -worldManifold.normal;
+			point_info.normal_2 = worldManifold.normal;
+			point_info.impulse_1 = impulse->normalImpulses[i];
+			point_info.impulse_2 = impulse->normalImpulses[i];
+			point_info.tangent_impulse_1 = impulse->tangentImpulses[i];
+			point_info.tangent_impulse_2 = impulse->tangentImpulses[i];
+			point_info.local_pos_1 = worldManifold.points[i] - point_info.distance_1 * point_info.normal_1;
+			point_info.local_pos_2 = worldManifold.points[i] - point_info.distance_2 * point_info.normal_2;
+			point_info.velocity_pos_1 = contact->GetFixtureA()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_1);
+			point_info.velocity_pos_2 = contact->GetFixtureB()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_2);
+			contact_point_callback(handle, &point_info, &force_info);
 		}
 	}
 }
