@@ -26,6 +26,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ steps.version.outputs.version }}
-          files: build/*
+          files: bin/*
           draft: true
           prerelease: true
