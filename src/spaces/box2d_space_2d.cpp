@@ -219,17 +219,23 @@ void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
 		if (collision_object_1->get_type() == Box2DCollisionObject2D::TYPE_BODY && collision_object_2->get_type() == Box2DCollisionObject2D::TYPE_BODY) {
 			Box2DBody2D *body1 = static_cast<Box2DBody2D *>(collision_object_1);
 			Box2DBody2D *body2 = static_cast<Box2DBody2D *>(collision_object_2);
-			if (body1->get_static_linear_velocity() != Vector2()) {
-				body2->to_add_static_constant_linear_velocity(body1->get_static_linear_velocity());
+			if (body1->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_STATIC ||
+					body1->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_KINEMATIC) {
+				if (body1->get_static_linear_velocity() != Vector2()) {
+					body2->to_add_static_constant_linear_velocity(body1->get_static_linear_velocity());
+				}
+				if (body1->get_static_angular_velocity() != 0.0) {
+					body2->to_add_static_constant_angular_velocity(body1->get_static_angular_velocity());
+				}
 			}
-			if (body2->get_static_linear_velocity() != Vector2()) {
-				body1->to_add_static_constant_linear_velocity(body2->get_static_linear_velocity());
-			}
-			if (body1->get_static_angular_velocity() != 0.0) {
-				body2->to_add_static_constant_angular_velocity(body1->get_static_angular_velocity());
-			}
-			if (body2->get_static_angular_velocity() != 0.0) {
-				body1->to_add_static_constant_angular_velocity(body2->get_static_angular_velocity());
+			if (body2->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_STATIC ||
+					body2->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_KINEMATIC) {
+				if (body2->get_static_linear_velocity() != Vector2()) {
+					body1->to_add_static_constant_linear_velocity(body2->get_static_linear_velocity());
+				}
+				if (body2->get_static_angular_velocity() != 0.0) {
+					body1->to_add_static_constant_angular_velocity(body2->get_static_angular_velocity());
+				}
 			}
 		}
 	}
@@ -245,21 +251,19 @@ void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse
 		b2WorldManifold worldManifold;
 		contact->GetWorldManifold(&worldManifold);
 		for (int i = 0; i < contact->GetManifold()->pointCount; i++) {
-			if (worldManifold.separations[i] < 0.0) {
-				point_info.distance_1 = worldManifold.separations[i] * 0.5;
-				point_info.distance_2 = worldManifold.separations[i] * 0.5;
-				point_info.normal_1 = -worldManifold.normal;
-				point_info.normal_2 = worldManifold.normal;
-				point_info.impulse_1 = impulse->normalImpulses[i];
-				point_info.impulse_2 = impulse->normalImpulses[i];
-				point_info.tangent_impulse_1 = impulse->tangentImpulses[i];
-				point_info.tangent_impulse_2 = impulse->tangentImpulses[i];
-				point_info.local_pos_1 = worldManifold.points[i] - point_info.distance_1 * point_info.normal_1;
-				point_info.local_pos_2 = worldManifold.points[i] - point_info.distance_2 * point_info.normal_2;
-				point_info.velocity_pos_1 = contact->GetFixtureA()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_1);
-				point_info.velocity_pos_2 = contact->GetFixtureB()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_2);
-				contact_point_callback(handle, &point_info, &force_info);
-			}
+			point_info.distance_1 = worldManifold.separations[i] * 0.5;
+			point_info.distance_2 = worldManifold.separations[i] * 0.5;
+			point_info.normal_1 = -worldManifold.normal;
+			point_info.normal_2 = worldManifold.normal;
+			point_info.impulse_1 = impulse->normalImpulses[i];
+			point_info.impulse_2 = impulse->normalImpulses[i];
+			point_info.tangent_impulse_1 = impulse->tangentImpulses[i];
+			point_info.tangent_impulse_2 = impulse->tangentImpulses[i];
+			point_info.local_pos_1 = worldManifold.points[i] - point_info.distance_1 * point_info.normal_1;
+			point_info.local_pos_2 = worldManifold.points[i] - point_info.distance_2 * point_info.normal_2;
+			point_info.velocity_pos_1 = contact->GetFixtureA()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_1);
+			point_info.velocity_pos_2 = contact->GetFixtureB()->GetBody()->GetLinearVelocityFromLocalPoint(point_info.local_pos_2);
+			contact_point_callback(handle, &point_info, &force_info);
 		}
 	}
 }
