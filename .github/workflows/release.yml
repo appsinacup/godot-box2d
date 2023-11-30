@@ -1,4 +1,4 @@
-name: 🍎 macOS Builds
+name: Release
 on:
   workflow_call:
 
