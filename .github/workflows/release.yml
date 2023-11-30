@@ -12,6 +12,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: Godot Box2D
+          path: godot-box2d
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: godot-box2d
       - name: Delete draft release(s)
         uses: hugo19941994/delete-draft-releases@v1.0.0
         env:
