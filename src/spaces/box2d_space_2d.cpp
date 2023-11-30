@@ -219,17 +219,23 @@ void Box2DSpace2D::PreSolve(b2Contact *contact, const b2Manifold *oldManifold) {
 		if (collision_object_1->get_type() == Box2DCollisionObject2D::TYPE_BODY && collision_object_2->get_type() == Box2DCollisionObject2D::TYPE_BODY) {
 			Box2DBody2D *body1 = static_cast<Box2DBody2D *>(collision_object_1);
 			Box2DBody2D *body2 = static_cast<Box2DBody2D *>(collision_object_2);
-			if (body1->get_static_linear_velocity() != Vector2()) {
-				body2->to_add_static_constant_linear_velocity(body1->get_static_linear_velocity());
+			if (body1->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_STATIC ||
+					body1->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_KINEMATIC) {
+				if (body1->get_static_linear_velocity() != Vector2()) {
+					body2->to_add_static_constant_linear_velocity(body1->get_static_linear_velocity());
+				}
+				if (body1->get_static_angular_velocity() != 0.0) {
+					body2->to_add_static_constant_angular_velocity(body1->get_static_angular_velocity());
+				}
 			}
-			if (body2->get_static_linear_velocity() != Vector2()) {
-				body1->to_add_static_constant_linear_velocity(body2->get_static_linear_velocity());
-			}
-			if (body1->get_static_angular_velocity() != 0.0) {
-				body2->to_add_static_constant_angular_velocity(body1->get_static_angular_velocity());
-			}
-			if (body2->get_static_angular_velocity() != 0.0) {
-				body1->to_add_static_constant_angular_velocity(body2->get_static_angular_velocity());
+			if (body2->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_STATIC ||
+					body2->get_mode() == PhysicsServer2D::BodyMode::BODY_MODE_KINEMATIC) {
+				if (body2->get_static_linear_velocity() != Vector2()) {
+					body1->to_add_static_constant_linear_velocity(body2->get_static_linear_velocity());
+				}
+				if (body2->get_static_angular_velocity() != 0.0) {
+					body1->to_add_static_constant_angular_velocity(body2->get_static_angular_velocity());
+				}
 			}
 		}
 	}

@@ -432,6 +432,7 @@ FixtureHandle box2d::collider_create_sensor(b2World *world_handle,
 		(b2Fixture **)memalloc((shape_handle.count) * sizeof(b2Fixture *)),
 		shape_handle.count
 	};
+	b2MassData mass_data = body_handle->GetMassData();
 	for (int i = 0; i < shape_handle.count; i++) {
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
@@ -441,6 +442,7 @@ FixtureHandle box2d::collider_create_sensor(b2World *world_handle,
 		b2Fixture *fixture = body_handle->CreateFixture(&fixture_def);
 		fixture_handle.handles[i] = fixture;
 	}
+	body_handle->SetMassData(&mass_data);
 	return fixture_handle;
 }
 
@@ -453,6 +455,7 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 		(b2Fixture **)memalloc((shape_handle.count) * sizeof(b2Fixture *)),
 		shape_handle.count
 	};
+	b2MassData mass_data = body_handle->GetMassData();
 	for (int i = 0; i < shape_handle.count; i++) {
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
@@ -464,6 +467,7 @@ FixtureHandle box2d::collider_create_solid(b2World *world_handle,
 		b2Fixture *fixture = body_handle->CreateFixture(&fixture_def);
 		fixture_handle.handles[i] = fixture;
 	}
+	body_handle->SetMassData(&mass_data);
 	return fixture_handle;
 }
 
