@@ -10,6 +10,9 @@ jobs:
     steps:
       - name: Checkout 
         uses: actions/checkout@v2
+        with:
+          submodules: true
+          fetch-depth: 0
       - uses: paulhatch/semantic-version@v5.3.0
         id: version
         with:
@@ -28,11 +31,15 @@ jobs:
         uses: hugo19941994/delete-draft-releases@v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Archive
+        shell: sh
+        run: zip -j "godot-box2d.v${steps.version.outputs.version}.zip" godot-box2d/*
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: Godot Box2D ${{ steps.version.outputs.version }}
-          files: godot-box2d-${{ steps.version.outputs.version }}/*
+          files: godot-box2d.v${steps.version.outputs.version}.zip
           generate_release_notes: true
           draft: true
           prerelease: true
+          fail_on_unmatched_files: true
