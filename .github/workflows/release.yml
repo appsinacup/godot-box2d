@@ -26,10 +26,10 @@ jobs:
           bump_each_commit: true
           tag_prefix: "v"
           debug: true
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ steps.version.outputs.version }}
-          files: godot-box2d/*
-          draft: true
-          prerelease: true
+      #- name: Release
+      #  uses: softprops/action-gh-release@v1
+      #  with:
+      #    name: ${{ steps.version.outputs.version }}
+      #    files: godot-box2d/*
+      #    draft: true
+      #    prerelease: true
