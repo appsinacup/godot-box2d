@@ -39,17 +39,17 @@ runs:
     - name: Build Godot Cpp
       shell: sh
       env:
-        SCONS_CACHE: .scons-cache
-        SCONS_CACHE_DIR: .scons-cache
+        SCONS_CACHE: "${{ github.workspace }}/godot-cpp/.scons-cache/"
+        SCONS_CACHE_LIMIT: 7168
+      working-directory: godot-cpp
       run: |
-        cd godot-cpp && \
-        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes && \
+        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes
         scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes
     - name: Build Physics Server Box2D
       shell: sh
       env:
-        SCONS_CACHE: .scons-cache
-        SCONS_CACHE_DIR: .scons-cache
+        SCONS_CACHE: "${{ github.workspace }}/.scons-cache/"
+        SCONS_CACHE_LIMIT: 7168
       run: |
         scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
         scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
