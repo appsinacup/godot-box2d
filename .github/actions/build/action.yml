@@ -25,10 +25,6 @@ runs:
         bump_each_commit: true
         tag_prefix: "v"
         debug: true
-    - name: Print version to plugin cfg
-      shell: pwsh
-      run:
-        (Get-Content bin/addons/godot-box2d/plugin.cfg).replace('version="1.0"', 'version="${{ steps.version.outputs.version }}"') | Set-Content bin/addons/godot-box2d/plugin.cfg
     - name: Setup python and scons
       uses: ./.github/actions/deps
     - name: Lint
@@ -36,6 +32,10 @@ runs:
       run:
         ./scripts/clang-format.sh
         ./scripts/clang-tidy.sh
+    - name: Print version to plugin cfg
+      shell: pwsh
+      run:
+        (Get-Content bin/addons/godot-box2d/plugin.cfg).replace('version="1.0"', 'version="${{ steps.version.outputs.version }}"') | Set-Content bin/addons/godot-box2d/plugin.cfg
     - name: Build Godot Cpp
       shell: sh
       env:
