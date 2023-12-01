@@ -25,10 +25,10 @@ runs:
         bump_each_commit: true
         tag_prefix: "v"
         debug: true
-    - name: Print version
-      shell: sh
+    - name: Print version to plugin cfg
+      shell: pwsh
       run:
-        echo v${{ steps.version.outputs.version }} > bin/addons/godot-box2d/VERSION.txt
+        (Get-Content bin/addons/godot-box2d/plugin.cfg).replace('version="1.0"', 'version="${{ steps.version.outputs.version }}"') | Set-Content bin/addons/godot-box2d/plugin.cfg
     - name: Setup python and scons
       uses: ./.github/actions/deps
     - name: Lint
