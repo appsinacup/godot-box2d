@@ -33,7 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive
         shell: sh
-        run: zip -j "godot-box2d.v${{steps.version.outputs.version}}.zip" godot-box2d/*
+        run: zip -r "godot-box2d.v${{steps.version.outputs.version}}.zip" godot-box2d
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
