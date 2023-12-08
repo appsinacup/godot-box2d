@@ -43,7 +43,6 @@ runs:
         SCONS_CACHE_LIMIT: 7168
       working-directory: godot-cpp
       run: |
-        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes
         scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=yes production=yes
     - name: Build Physics Server Box2D
       shell: sh
@@ -51,5 +50,4 @@ runs:
         SCONS_CACHE: "${{ github.workspace }}/.scons-cache/"
         SCONS_CACHE_LIMIT: 7168
       run: |
-        scons target=template_debug platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
         scons target=template_release platform=${{ inputs.platform }} arch=${{ inputs.arch }} generate_bindings=no production=yes
