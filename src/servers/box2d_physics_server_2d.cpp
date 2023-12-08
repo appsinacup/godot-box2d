@@ -141,16 +141,19 @@ bool Box2DPhysicsServer2D::_shape_collide(const RID &p_shape_A, const Transform2
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 
 	int array_idx = 0;
-	box2d::ShapeCollideResult result = box2d::shape_collide(box2d_A_motion, shape_A_info, box2d_A_motion, shape_A_info);
+	box2d::ShapeCollideResult result = box2d::shape_collide(box2d_A_motion, shape_A_info, box2d_B_motion, shape_B_info);
 	if (!result.collided) {
 		return false;
 	}
 	(*p_result_count)++;
+	if (p_result_max > 0) {
+		results_out[array_idx++] = Vector2(result.witness1.x, result.witness1.y);
+	}
+	if (p_result_max > 1) {
+		results_out[array_idx++] = Vector2(result.witness2.x, result.witness2.y);
+	}
 
-	results_out[array_idx++] = Vector2(result.witness1.x, result.witness1.y);
-	results_out[array_idx++] = Vector2(result.witness2.x, result.witness2.y);
-
-	return array_idx > 0;
+	return true;
 }
 
 RID Box2DPhysicsServer2D::_space_create() {

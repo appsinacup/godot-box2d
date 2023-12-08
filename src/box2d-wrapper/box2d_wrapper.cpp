@@ -987,9 +987,12 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 				continue;
 			}
 			ShapeCollideResult result;
-			result.collided = is_toi_intersected(toi_output);
-			result.witness1 = transformA.p + toi_output.t * motion1;
-			result.witness2 = transformB.p + toi_output.t * motion2;
+			result.collided = true;
+			transformA.p = transformA.p + toi_output.t * motion1;
+			transformB.p = transformB.p + toi_output.t * motion2;
+			b2DistanceOutput distance_output = _call_b2_distance(transformA, shape_info1.handle.handles[i], 0, transformB, shape_info2.handle.handles[j], 0);
+			result.witness1 = distance_output.pointA;
+			result.witness2 = distance_output.pointB;
 			return result;
 		}
 	}
