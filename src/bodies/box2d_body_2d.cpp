@@ -649,7 +649,7 @@ void Box2DBody2D::apply_central_impulse(const Vector2 &p_impulse) {
 
 void Box2DBody2D::apply_impulse(const Vector2 &p_impulse, const Vector2 &p_position) {
 	impulse += p_impulse;
-	torque += (p_position - get_center_of_mass()).cross(p_impulse);
+	torque += p_position.cross(p_impulse);
 	if (!get_space()) {
 		return;
 	}
@@ -664,7 +664,8 @@ void Box2DBody2D::apply_impulse(const Vector2 &p_impulse, const Vector2 &p_posit
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 	b2Vec2 impulse = { p_impulse.x, p_impulse.y };
-	b2Vec2 pos = { p_position.x, p_position.y };
+	Vector2 point_centered = get_transform().get_origin() + p_position + get_center_of_mass();
+	b2Vec2 pos = { point_centered.x, point_centered.y };
 	box2d::body_apply_impulse_at_point(space_handle, body_handle, impulse, pos);
 }
 
@@ -711,7 +712,7 @@ void Box2DBody2D::apply_force(const Vector2 &p_force, const Vector2 &p_position)
 	// Note: using last delta assuming constant physics time
 	real_t last_delta = get_space()->get_last_step();
 	impulse += p_force * last_delta;
-	torque += (p_position - get_center_of_mass()).cross(p_force) * last_delta;
+	torque += p_position.cross(p_force) * last_delta;
 	if (!get_space()) {
 		return;
 	}
@@ -725,7 +726,8 @@ void Box2DBody2D::apply_force(const Vector2 &p_force, const Vector2 &p_position)
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 	b2Vec2 force = { p_force.x * last_delta, p_force.y * last_delta };
-	b2Vec2 pos = { p_position.x, p_position.y };
+	Vector2 point_centered = get_transform().get_origin() + p_position + get_center_of_mass();
+	b2Vec2 pos = { point_centered.x, point_centered.y };
 	box2d::body_apply_impulse_at_point(space_handle, body_handle, force, pos);
 }
 
