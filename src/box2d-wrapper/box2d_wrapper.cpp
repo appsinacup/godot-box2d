@@ -410,7 +410,6 @@ void box2d::body_set_transform(b2World *world_handle,
 			body_handle->SetAwake(true);
 		}
 	}
-	// also update collider transform with new values
 }
 
 void box2d::body_update_material(b2World *world_handle, b2Body *body_handle, const Material *mat) {
