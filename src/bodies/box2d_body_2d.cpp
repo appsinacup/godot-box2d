@@ -166,6 +166,7 @@ void Box2DBody2D::on_marked_active() {
 }
 
 void Box2DBody2D::on_update_active() {
+	ERR_FAIL_COND(!get_space());
 	if (!marked_active) {
 		set_active(false);
 		return;
@@ -481,6 +482,7 @@ void Box2DBody2D::_init_material(box2d::Material &mat) const {
 }
 
 void Box2DBody2D::_init_collider(box2d::FixtureHandle collider_handle) const {
+	ERR_FAIL_COND(!get_space());
 	b2World *space_handle = get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
@@ -546,21 +548,35 @@ void Box2DBody2D::set_space(Box2DSpace2D *p_space) {
 				_mass_properties_changed();
 				if (linear_velocity != Vector2()) {
 					set_linear_velocity(linear_velocity);
+					linear_velocity = Vector2();
 				}
 				if (angular_velocity != 0.0) {
 					set_angular_velocity(angular_velocity);
+					angular_velocity = 0.0;
 				}
 				if (constant_force != Vector2()) {
 					set_constant_force(constant_force);
+					constant_force = Vector2();
 				}
 				if (constant_torque != 0.0) {
 					set_constant_torque(constant_torque);
+					constant_torque = 0.0;
 				}
 				if (impulse != Vector2()) {
 					apply_impulse(impulse);
+					impulse = Vector2();
 				}
 				if (torque != 0.0) {
 					apply_torque_impulse(torque);
+					torque = 0.0;
+				}
+				if (force != Vector2()) {
+					apply_force(force);
+					force = Vector2();
+				}
+				if (torque_force != 0.0) {
+					apply_torque(torque_force);
+					torque_force = 0.0;
 				}
 				b2World *space_handle = get_space()->get_handle();
 				box2d::Material mat;
@@ -688,9 +704,7 @@ void Box2DBody2D::apply_torque_impulse(real_t p_torque) {
 }
 
 void Box2DBody2D::apply_central_force(const Vector2 &p_force) {
-	// Note: using last delta assuming constant physics time
-	real_t last_delta = get_space()->get_last_step();
-	impulse += p_force * last_delta;
+	force += p_force;
 	if (!get_space()) {
 		return;
 	}
@@ -702,6 +716,8 @@ void Box2DBody2D::apply_central_force(const Vector2 &p_force) {
 
 	b2World *space_handle = get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
+	// Note: using last delta assuming constant physics time
+	real_t last_delta = get_space()->get_last_step();
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 	b2Vec2 force = { p_force.x * last_delta, p_force.y * last_delta };
@@ -709,10 +725,8 @@ void Box2DBody2D::apply_central_force(const Vector2 &p_force) {
 }
 
 void Box2DBody2D::apply_force(const Vector2 &p_force, const Vector2 &p_position) {
-	// Note: using last delta assuming constant physics time
-	real_t last_delta = get_space()->get_last_step();
-	impulse += p_force * last_delta;
-	torque += p_position.cross(p_force) * last_delta;
+	force += p_force;
+	torque_force += p_position.cross(p_force);
 	if (!get_space()) {
 		return;
 	}
@@ -725,6 +739,8 @@ void Box2DBody2D::apply_force(const Vector2 &p_force, const Vector2 &p_position)
 	b2World *space_handle = get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	// Note: using last delta assuming constant physics time
+	real_t last_delta = get_space()->get_last_step();
 	b2Vec2 force = { p_force.x * last_delta, p_force.y * last_delta };
 	Vector2 point_centered = get_transform().get_origin() + p_position + get_center_of_mass();
 	b2Vec2 pos = { point_centered.x, point_centered.y };
@@ -732,9 +748,7 @@ void Box2DBody2D::apply_force(const Vector2 &p_force, const Vector2 &p_position)
 }
 
 void Box2DBody2D::apply_torque(real_t p_torque) {
-	// Note: using last delta assuming constant physics time
-	real_t last_delta = get_space()->get_last_step();
-	torque += p_torque * last_delta;
+	torque_force += p_torque;
 	if (!get_space()) {
 		return;
 	}
@@ -748,6 +762,8 @@ void Box2DBody2D::apply_torque(real_t p_torque) {
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	// Note: using last delta assuming constant physics time
+	real_t last_delta = get_space()->get_last_step();
 	box2d::body_apply_torque_impulse(space_handle, body_handle, p_torque * last_delta);
 }
 
@@ -896,15 +912,12 @@ void Box2DBody2D::wakeup() {
 
 void Box2DBody2D::force_sleep() {
 	sleep = true;
-	if (!get_space()) {
+	if (!get_space() || !can_sleep) {
 		return;
 	}
 
-	ERR_FAIL_COND(!can_sleep);
-
 	b2World *space_handle = get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 	box2d::body_force_sleep(space_handle, body_handle);
 }
