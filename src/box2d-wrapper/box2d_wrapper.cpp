@@ -701,12 +701,13 @@ public:
 			return -1;
 		}
 		if (!handle_excluded_callback(world, fixture, fixture->GetUserData(), handle_excluded_info)) {
-			hit_info_array[count++] = RayHitInfo{
+			hit_info_array[0] = RayHitInfo{
 				point,
 				normal,
 				fixture,
 				fixture->GetUserData()
 			};
+			count = 1;
 		}
 		return 1;
 	}
@@ -1178,7 +1179,7 @@ b2World *box2d::world_create(const WorldSettings *settings) {
 }
 
 void box2d::world_destroy(b2World *world_handle) {
-	memfree(world_handle);
+	memdelete(world_handle);
 }
 
 size_t box2d::world_get_active_objects_count(b2World *world_handle) {
