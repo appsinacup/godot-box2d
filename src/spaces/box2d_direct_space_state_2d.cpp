@@ -15,7 +15,11 @@ int Box2DDirectSpaceState2D::_intersect_point(const Vector2 &position, uint64_t 
 
 	uint32_t result_count = box2d::intersect_point(space->handle, box2d_pos, collide_with_bodies, collide_with_areas, hit_info_array, p_result_max, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info);
 	ERR_FAIL_COND_V(result_count > (uint32_t)p_result_max, 0);
-
+	result_count = MIN(result_count, p_result_max);
+	if (!r_results) {
+		memfree(hit_info_array);
+		return result_count;
+	}
 	for (uint32_t i = 0; i < result_count; i++) {
 		box2d::PointHitInfo &hit_info = hit_info_array[i];
 		PhysicsServer2DExtensionShapeResult &result = r_results[i];
@@ -33,12 +37,14 @@ int Box2DDirectSpaceState2D::_intersect_point(const Vector2 &position, uint64_t 
 			result.collider = Box2DSpace2D::_get_object_instance_hack(result.collider_id);
 		}
 	}
+	memfree(hit_info_array);
 
 	return result_count;
 }
 
 bool Box2DDirectSpaceState2D::_intersect_ray(const Vector2 &from, const Vector2 &to, uint32_t collision_mask, bool collide_with_bodies, bool collide_with_areas, bool hit_from_inside, PhysicsServer2DExtensionRayResult *r_result) {
 	ERR_FAIL_COND_V(space->locked, false);
+	ERR_FAIL_COND_V(!space, false);
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(space->handle), false);
 
 	// Raycast Info
@@ -67,20 +73,22 @@ bool Box2DDirectSpaceState2D::_intersect_ray(const Vector2 &from, const Vector2 
 			&query_excluded_info);
 
 	if (collide) {
-		r_result->position = Vector2(hit_info.position.x, hit_info.position.y);
-		r_result->normal = Vector2(hit_info.normal.x, hit_info.normal.y);
+		if (r_result != nullptr) {
+			r_result->position = Vector2(hit_info.position.x, hit_info.position.y);
+			r_result->normal = Vector2(hit_info.normal.x, hit_info.normal.y);
 
-		ERR_FAIL_COND_V(!box2d::is_user_data_valid(hit_info.user_data), false);
-		uint32_t shape_index = 0;
-		Box2DCollisionObject2D *collision_object_2d = Box2DCollisionObject2D::get_collider_user_data(hit_info.user_data, shape_index);
-		ERR_FAIL_NULL_V(collision_object_2d, false);
+			ERR_FAIL_COND_V(!box2d::is_user_data_valid(hit_info.user_data), false);
+			uint32_t shape_index = 0;
+			Box2DCollisionObject2D *collision_object_2d = Box2DCollisionObject2D::get_collider_user_data(hit_info.user_data, shape_index);
+			ERR_FAIL_NULL_V(collision_object_2d, false);
 
-		r_result->shape = shape_index;
-		r_result->collider_id = collision_object_2d->get_instance_id();
-		r_result->rid = collision_object_2d->get_rid();
+			r_result->shape = shape_index;
+			r_result->collider_id = collision_object_2d->get_instance_id();
+			r_result->rid = collision_object_2d->get_rid();
 
-		if (r_result->collider_id.is_valid()) {
-			r_result->collider = Box2DSpace2D::_get_object_instance_hack(r_result->collider_id);
+			if (r_result->collider_id.is_valid()) {
+				r_result->collider = Box2DSpace2D::_get_object_instance_hack(r_result->collider_id);
+			}
 		}
 
 		return true;
@@ -101,8 +109,12 @@ bool Box2DDirectSpaceState2D::_cast_motion(const RID &shape_rid, const Transform
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
 	real_t hit = box2d::shape_casting(space->handle, box2d_motion, shape_info, collide_with_bodies, collide_with_areas, Box2DSpace2D::_is_handle_excluded_callback, &query_excluded_info, margin).toi;
-	*p_closest_safe = hit;
-	*p_closest_unsafe = hit;
+	if (p_closest_safe != nullptr) {
+		*p_closest_safe = hit;
+	}
+	if (p_closest_unsafe != nullptr) {
+		*p_closest_unsafe = hit;
+	}
 	return true;
 }
 
@@ -130,13 +142,14 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 		}
 		(*result_count)++;
 		query_excluded_info.query_exclude[query_excluded_info.query_exclude_size++] = result.collider;
-
-		results_out[array_idx++] = Vector2(result.witness1.x, result.witness1.y);
-		results_out[array_idx++] = Vector2(result.witness2.x, result.witness2.y);
+		if (results_out != nullptr) {
+			results_out[array_idx++] = Vector2(result.witness1.x, result.witness1.y);
+			results_out[array_idx++] = Vector2(result.witness2.x, result.witness2.y);
+		}
 
 		cpt++;
 	} while (cpt < max_results);
-
+	memfree(query_excluded_info.query_exclude);
 	return array_idx > 0;
 }
 
@@ -181,6 +194,7 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 
 	} while (cpt < p_result_max);
 
+	memfree(query_excluded_info.query_exclude);
 	return cpt;
 }
 

@@ -50,7 +50,9 @@ class Box2DBody2D : public Box2DCollisionObject2D {
 	Vector2 constant_force;
 	Vector2 linear_velocity;
 	Vector2 impulse;
+	Vector2 force;
 	real_t torque = 0.0;
+	real_t torque_force = 0.0;
 	real_t angular_velocity = 0.0;
 	real_t constant_torque = 0.0;
 
