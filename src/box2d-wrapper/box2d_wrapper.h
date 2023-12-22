@@ -4,12 +4,11 @@
 #include "../b2_user_settings.h"
 
 #include <box2d/box2d.h>
+#include <box2d/distance.h>
 #include <stdio.h>
 #include <cstdint>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/variant/transform2d.hpp>
-
-/* Generated with cbindgen:0.26.0 */
 
 class b2FixtureUserData;
 class b2BodyUserData;
@@ -22,7 +21,7 @@ struct Material {
 };
 
 struct ShapeHandle {
-	b2Shape **handles;
+	b2ShapeId **handles;
 	int count;
 };
 
@@ -57,7 +56,7 @@ struct PointHitInfo {
 	b2FixtureUserData user_data;
 };
 
-using QueryHandleExcludedCallback = bool (*)(b2World *world_handle,
+using QueryHandleExcludedCallback = bool (*)(b2WorldId world_handle,
 		b2Fixture *collider_handle,
 		b2FixtureUserData user_data,
 		const QueryExcludedInfo *handle_excluded_info);
@@ -97,7 +96,7 @@ struct ContactResult {
 };
 
 struct ActiveBodyInfo {
-	b2Body *body_handle;
+	b2BodyId body_handle;
 	b2BodyUserData body_user_data;
 };
 
@@ -109,7 +108,7 @@ struct CollisionFilterInfo {
 	bool is_valid;
 };
 
-using CollisionFilterCallback = bool (*)(b2World *world_handle, const CollisionFilterInfo *filter_info);
+using CollisionFilterCallback = bool (*)(b2WorldId world_handle, const CollisionFilterInfo *filter_info);
 
 struct CollisionEventInfo {
 	b2Fixture *collider1;
@@ -122,7 +121,7 @@ struct CollisionEventInfo {
 	bool is_valid;
 };
 
-using CollisionEventCallback = void (*)(b2World *world_handle, const CollisionEventInfo *event_info);
+using CollisionEventCallback = void (*)(b2WorldId world_handle, const CollisionEventInfo *event_info);
 
 struct ContactForceEventInfo {
 	b2Fixture *collider1;
@@ -132,7 +131,7 @@ struct ContactForceEventInfo {
 	bool is_valid;
 };
 
-using ContactForceEventCallback = bool (*)(b2World *world_handle,
+using ContactForceEventCallback = bool (*)(b2WorldId world_handle,
 		const ContactForceEventInfo *event_info);
 
 struct ContactPointInfo {
@@ -150,7 +149,7 @@ struct ContactPointInfo {
 	real_t tangent_impulse_2;
 };
 
-using ContactPointCallback = bool (*)(b2World *world_handle,
+using ContactPointCallback = bool (*)(b2WorldId world_handle,
 		const ContactPointInfo *contact_info,
 		const ContactForceEventInfo *event_info);
 
@@ -162,7 +161,7 @@ struct OneWayDirection {
 	real_t last_timestep;
 };
 
-using CollisionModifyContactsCallback = OneWayDirection (*)(b2World *world_handle,
+using CollisionModifyContactsCallback = OneWayDirection (*)(b2WorldId world_handle,
 		const CollisionFilterInfo *filter_info);
 
 struct SimulationSettings {
@@ -175,21 +174,21 @@ struct SimulationSettings {
 b2Vec2 Vector2_to_b2Vec2(godot::Vector2 vec);
 godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
-bool are_handles_equal(b2World *handle1, b2World *handle2);
-bool are_handles_equal(b2Body *handle1, b2Body *handle2);
+bool are_handles_equal(b2WorldId handle1, b2WorldId handle2);
+bool are_handles_equal(b2BodyId handle1, b2BodyId handle2);
 bool are_handles_equal(FixtureHandle handle1, FixtureHandle handle2);
 bool are_handles_equal(ShapeHandle handle1, ShapeHandle handle2);
-bool are_handles_equal(b2Joint *handle1, b2Joint *handle2);
+bool are_handles_equal(b2JointId handle1, b2JointId handle2);
 bool are_handles_equal(b2Fixture *handle1, b2Fixture *handle2);
 
-void body_add_force(b2World *world_handle, b2Body *body_handle, const b2Vec2 force);
+void body_add_force(b2WorldId world_handle, b2BodyId body_handle, const b2Vec2 force);
 
-void body_add_torque(b2World *world_handle, b2Body *body_handle, real_t torque);
+void body_add_torque(b2WorldId world_handle, b2BodyId body_handle, real_t torque);
 
-void body_apply_impulse(b2World *world_handle, b2Body *body_handle, const b2Vec2 impulse);
+void body_apply_impulse(b2WorldId world_handle, b2BodyId body_handle, const b2Vec2 impulse);
 
-void body_apply_impulse_at_point(b2World *world_handle,
-		b2Body *body_handle,
+void body_apply_impulse_at_point(b2WorldId world_handle,
+		b2BodyId body_handle,
 		const b2Vec2 impulse,
 		const b2Vec2 point);
 
@@ -325,7 +324,7 @@ size_t intersect_shape(b2World *world_handle,
 		const QueryExcludedInfo *handle_excluded_info,
 		double margin);
 
-b2World *invalid_world_handle();
+b2WorldId invalid_world_handle();
 FixtureHandle invalid_fixture_handle();
 b2Body *invalid_body_handle();
 ShapeHandle invalid_shape_handle();
@@ -439,10 +438,10 @@ void world_set_active_body_callback(b2World *world_handle, ActiveBodyCallback ca
 void world_set_collision_filter_callback(b2World *world_handle,
 		b2ContactFilter *callback);
 
-void world_set_contact_listener(b2World *world_handle,
+void world_set_contact_listener(b2WorldId world_handle,
 		b2ContactListener *callback);
 
-void world_step(b2World *world_handle, const SimulationSettings *settings);
+void world_step(b2WorldId world_handle, const SimulationSettings settings);
 
 } // namespace box2d
 

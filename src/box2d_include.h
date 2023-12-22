@@ -11,10 +11,9 @@ using namespace godot;
 
 namespace box2d {
 
-inline uint32_t handle_hash(b2World *handle) {
-	return hash_one_uint64(uint64_t(handle));
-	//uint64_t combined = uint64_t(handle.id) + (uint64_t(handle.generation) << 32);
-	//return hash_one_uint64(combined);
+inline uint32_t handle_hash(b2WorldId handle) {
+	uint64_t combined = uint64_t(handle.index) + (uint64_t(handle.revision) << 32);
+	return hash_one_uint64(combined);
 }
 inline uint32_t handle_hash(b2Fixture *handle) {
 	return hash_one_uint64(uint64_t(handle));

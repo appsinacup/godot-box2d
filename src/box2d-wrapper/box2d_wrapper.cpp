@@ -1,8 +1,6 @@
 #include "box2d_wrapper.h"
 #include "../b2_user_settings.h"
 #include "../bodies/box2d_collision_object_2d.h"
-#include <box2d/b2_distance.h>
-#include <box2d/b2_time_of_impact.h>
 #include <box2d/box2d.h>
 #include <godot_cpp/templates/hash_set.hpp>
 
@@ -16,8 +14,8 @@ enum class ShapeType {
 };
 
 struct Box2DHolder {
-	HashMap<b2World *, ActiveBodyCallback> active_body_callbacks;
-	HashMap<b2World *, int> active_objects;
+	HashMap<b2WorldId , ActiveBodyCallback> active_body_callbacks;
+	HashMap<b2WorldId , int> active_objects;
 };
 
 Box2DHolder holder;
@@ -252,8 +250,8 @@ void box2d::body_apply_impulse(b2World *world_handle, b2Body *body_handle, const
 	body_handle->ApplyLinearImpulseToCenter(impulse, true);
 }
 
-void box2d::body_apply_impulse_at_point(b2World *world_handle,
-		b2Body *body_handle,
+void box2d::body_apply_impulse_at_point(b2WorldId world_handle,
+		b2BodyId body_handle,
 		const b2Vec2 impulse,
 		const b2Vec2 point) {
 	body_handle->ApplyLinearImpulse(impulse, point, true);
@@ -740,8 +738,8 @@ bool box2d::intersect_ray(b2World *world_handle,
 	return callback.count;
 }
 
-b2World *box2d::invalid_world_handle() {
-	return nullptr;
+b2WorldId box2d::invalid_world_handle() {
+	return b2_nullWorldId;
 }
 FixtureHandle box2d::invalid_fixture_handle() {
 	return FixtureHandle{
@@ -1200,9 +1198,10 @@ void box2d::world_set_contact_listener(b2World *world_handle,
 	world_handle->SetContactListener(callback);
 }
 
-void box2d::world_step(b2World *world_handle, const SimulationSettings *settings) {
-	world_handle->SetGravity(settings->gravity);
-	world_handle->Step(settings->dt, settings->max_velocity_iterations, settings->max_position_iterations);
+void box2d::world_step(b2WorldId world_handle, const SimulationSettings *settings) {
+	//world_handle->SetGravity(settings->gravity);
+	// TODO set world gravity
+	b2World_Step(world_handle, settings->dt, settings->max_velocity_iterations, settings->max_position_iterations)
 	int active_objects = 0;
 	if (holder.active_body_callbacks.has(world_handle)) {
 		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];

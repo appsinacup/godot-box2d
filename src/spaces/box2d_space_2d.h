@@ -24,7 +24,7 @@ class Box2DSpace2D : public b2ContactFilter, public b2ContactListener {
 	Box2DDirectSpaceState2D *direct_access = nullptr;
 	RID rid;
 
-	b2World *handle = box2d::invalid_world_handle();
+	b2WorldId handle = box2d::invalid_world_handle();
 
 	struct RemovedColliderInfo {
 		RID rid;
@@ -106,7 +106,7 @@ class Box2DSpace2D : public b2ContactFilter, public b2ContactListener {
 	}
 
 public:
-	_FORCE_INLINE_ b2World *get_handle() const { return handle; }
+	_FORCE_INLINE_ b2WorldId get_handle() const { return handle; }
 
 	_FORCE_INLINE_ void set_rid(const RID &p_rid) { rid = p_rid; }
 	_FORCE_INLINE_ RID get_rid() const { return rid; }

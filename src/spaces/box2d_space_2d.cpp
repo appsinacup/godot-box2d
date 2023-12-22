@@ -540,7 +540,7 @@ void Box2DSpace2D::step(real_t p_step) {
 	settings.gravity.y = default_gravity_dir.y * default_gravity_value;
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-	box2d::world_step(handle, &settings);
+	box2d::world_step(handle, settings);
 
 	// Needed only for one physics step to retrieve lost info
 	removed_colliders.clear();
