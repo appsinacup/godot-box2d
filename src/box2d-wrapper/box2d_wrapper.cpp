@@ -796,6 +796,7 @@ bool box2d::is_handle_valid(b2Joint *handle) {
 
 void box2d::joint_set_disable_collision(b2Joint *joint_handle,
 		bool disable_collision) {
+	joint_handle->SetCollideConnected(!disable_collision);
 }
 
 void box2d::joint_change_revolute_params(b2World *world_handle,
@@ -979,7 +980,7 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 					transformA,
 					b2Vec2_zero,
 					motion1,
-					shape_info2.handle.handles[i],
+					shape_info2.handle.handles[j],
 					transformB,
 					b2Vec2_zero,
 					motion2);
