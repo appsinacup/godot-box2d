@@ -488,13 +488,9 @@ void Box2DBody2D::_init_collider(box2d::FixtureHandle collider_handle) const {
 
 	// Send contact infos for dynamic bodies
 	if (mode >= PhysicsServer2D::BODY_MODE_KINEMATIC) {
-#ifdef DEBUG_ENABLED
-		// Always send contacts in case debug contacts is enabled
-		bool send_contacts = true;
-#else
 		// Only send contacts if contact monitor is enabled
 		bool send_contacts = can_report_contacts();
-#endif
+		// TODO set contacts callback only if needed
 		//box2d::collider_set_contact_force_events_enabled(space_handle, collider_handle, send_contacts);
 	}
 }
