@@ -796,6 +796,7 @@ bool box2d::is_handle_valid(b2Joint *handle) {
 
 void box2d::joint_set_disable_collision(b2Joint *joint_handle,
 		bool disable_collision) {
+	joint_handle->SetCollideConnected(!disable_collision);
 }
 
 void box2d::joint_change_revolute_params(b2World *world_handle,
