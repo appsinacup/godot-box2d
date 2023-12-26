@@ -980,7 +980,7 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 					transformA,
 					b2Vec2_zero,
 					motion1,
-					shape_info2.handle.handles[i],
+					shape_info2.handle.handles[j],
 					transformB,
 					b2Vec2_zero,
 					motion2);
