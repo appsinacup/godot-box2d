@@ -398,11 +398,9 @@ bool Box2DSpace2D::contact_force_event_callback(b2World *world_handle, const box
 
 	bool send_contacts = false;
 
-#ifdef DEBUG_ENABLED
 	if (space->is_debugging_contacts()) {
 		send_contacts = true;
 	}
-#endif
 
 	uint32_t shape1 = 0;
 	Box2DCollisionObject2D *pObject1 = nullptr;
@@ -440,13 +438,11 @@ bool Box2DSpace2D::contact_point_callback(b2World *world_handle, const box2d::Co
 
 	bool keep_sending_contacts = false;
 
-#ifdef DEBUG_ENABLED
 	if (space->is_debugging_contacts()) {
 		keep_sending_contacts = true;
 		space->add_debug_contact(pos1);
 		space->add_debug_contact(pos2);
 	}
-#endif
 	// body and shape 1
 	uint32_t shape1 = 0;
 	Box2DCollisionObject2D *pObject1 = nullptr;

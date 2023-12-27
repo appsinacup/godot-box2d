@@ -11,7 +11,6 @@ void Box2DJoint2D::copy_settings_from(Box2DJoint2D *p_joint) {
 	set_max_force(p_joint->get_max_force());
 	set_bias(p_joint->get_bias());
 	set_max_bias(p_joint->get_max_bias());
-	disable_collisions_between_bodies(p_joint->is_disabled_collisions_between_bodies());
 }
 
 void Box2DJoint2D::disable_collisions_between_bodies(const bool p_disabled) {
