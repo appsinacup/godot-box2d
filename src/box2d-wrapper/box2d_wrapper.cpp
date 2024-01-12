@@ -14,8 +14,8 @@ enum class ShapeType {
 };
 
 struct Box2DHolder {
-	HashMap<b2WorldId , ActiveBodyCallback> active_body_callbacks;
-	HashMap<b2WorldId , int> active_objects;
+	HashMap<b2WorldId, ActiveBodyCallback> active_body_callbacks;
+	HashMap<b2WorldId, int> active_objects;
 };
 
 Box2DHolder holder;

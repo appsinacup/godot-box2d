@@ -326,46 +326,46 @@ size_t intersect_shape(b2World *world_handle,
 
 b2WorldId invalid_world_handle();
 FixtureHandle invalid_fixture_handle();
-b2Body *invalid_body_handle();
+b2BodyId invalid_body_handle();
 ShapeHandle invalid_shape_handle();
-b2Joint *invalid_joint_handle();
+b2JointId invalid_joint_handle();
 
 b2FixtureUserData invalid_fixture_user_data();
 b2BodyUserData invalid_body_user_data();
 
 bool is_handle_valid(FixtureHandle handle);
-bool is_handle_valid(b2World *handle);
+bool is_handle_valid(b2WorldId handle);
 bool is_handle_valid(ShapeHandle handle);
-bool is_handle_valid(b2Body *handle);
-bool is_handle_valid(b2Joint *handle);
+bool is_handle_valid(b2BodyId handle);
+bool is_handle_valid(b2JointId handle);
 bool is_handle_valid(b2Fixture *handle);
 
 bool is_user_data_valid(b2FixtureUserData user_data);
 bool is_user_data_valid(b2BodyUserData user_data);
 
-void joint_set_disable_collision(b2Joint *joint_handle,
+void joint_set_disable_collision(b2JointId joint_handle,
 		bool disable_collision);
 
-void joint_change_revolute_params(b2World *world_handle,
-		b2Joint *joint_handle,
+void joint_change_revolute_params(b2WorldId world_handle,
+		b2JointId joint_handle,
 		real_t angular_limit_lower,
 		real_t angular_limit_upper,
 		bool angular_limit_enabled,
 		real_t motor_target_velocity,
 		bool motor_enabled);
 
-b2Joint *joint_create_prismatic(b2World *world_handle,
-		b2Body *body_handle_1,
-		b2Body *body_handle_2,
+b2JointId joint_create_prismatic(b2WorldId world_handle,
+		b2BodyId body_handle_1,
+		b2BodyId body_handle_2,
 		const b2Vec2 axis,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
 		const b2Vec2 limits,
 		bool disable_collision);
 
-b2Joint *joint_create_revolute(b2World *world_handle,
-		b2Body *body_handle_1,
-		b2Body *body_handle_2,
+b2JointId joint_create_revolute(b2WorldId world_handle,
+		b2BodyId body_handle_1,
+		b2BodyId body_handle_2,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
 		real_t angular_limit_lower,
@@ -375,9 +375,9 @@ b2Joint *joint_create_revolute(b2World *world_handle,
 		bool motor_enabled,
 		bool disable_collision);
 
-b2Joint *joint_create_distance_joint(b2World *world_handle,
-		b2Body *body_handle_1,
-		b2Body *body_handle_2,
+b2JointId joint_create_distance_joint(b2WorldId world_handle,
+		b2BodyId body_handle_1,
+		b2BodyId body_handle_2,
 		const b2Vec2 anchor_1,
 		const b2Vec2 anchor_2,
 		real_t rest_length,
@@ -386,15 +386,15 @@ b2Joint *joint_create_distance_joint(b2World *world_handle,
 		real_t damping,
 		bool disable_collision);
 
-void joint_change_distance_joint(b2World *world_handle,
-		b2Joint *joint_handle,
+void joint_change_distance_joint(b2WorldId world_handle,
+		b2JointId joint_handle,
 		real_t rest_length,
 		real_t stiffness,
 		real_t damping);
 
-void joint_destroy(b2World *world_handle, b2Joint *joint_handle);
+void joint_destroy(b2WorldId world_handle, b2JointId joint_handle);
 
-ShapeCastResult shape_casting(b2World *world_handle,
+ShapeCastResult shape_casting(b2WorldId world_handle,
 		const b2Vec2 motion,
 		ShapeInfo shape_info,
 		bool collide_with_body,
@@ -422,14 +422,14 @@ ShapeHandle shape_create_halfspace(const b2Vec2 normal, real_t distance);
 
 void shape_destroy(ShapeHandle shape_handle);
 
-ContactResult shapes_contact(b2World *world_handle,
+ContactResult shapes_contact(b2WorldId world_handle,
 		ShapeInfo shape_info1,
 		ShapeInfo shape_info2,
 		real_t margin);
 
-b2World *world_create(const WorldSettings *settings);
+b2WorldId world_create(const WorldSettings *settings);
 
-void world_destroy(b2World *world_handle);
+void world_destroy(b2WorldId world_handle);
 
 size_t world_get_active_objects_count(b2World *world_handle);
 
