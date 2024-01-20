@@ -1,14 +1,15 @@
 #ifndef BOX2D_WRAPPER_H
 #define BOX2D_WRAPPER_H
 
-#include "../b2_user_settings.h"
-
 #include <box2d/box2d.h>
 #include <box2d/distance.h>
 #include <stdio.h>
 #include <cstdint>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/variant/transform2d.hpp>
+#include <godot_cpp/variant/array.hpp>
+#include <vector>
+
 
 class b2FixtureUserData;
 class b2BodyUserData;
@@ -20,14 +21,18 @@ struct Material {
 	real_t restitution;
 };
 
-struct ShapeHandle {
-	b2ShapeId **handles;
-	int count;
+struct ShapeData {
+	b2ShapeType type;
+	union {
+		b2Polygon polygon;
+		b2Circle circle;
+		b2Capsule capsule;
+		b2Segment segment;
+	} data;
 };
 
-struct FixtureHandle {
-	b2Fixture **handles;
-	int count;
+struct ShapeHandle {
+	std::vector<ShapeData> handles;
 };
 
 struct ShapeInfo {
@@ -39,7 +44,7 @@ struct ShapeInfo {
 struct QueryExcludedInfo {
 	uint32_t query_collision_layer_mask;
 	uint64_t query_canvas_instance_id;
-	b2Fixture **query_exclude;
+	//b2Fixture **query_exclude;
 	uint32_t query_exclude_size;
 	int64_t query_exclude_body;
 };
@@ -52,19 +57,19 @@ struct WorldSettings {
 };
 
 struct PointHitInfo {
-	b2Fixture *collider;
+	//b2Fixture *collider;
 	b2FixtureUserData user_data;
 };
 
 using QueryHandleExcludedCallback = bool (*)(b2WorldId world_handle,
-		b2Fixture *collider_handle,
+		//b2Fixture *collider_handle,
 		b2FixtureUserData user_data,
 		const QueryExcludedInfo *handle_excluded_info);
 
 struct RayHitInfo {
 	b2Vec2 position;
 	b2Vec2 normal;
-	b2Fixture *collider;
+	//b2Fixture *collider;
 	b2FixtureUserData user_data;
 };
 
@@ -81,7 +86,7 @@ struct ShapeCastResult {
 	b2Vec2 witness2;
 	b2Vec2 normal1;
 	b2Vec2 normal2;
-	b2Fixture *collider;
+	//b2Fixture *collider;
 	b2FixtureUserData user_data;
 };
 
@@ -111,8 +116,8 @@ struct CollisionFilterInfo {
 using CollisionFilterCallback = bool (*)(b2WorldId world_handle, const CollisionFilterInfo *filter_info);
 
 struct CollisionEventInfo {
-	b2Fixture *collider1;
-	b2Fixture *collider2;
+	//b2Fixture *collider1;
+	//b2Fixture *collider2;
 	b2FixtureUserData user_data1;
 	b2FixtureUserData user_data2;
 	bool is_sensor;
@@ -124,15 +129,15 @@ struct CollisionEventInfo {
 using CollisionEventCallback = void (*)(b2WorldId world_handle, const CollisionEventInfo *event_info);
 
 struct ContactForceEventInfo {
-	b2Fixture *collider1;
-	b2Fixture *collider2;
+	//b2Fixture *collider1;
+	//b2Fixture *collider2;
 	b2FixtureUserData user_data1;
 	b2FixtureUserData user_data2;
 	bool is_valid;
 };
 
 using ContactForceEventCallback = bool (*)(b2WorldId world_handle,
-		const ContactForceEventInfo *event_info);
+		const ContactForceEventInfo &event_info);
 
 struct ContactPointInfo {
 	b2Vec2 local_pos_1;
@@ -150,8 +155,8 @@ struct ContactPointInfo {
 };
 
 using ContactPointCallback = bool (*)(b2WorldId world_handle,
-		const ContactPointInfo *contact_info,
-		const ContactForceEventInfo *event_info);
+		const ContactPointInfo &contact_info,
+		const ContactForceEventInfo &event_info);
 
 struct OneWayDirection {
 	bool body1;
@@ -162,7 +167,7 @@ struct OneWayDirection {
 };
 
 using CollisionModifyContactsCallback = OneWayDirection (*)(b2WorldId world_handle,
-		const CollisionFilterInfo *filter_info);
+		const CollisionFilterInfo &filter_info);
 
 struct SimulationSettings {
 	real_t dt;
@@ -174,96 +179,71 @@ struct SimulationSettings {
 b2Vec2 Vector2_to_b2Vec2(godot::Vector2 vec);
 godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
-bool are_handles_equal(b2WorldId handle1, b2WorldId handle2);
-bool are_handles_equal(b2BodyId handle1, b2BodyId handle2);
-bool are_handles_equal(FixtureHandle handle1, FixtureHandle handle2);
-bool are_handles_equal(ShapeHandle handle1, ShapeHandle handle2);
-bool are_handles_equal(b2JointId handle1, b2JointId handle2);
-bool are_handles_equal(b2Fixture *handle1, b2Fixture *handle2);
+void body_add_force(b2BodyId body_handle, b2Vec2 force);
 
-void body_add_force(b2WorldId world_handle, b2BodyId body_handle, const b2Vec2 force);
+void body_add_torque(b2Worb2BodyId body_handle, real_t torque);
 
-void body_add_torque(b2WorldId world_handle, b2BodyId body_handle, real_t torque);
+void body_apply_impulse(b2BodyId body_handle, b2Vec2 impulse);
 
-void body_apply_impulse(b2WorldId world_handle, b2BodyId body_handle, const b2Vec2 impulse);
+void body_apply_impulse_at_point(b2BodyId body_handle, b2Vec2 impulse, b2Vec2 point);
 
-void body_apply_impulse_at_point(b2WorldId world_handle,
-		b2BodyId body_handle,
-		const b2Vec2 impulse,
-		const b2Vec2 point);
+void body_apply_torque_impulse(b2BodyId body_handle, real_t torque_impulse);
 
-void body_apply_torque_impulse(b2World *world_handle, b2Body *body_handle, real_t torque_impulse);
+void body_change_mode(b2BodyId body_handle, b2BodyType body_type, bool fixed_rotation);
 
-void body_change_mode(b2World *world_handle, b2Body *body_handle, b2BodyType body_type, bool wakeup, bool fixed_rotation);
-
-b2Body *body_create(b2World *world_handle,
-		const b2Vec2 pos,
+b2Body *body_create(b2WorldId world_handle,
+		b2Vec2 pos,
 		real_t rot,
-		const b2BodyUserData &user_data,
+		b2BodyUserData *user_data,
 		b2BodyType body_type);
 
-void body_destroy(b2World *world_handle, b2Body *body_handle);
+void body_destroy(b2BodyId body_handle);
 
-void body_force_sleep(b2World *world_handle, b2Body *body_handle);
+void body_force_sleep(b2BodyId body_handle);
 
-real_t body_get_angle(b2World *world_handle, b2Body *body_handle);
+real_t body_get_angle(b2BodyId body_handle);
 
-real_t body_get_angular_velocity(b2World *world_handle, b2Body *body_handle);
+real_t body_get_angular_velocity(b2BodyId body_handle);
 
-b2Vec2 body_get_constant_force(b2World *world_handle, b2Body *body_handle);
+b2Vec2 body_get_constant_force(b2BodyId body_handle);
 
-real_t body_get_constant_torque(b2World *world_handle, b2Body *body_handle);
+real_t body_get_constant_torque(b2BodyId body_handle);
 
-b2Vec2 body_get_linear_velocity(b2World *world_handle, b2Body *body_handle);
+b2Vec2 body_get_linear_velocity(b2BodyId body_handle);
 
-b2Vec2 body_get_position(b2World *world_handle, b2Body *body_handle);
+b2Vec2 body_get_position(b2BodyId body_handle);
 
-bool body_is_ccd_enabled(b2World *world_handle, b2Body *body_handle);
+bool body_is_ccd_enabled(b2BodyId body_handle);
 
-void body_reset_forces(b2World *world_handle, b2Body *body_handle);
+void body_reset_forces(b2BodyId body_handle);
 
-void body_reset_torques(b2World *world_handle, b2Body *body_handle);
+void body_reset_torques(b2BodyId body_handle);
 
-void body_set_angular_damping(b2World *world_handle, b2Body *body_handle, real_t angular_damping);
+void body_set_angular_damping(b2BodyId body_handle, real_t angular_damping);
 
-void body_set_angular_velocity(b2World *world_handle, b2Body *body_handle, real_t vel);
+void body_set_angular_velocity(b2BodyId body_handle, real_t vel);
 
-void body_set_can_sleep(b2World *world_handle, b2Body *body_handle, bool can_sleep);
+void body_set_can_sleep(b2BodyId body_handle, bool can_sleep);
 
-void body_set_ccd_enabled(b2World *world_handle, b2Body *body_handle, bool enable);
+void body_set_ccd_enabled(b2BodyId body_handle, bool enable);
 
-void body_set_gravity_scale(b2World *world_handle,
-		b2Body *body_handle,
-		real_t gravity_scale,
-		bool wake_up);
+void body_set_gravity_scale(b2BodyId body_handle, real_t gravity_scale);
 
-void body_set_linear_damping(b2World *world_handle, b2Body *body_handle, real_t linear_damping);
+void body_set_linear_damping(b2BodyId body_handle, real_t linear_damping);
 
-void body_set_linear_velocity(b2World *world_handle, b2Body *body_handle, const b2Vec2 vel);
+void body_set_linear_velocity(b2BodyId body_handle, b2Vec2 vel);
 
-void body_set_mass_properties(b2World *world_handle,
-		b2Body *body_handle,
-		real_t mass,
-		real_t inertia,
-		const b2Vec2 local_com,
-		bool wake_up,
-		bool force_update);
+void body_set_mass_properties(b2BodyId body_handle, real_t mass, real_t inertia, b2Vec2 local_com);
 
-void body_set_transform(b2World *world_handle,
-		b2Body *body_handle,
-		const b2Vec2 pos,
-		real_t rot,
-		bool wake_up,
-		real_t step);
+void body_set_transform(b2BodyId body_handle, b2Vec2 pos, real_t rot, real_t step);
 
-void body_update_material(b2World *world_handle, b2Body *body_handle, const Material *mat);
+void body_update_material(b2BodyId body_handle, Material mat);
 
-void body_wake_up(b2World *world_handle, b2Body *body_handle, bool strong);
+void body_wake_up(b2BodyId body_handle);
 
-FixtureHandle collider_create_sensor(b2World *world_handle,
-		ShapeHandle shape_handle,
-		b2Body *body_handle,
-		b2FixtureUserData user_data);
+FixtureHandle collider_create_sensor(ShapeHandle shape_handles,
+	b2BodyId body_handle,
+	b2FixtureUserData *user_data);
 
 FixtureHandle collider_create_solid(b2World *world_handle,
 		ShapeHandle shape_handle,

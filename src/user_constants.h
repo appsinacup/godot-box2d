@@ -9,8 +9,6 @@
 #include <godot_cpp/variant/transform2d.hpp>
 #include <godot_cpp/variant/vector2.hpp>
 
-#include <box2d/box2d.h>
-
 // Tunable Constants
 
 // You can use this to change the length scale used by your game.
@@ -21,6 +19,7 @@
 // this too much because b2BlockAllocator has a maximum object size.
 #define b2_maxPolygonVertices 64
 
+/*
 class Box2DCollisionObject2D;
 class Box2DShape2D;
 
@@ -62,5 +61,6 @@ inline int b2AssertFcnGodot(const char* condition, const char* fileName, int lin
 	// don't assert it, just print error.
 	return 0;
 }
+*/
 
 #endif // B2_USER_SETTINGS_H

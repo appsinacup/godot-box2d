@@ -550,7 +550,7 @@ void Box2DSpace2D::step(real_t p_step) {
 }
 
 // Returns true to ignore the collider
-bool Box2DSpace2D::_is_handle_excluded_callback(b2World *world_handle, b2Fixture *collider_handle, b2FixtureUserData user_data, const box2d::QueryExcludedInfo *handle_excluded_info) {
+bool Box2DSpace2D::_is_handle_excluded_callback(b2WorldId *world_handle, b2Fixture *collider_handle, b2FixtureUserData user_data, const box2d::QueryExcludedInfo *handle_excluded_info) {
 	for (uint32_t exclude_index = 0; exclude_index < handle_excluded_info->query_exclude_size; ++exclude_index) {
 		if (box2d::are_handles_equal(handle_excluded_info->query_exclude[exclude_index], collider_handle)) {
 			return true;
