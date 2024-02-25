@@ -149,7 +149,7 @@ void Box2DCollisionObject2D::_update_transform() {
 		return;
 	}
 
-	b2World *space_handle = space->get_handle();
+	b2WorldId space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -168,7 +168,7 @@ void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool 
 	inv_transform = transform.affine_inverse();
 
 	if (space) {
-		b2World *space_handle = space->get_handle();
+		b2WorldId space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -194,7 +194,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 		return;
 	}
 
-	b2World *space_handle = space->get_handle();
+	b2WorldId space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(box2d::is_handle_valid(shape.collider_handle));
@@ -226,7 +226,7 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 		return;
 	}
 
-	b2World *space_handle = space->get_handle();
+	b2WorldId space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape.collider_handle));
@@ -246,7 +246,7 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 		return;
 	}
 
-	b2World *space_handle = space->get_handle();
+	b2WorldId space_handle = space->get_handle();
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
@@ -260,7 +260,7 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 
 void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	if (space) {
-		b2World *space_handle = space->get_handle();
+		b2WorldId space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -284,7 +284,7 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	space = p_space;
 
 	if (space) {
-		b2World *space_handle = space->get_handle();
+		b2WorldId space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(box2d::is_handle_valid(body_handle));

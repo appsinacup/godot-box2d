@@ -69,7 +69,7 @@ Box2DPinJoint2D::Box2DPinJoint2D(const Vector2 &p_pos, Box2DBody2D *p_body_a, Bo
 		Box2DJoint2D(p_body_a, p_body_b) {
 	Vector2 anchor_A = p_body_a->get_inv_transform().xform(p_pos);
 	Vector2 anchor_B = p_body_b ? p_body_b->get_inv_transform().xform(p_pos) : p_pos;
-
+ 
 	b2Vec2 box2d_anchor_A = { anchor_A.x, anchor_A.y };
 	b2Vec2 box2d_anchor_B = { anchor_B.x, anchor_B.y };
 

@@ -84,22 +84,22 @@ class Box2DSpace2D : public b2ContactFilter, public b2ContactListener {
 		Box2DCollisionObject2D *object2 = nullptr;
 	};
 
-	virtual bool ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB) override;
+	virtual bool ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB) override;
 	virtual void BeginContact(b2Contact *contact) override;
 
 	virtual void EndContact(b2Contact *contact) override;
 	virtual void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) override;
 	virtual void PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) override;
 
-	static bool collision_filter_common_callback(b2World *world_handle, const box2d::CollisionFilterInfo *filter_info, CollidersInfo &r_colliders_info);
-	static box2d::OneWayDirection collision_modify_contacts_callback(b2World *world_handle, const box2d::CollisionFilterInfo *filter_info);
+	static bool collision_filter_common_callback(b2WorldId world_handle, const box2d::CollisionFilterInfo *filter_info, CollidersInfo &r_colliders_info);
+	static box2d::OneWayDirection collision_modify_contacts_callback(b2WorldId world_handle, const box2d::CollisionFilterInfo *filter_info);
 
-	static void collision_event_callback(b2World *world_handle, const box2d::CollisionEventInfo *event_info);
+	static void collision_event_callback(b2WorldId world_handle, const box2d::CollisionEventInfo *event_info);
 
-	static bool contact_force_event_callback(b2World *world_handle, const box2d::ContactForceEventInfo *event_info);
-	static bool contact_point_callback(b2World *world_handle, const box2d::ContactPointInfo *contact_info, const box2d::ContactForceEventInfo *event_info);
+	static bool contact_force_event_callback(b2WorldId world_handle, const box2d::ContactForceEventInfo *event_info);
+	static bool contact_point_callback(b2WorldId world_handle, const box2d::ContactPointInfo *contact_info, const box2d::ContactForceEventInfo *event_info);
 
-	static bool _is_handle_excluded_callback(b2World *world_handle, b2Fixture *collider_handle, b2FixtureUserData collider, const box2d::QueryExcludedInfo *handle_excluded_info);
+	static bool _is_handle_excluded_callback(b2WorldId world_handle, b2ShapeId collider_handle, b2FixtureUserData collider, const box2d::QueryExcludedInfo *handle_excluded_info);
 
 	static Object *_get_object_instance_hack(uint64_t p_object_id) {
 		return reinterpret_cast<Object *>((GodotObject *)(internal::gdextension_interface_object_get_instance_from_id(p_object_id)));
@@ -121,8 +121,8 @@ public:
 	void area_add_to_area_update_list(SelfList<Box2DArea2D> *p_area);
 	void body_add_to_area_update_list(SelfList<Box2DBody2D> *p_body);
 
-	void add_removed_collider(b2Fixture *p_handle, Box2DCollisionObject2D *p_object, uint32_t p_shape_index);
-	bool get_removed_collider_info(b2Fixture *p_handle, RID &r_rid, ObjectID &r_instance_id, uint32_t &r_shape_index, Box2DCollisionObject2D::Type &r_type) const;
+	void add_removed_collider(b2ShapeId p_handle, Box2DCollisionObject2D *p_object, uint32_t p_shape_index);
+	bool get_removed_collider_info(b2ShapeId p_handle, RID &r_rid, ObjectID &r_instance_id, uint32_t &r_shape_index, Box2DCollisionObject2D::Type &r_type) const;
 
 	_FORCE_INLINE_ int get_solver_iterations() const { return solver_iterations; }
 	_FORCE_INLINE_ real_t get_contact_recycle_radius() const { return contact_recycle_radius; }

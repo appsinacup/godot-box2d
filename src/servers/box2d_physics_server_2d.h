@@ -286,7 +286,7 @@ public:
 
 	int get_frame() { return frame; }
 
-	Box2DSpace2D *get_active_space(b2World *p_handle) const {
+	Box2DSpace2D *get_active_space(b2WorldId p_handle) const {
 		ERR_FAIL_COND_V(!box2d::is_handle_valid(p_handle), nullptr);
 		return active_spaces.get(box2d::handle_hash(p_handle));
 	}

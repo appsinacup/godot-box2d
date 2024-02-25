@@ -6,13 +6,43 @@
 #include <stdio.h>
 #include <cstdint>
 #include <godot_cpp/core/defs.hpp>
-#include <godot_cpp/variant/transform2d.hpp>
 #include <godot_cpp/variant/array.hpp>
+#include <godot_cpp/variant/transform2d.hpp>
 #include <vector>
 
+// Tunable Constants
 
-class b2FixtureUserData;
-class b2BodyUserData;
+// You can use this to change the length scale used by your game.
+// For example for inches you could use 39.4.
+#define b2_lengthUnitsPerMeter 100.0f
+
+// The maximum number of vertices on a convex polygon. You cannot increase
+// this too much because b2BlockAllocator has a maximum object size.
+#define b2_maxPolygonVertices 64
+
+class Box2DCollisionObject2D;
+class Box2DShape2D;
+
+// You can define this to inject whatever data you want in b2Fixture
+struct b2FixtureUserData {
+	b2FixtureUserData() :
+			shape_idx(-1), transform(), collision_object(nullptr) {}
+
+	godot::Transform2D transform;
+	int shape_idx;
+	Box2DCollisionObject2D *collision_object;
+};
+struct b2BodyUserData {
+	b2BodyUserData() :
+			old_linear_velocity(0, 0), old_angular_velocity(0), constant_force(0, 0), constant_torque(0), collision_object(nullptr) {}
+
+	// for kinematic body
+	godot::Vector2 old_linear_velocity;
+	real_t old_angular_velocity;
+	godot::Vector2 constant_force;
+	real_t constant_torque;
+	Box2DCollisionObject2D *collision_object;
+};
 
 namespace box2d {
 
@@ -44,7 +74,7 @@ struct ShapeInfo {
 struct QueryExcludedInfo {
 	uint32_t query_collision_layer_mask;
 	uint64_t query_canvas_instance_id;
-	//b2Fixture **query_exclude;
+	//b2ShapeId *query_exclude;
 	uint32_t query_exclude_size;
 	int64_t query_exclude_body;
 };
@@ -57,19 +87,19 @@ struct WorldSettings {
 };
 
 struct PointHitInfo {
-	//b2Fixture *collider;
+	//b2ShapeId collider;
 	b2FixtureUserData user_data;
 };
 
 using QueryHandleExcludedCallback = bool (*)(b2WorldId world_handle,
-		//b2Fixture *collider_handle,
+		b2ShapeId collider_handle,
 		b2FixtureUserData user_data,
 		const QueryExcludedInfo *handle_excluded_info);
 
 struct RayHitInfo {
 	b2Vec2 position;
 	b2Vec2 normal;
-	//b2Fixture *collider;
+	//b2ShapeId collider;
 	b2FixtureUserData user_data;
 };
 
@@ -86,7 +116,7 @@ struct ShapeCastResult {
 	b2Vec2 witness2;
 	b2Vec2 normal1;
 	b2Vec2 normal2;
-	//b2Fixture *collider;
+	//b2ShapeId collider;
 	b2FixtureUserData user_data;
 };
 
@@ -116,8 +146,8 @@ struct CollisionFilterInfo {
 using CollisionFilterCallback = bool (*)(b2WorldId world_handle, const CollisionFilterInfo *filter_info);
 
 struct CollisionEventInfo {
-	//b2Fixture *collider1;
-	//b2Fixture *collider2;
+	//b2ShapeId collider1;
+	//b2ShapeId collider2;
 	b2FixtureUserData user_data1;
 	b2FixtureUserData user_data2;
 	bool is_sensor;
@@ -129,8 +159,8 @@ struct CollisionEventInfo {
 using CollisionEventCallback = void (*)(b2WorldId world_handle, const CollisionEventInfo *event_info);
 
 struct ContactForceEventInfo {
-	//b2Fixture *collider1;
-	//b2Fixture *collider2;
+	//b2ShapeId collider1;
+	//b2ShapeId collider2;
 	b2FixtureUserData user_data1;
 	b2FixtureUserData user_data2;
 	bool is_valid;
@@ -179,9 +209,28 @@ struct SimulationSettings {
 b2Vec2 Vector2_to_b2Vec2(godot::Vector2 vec);
 godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
+
+b2Vec2 b2Vec2_add(b2Vec2 vec, b2Vec2 other) {
+	vec.x += other.x;
+	vec.y += other.y;
+	return vec;
+}
+b2Vec2 b2Vec2_mul(b2Vec2 vec, real_t other) {
+	vec.x *= other;
+	vec.y *= other;
+	return vec;
+}
+
+
+b2Vec2 b2Vec2_sub(b2Vec2 vec, b2Vec2 other) {
+	vec.x -= other.x;
+	vec.y -= other.y;
+	return vec;
+}
+
 void body_add_force(b2BodyId body_handle, b2Vec2 force);
 
-void body_add_torque(b2Worb2BodyId body_handle, real_t torque);
+void body_add_torque(b2BodyId body_handle, real_t torque);
 
 void body_apply_impulse(b2BodyId body_handle, b2Vec2 impulse);
 
@@ -191,7 +240,7 @@ void body_apply_torque_impulse(b2BodyId body_handle, real_t torque_impulse);
 
 void body_change_mode(b2BodyId body_handle, b2BodyType body_type, bool fixed_rotation);
 
-b2Body *body_create(b2WorldId world_handle,
+b2BodyId body_create(b2WorldId world_handle,
 		b2Vec2 pos,
 		real_t rot,
 		b2BodyUserData *user_data,
@@ -242,21 +291,21 @@ void body_update_material(b2BodyId body_handle, Material mat);
 void body_wake_up(b2BodyId body_handle);
 
 FixtureHandle collider_create_sensor(ShapeHandle shape_handles,
-	b2BodyId body_handle,
-	b2FixtureUserData *user_data);
+		b2BodyId body_handle,
+		b2FixtureUserData *user_data);
 
-FixtureHandle collider_create_solid(b2World *world_handle,
+FixtureHandle collider_create_solid(b2WorldId world_handle,
 		ShapeHandle shape_handle,
 		const Material *mat,
-		b2Body *body_handle,
+		b2BodyId body_handle,
 		b2FixtureUserData user_data);
 
-void collider_destroy(b2World *world_handle, FixtureHandle handle);
+void collider_destroy(b2WorldId world_handle, FixtureHandle handle);
 
-void collider_set_transform(b2World *world_handle, FixtureHandle handle, ShapeInfo shape_info);
+void collider_set_transform(b2WorldId world_handle, FixtureHandle handle, ShapeInfo shape_info);
 
-godot::Transform2D collider_get_transform(b2World *world_handle, FixtureHandle handle);
-godot::Transform2D collider_get_transform(b2World *world_handle, b2Fixture *handle);
+godot::Transform2D collider_get_transform(b2WorldId world_handle, FixtureHandle handle);
+godot::Transform2D collider_get_transform(b2WorldId world_handle, b2ShapeId handle);
 
 Material default_material();
 
@@ -264,7 +313,7 @@ QueryExcludedInfo default_query_excluded_info();
 
 WorldSettings default_world_settings();
 
-size_t intersect_aabb(b2World *world_handle,
+size_t intersect_aabb(b2WorldId world_handle,
 		const b2Vec2 aabb_min,
 		const b2Vec2 aabb_max,
 		bool collide_with_body,
@@ -274,7 +323,7 @@ size_t intersect_aabb(b2World *world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-size_t intersect_point(b2World *world_handle,
+size_t intersect_point(b2WorldId world_handle,
 		const b2Vec2 position,
 		bool collide_with_body,
 		bool collide_with_area,
@@ -283,7 +332,7 @@ size_t intersect_point(b2World *world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-bool intersect_ray(b2World *world_handle,
+bool intersect_ray(b2WorldId world_handle,
 		const b2Vec2 from,
 		const b2Vec2 dir,
 		real_t length,
@@ -294,7 +343,7 @@ bool intersect_ray(b2World *world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info);
 
-size_t intersect_shape(b2World *world_handle,
+size_t intersect_shape(b2WorldId world_handle,
 		ShapeInfo shape_info,
 		bool collide_with_body,
 		bool collide_with_area,
@@ -318,7 +367,7 @@ bool is_handle_valid(b2WorldId handle);
 bool is_handle_valid(ShapeHandle handle);
 bool is_handle_valid(b2BodyId handle);
 bool is_handle_valid(b2JointId handle);
-bool is_handle_valid(b2Fixture *handle);
+bool is_handle_valid(b2ShapeId handle);
 
 bool is_user_data_valid(b2FixtureUserData user_data);
 bool is_user_data_valid(b2BodyUserData user_data);
@@ -326,8 +375,7 @@ bool is_user_data_valid(b2BodyUserData user_data);
 void joint_set_disable_collision(b2JointId joint_handle,
 		bool disable_collision);
 
-void joint_change_revolute_params(b2WorldId world_handle,
-		b2JointId joint_handle,
+void joint_change_revolute_params(b2JointId joint_handle,
 		real_t angular_limit_lower,
 		real_t angular_limit_upper,
 		bool angular_limit_enabled,
@@ -366,13 +414,12 @@ b2JointId joint_create_distance_joint(b2WorldId world_handle,
 		real_t damping,
 		bool disable_collision);
 
-void joint_change_distance_joint(b2WorldId world_handle,
-		b2JointId joint_handle,
+void joint_change_distance_joint(b2JointId joint_handle,
 		real_t rest_length,
 		real_t stiffness,
 		real_t damping);
 
-void joint_destroy(b2WorldId world_handle, b2JointId joint_handle);
+void joint_destroy(b2JointId joint_handle);
 
 ShapeCastResult shape_casting(b2WorldId world_handle,
 		const b2Vec2 motion,
@@ -407,15 +454,15 @@ ContactResult shapes_contact(b2WorldId world_handle,
 		ShapeInfo shape_info2,
 		real_t margin);
 
-b2WorldId world_create(const WorldSettings *settings);
+b2WorldId world_create(WorldSettings settings);
 
 void world_destroy(b2WorldId world_handle);
 
-size_t world_get_active_objects_count(b2World *world_handle);
+size_t world_get_active_objects_count(b2WorldId world_handle);
 
-void world_set_active_body_callback(b2World *world_handle, ActiveBodyCallback callback);
+void world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback callback);
 
-void world_set_collision_filter_callback(b2World *world_handle,
+void world_set_collision_filter_callback(b2WorldId world_handle,
 		b2ContactFilter *callback);
 
 void world_set_contact_listener(b2WorldId world_handle,

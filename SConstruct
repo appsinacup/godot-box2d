@@ -12,7 +12,7 @@ env.Append(
 	]
 )
 
-env.Prepend(CPPPATH=["box2d/extern/simde", "box2d/include", "box2d/src"])
+env.Prepend(CPPPATH=["box2d/extern/simde", "box2d/include"])
 # For the reference:
 # - CCFLAGS are compilation flags shared between C and C++
 # tweak this if you want to use different folders, or more folders, to store your source code in.

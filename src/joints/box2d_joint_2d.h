@@ -17,8 +17,8 @@ protected:
 	Box2DBody2D *A;
 	Box2DBody2D *B;
 
-	b2World *space_handle = box2d::invalid_world_handle();
-	b2Joint *handle = box2d::invalid_joint_handle();
+	b2WorldId space_handle = box2d::invalid_world_handle();
+	b2JointId handle = box2d::invalid_joint_handle();
 
 public:
 	_FORCE_INLINE_ void set_rid(const RID &p_rid) { rid = p_rid; }

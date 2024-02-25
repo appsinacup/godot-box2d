@@ -1,5 +1,4 @@
 # Binaries
-*.os
 *.os.tmp
 *.o
 *.dblite
