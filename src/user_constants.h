@@ -19,11 +19,18 @@
 // this too much because b2BlockAllocator has a maximum object size.
 #define b2_maxPolygonVertices 64
 
-/*
 class Box2DCollisionObject2D;
 class Box2DShape2D;
 
-// You can define this to inject whatever data you want in b2Body
+// You can define this to inject whatever data you want in b2Fixture
+struct b2FixtureUserData {
+	b2FixtureUserData() :
+			shape_idx(-1), transform(), collision_object(nullptr) {}
+
+	godot::Transform2D transform;
+	int shape_idx;
+	Box2DCollisionObject2D *collision_object;
+};
 struct b2BodyUserData {
 	b2BodyUserData() :
 			old_linear_velocity(0, 0), old_angular_velocity(0), constant_force(0, 0), constant_torque(0), collision_object(nullptr) {}
@@ -35,16 +42,9 @@ struct b2BodyUserData {
 	real_t constant_torque;
 	Box2DCollisionObject2D *collision_object;
 };
+/*
 
-// You can define this to inject whatever data you want in b2Fixture
-struct b2FixtureUserData {
-	b2FixtureUserData() :
-			shape_idx(-1), transform(), collision_object(nullptr) {}
-
-	godot::Transform2D transform;
-	int shape_idx;
-	Box2DCollisionObject2D *collision_object;
-};
+// You can define this to inject whatever data you want in b2Body
 
 // Memory Allocation using Godot's functions
 inline void *b2AllocGodot(uint32_t size) {

@@ -1,7 +1,6 @@
 #ifndef BOX2D_INCLUDE_H
 #define BOX2D_INCLUDE_H
 
-#include "b2_user_settings.h"
 #include "box2d-wrapper/box2d_wrapper.h"
 
 #include <godot_cpp/templates/hashfuncs.hpp>

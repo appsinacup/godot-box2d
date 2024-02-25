@@ -375,8 +375,13 @@ FixtureHandle box2d::collider_create_sensor(ShapeHandle shape_handles,
 	b2BodyId body_handle,
 	b2FixtureUserData *user_data) {
 	b2MassData mass_data = b2Body_GetMassData(body_handle);
-	for (int i = 0; i < shape_handles.size(); i++) {
-		b2ShapeId shape_handle = shape_handles.handles[i];
+	for (int i = 0; i < shape_handles.handles.size(); i++) {
+		ShapeData shape_data = shape_handles.handles[i];
+		switch(shape_data.type) {
+			case b2ShapeType::e_polygon: {
+				
+			}
+		}
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
 		fixture_def.density = 1.0;

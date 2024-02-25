@@ -3,7 +3,16 @@ import os
 import sys
 
 env = SConscript("godot-cpp/SConstruct")
-env.Prepend(CPPPATH=["box2d/include", "box2d/src"])
+
+env.Append(
+	CPPDEFINES=[
+		"BOX2D_LENGTH_UNIT_PER_METER=100.0",
+		"BOX2D_MAX_POLYGON_VERTICES=64",
+		"BOX2D_AVX2=ON"
+	]
+)
+
+env.Prepend(CPPPATH=["box2d/extern/simde", "box2d/include", "box2d/src"])
 # For the reference:
 # - CCFLAGS are compilation flags shared between C and C++
 # tweak this if you want to use different folders, or more folders, to store your source code in.

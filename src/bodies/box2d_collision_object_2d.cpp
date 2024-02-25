@@ -1,6 +1,5 @@
 #include "box2d_collision_object_2d.h"
 
-#include "../b2_user_settings.h"
 #include "../servers/box2d_physics_server_2d.h"
 #include "../spaces/box2d_space_2d.h"
 
