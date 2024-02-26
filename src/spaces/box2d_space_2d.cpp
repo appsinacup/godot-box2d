@@ -92,11 +92,11 @@ bool Box2DSpace2D::collision_filter_common_callback(b2WorldId world_handle, cons
 	return true;
 }
 
-bool Box2DSpace2D::ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB) {
+bool Box2DSpace2D::ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB, b2Manifold *manifold) {
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(fixtureA), false);
 	ERR_FAIL_COND_V(!box2d::is_handle_valid(fixtureB), false);
-	b2FixtureUserData user_dataA = fixtureA->GetUserData();
-	b2FixtureUserData user_dataB = fixtureB->GetUserData();
+	b2FixtureUserData user_dataA = *static_cast<b2FixtureUserData *>(b2Shape_GetUserData(fixtureA));
+	b2FixtureUserData user_dataB = *static_cast<b2FixtureUserData *>(b2Shape_GetUserData(fixtureA));
 	ERR_FAIL_COND_V(!box2d::is_user_data_valid(user_dataA), false);
 	ERR_FAIL_COND_V(!box2d::is_user_data_valid(user_dataB), false);
 	CollidersInfo colliders_info;
@@ -117,6 +117,7 @@ bool Box2DSpace2D::ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB) {
 
 	return true;
 }
+/*
 box2d::CollisionEventInfo event_info_from_contact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info;
 	event_info.is_sensor = false;
@@ -159,6 +160,7 @@ box2d::ContactForceEventInfo force_info_from_contact(b2Contact *contact) {
 	event_info.is_valid = true;
 	return event_info;
 }
+
 void Box2DSpace2D::BeginContact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info = event_info_from_contact(contact);
 	if (!event_info.is_valid) {
@@ -267,7 +269,6 @@ void Box2DSpace2D::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse
 		}
 	}
 }
-
 void Box2DSpace2D::collision_event_callback(b2WorldId world_handle, const box2d::CollisionEventInfo *event_info) {
 	Box2DSpace2D *space = Box2DPhysicsServer2D::singleton->get_active_space(world_handle);
 	ERR_FAIL_COND(!space);
@@ -392,6 +393,7 @@ void Box2DSpace2D::collision_event_callback(b2WorldId world_handle, const box2d:
 	}
 }
 
+*/
 bool Box2DSpace2D::contact_force_event_callback(b2WorldId world_handle, const box2d::ContactForceEventInfo *event_info) {
 	Box2DSpace2D *space = Box2DPhysicsServer2D::singleton->get_active_space(world_handle);
 	ERR_FAIL_COND_V(!space, false);
@@ -530,8 +532,7 @@ void Box2DSpace2D::step(real_t p_step) {
 
 	box2d::SimulationSettings settings;
 	settings.dt = p_step;
-	settings.max_position_iterations = Box2DProjectSettings::get_position_iterations();
-	settings.max_velocity_iterations = Box2DProjectSettings::get_velocity_iterations();
+	settings.sub_step_count = Box2DProjectSettings::get_sub_step_count();
 	settings.gravity.x = default_gravity_dir.x * default_gravity_value;
 	settings.gravity.y = default_gravity_dir.y * default_gravity_value;
 
@@ -550,7 +551,8 @@ void Box2DSpace2D::step(real_t p_step) {
 }
 
 // Returns true to ignore the collider
-bool Box2DSpace2D::_is_handle_excluded_callback(b2WorldId *world_handle, b2ShapeId collider_handle, b2FixtureUserData user_data, const box2d::QueryExcludedInfo *handle_excluded_info) {
+bool Box2DSpace2D::_is_handle_excluded_callback(b2WorldId world_handle, b2ShapeId collider_handle, b2FixtureUserData user_data, const box2d::QueryExcludedInfo *handle_excluded_info) {
+	/*
 	for (uint32_t exclude_index = 0; exclude_index < handle_excluded_info->query_exclude_size; ++exclude_index) {
 		if (box2d::are_handles_equal(handle_excluded_info->query_exclude[exclude_index], collider_handle)) {
 			return true;
@@ -574,8 +576,10 @@ bool Box2DSpace2D::_is_handle_excluded_callback(b2WorldId *world_handle, b2Shape
 	if (handle_excluded_info->query_exclude_body == collision_object_2d->get_rid().get_id()) {
 		return true;
 	}
-
 	return Box2DPhysicsServer2D::singleton->get_active_space(world_handle)->get_direct_state()->is_body_excluded_from_query(collision_object_2d->get_rid());
+
+	*/
+	return false;
 }
 
 void Box2DSpace2D::call_queries() {
@@ -739,12 +743,11 @@ Box2DSpace2D::Box2DSpace2D() {
 	world_settings.sleep_angular_threshold = body_angular_velocity_sleep_threshold;
 	world_settings.sleep_time_until_sleep = body_time_to_sleep;
 
-	handle = box2d::world_create(&world_settings);
+	handle = box2d::world_create(world_settings);
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
 
 	box2d::world_set_active_body_callback(handle, active_body_callback);
 	box2d::world_set_collision_filter_callback(handle, this);
-	box2d::world_set_contact_listener(handle, this);
 }
 
 Box2DSpace2D::~Box2DSpace2D() {
@@ -813,7 +816,7 @@ int Box2DSpace2D::box2d_intersect_aabb(Rect2 p_aabb, uint32_t p_collision_mask, 
 	b2Vec2 rect_begin{ p_aabb.position.x, p_aabb.position.y };
 	b2Vec2 rect_end{ p_aabb.get_end().x, p_aabb.get_end().y };
 	box2d::QueryExcludedInfo handle_excluded_info = box2d::default_query_excluded_info();
-	handle_excluded_info.query_exclude = (b2ShapeId *)memalloc((p_max_results) * sizeof(b2ShapeId));
+	//handle_excluded_info.query_exclude = (b2ShapeId *)memalloc((p_max_results) * sizeof(b2ShapeId));
 	handle_excluded_info.query_collision_layer_mask = p_collision_mask;
 	handle_excluded_info.query_exclude_size = 0;
 	handle_excluded_info.query_exclude_body = p_exclude_body.get_id();

@@ -6,8 +6,7 @@ using namespace godot;
 
 constexpr char RUN_ON_SEPARATE_THREAD[] = "physics/2d/run_on_separate_thread";
 constexpr char MAX_THREADS[] = "threading/worker_pool/max_threads";
-constexpr char POSITION_ITERATIONS[] = "physics/box_2d/solver/position_iterations";
-constexpr char VELOCITY_ITERATIONS[] = "physics/box_2d/solver/velocity_iterations";
+constexpr char SUB_STEP_COUNT[] = "physics/box_2d/solver/sub_step_count";
 
 void register_setting(
 		const String &p_name,
@@ -64,8 +63,7 @@ void register_setting_ranged(
 }
 
 void Box2DProjectSettings::register_settings() {
-	register_setting_ranged(VELOCITY_ITERATIONS, 8, U"2,16,or_greater");
-	register_setting_ranged(POSITION_ITERATIONS, 3, U"1,16,or_greater");
+	register_setting_ranged(SUB_STEP_COUNT, 4, U"1,16,or_greater");
 }
 
 template <typename TType>
@@ -88,10 +86,6 @@ int Box2DProjectSettings::get_max_threads() {
 	return get_setting<int>(MAX_THREADS);
 }
 
-int Box2DProjectSettings::get_position_iterations() {
-	return get_setting<int>(POSITION_ITERATIONS);
-}
-
-int Box2DProjectSettings::get_velocity_iterations() {
-	return get_setting<int>(VELOCITY_ITERATIONS);
+int Box2DProjectSettings::get_sub_step_count() {
+	return get_setting<int>(SUB_STEP_COUNT);
 }

@@ -20,7 +20,7 @@ using namespace godot;
 class Box2DSpace2D;
 class Box2DDirectSpaceState2D;
 
-class Box2DSpace2D : public b2ContactFilter, public b2ContactListener {
+class Box2DSpace2D : public b2ContactFilter {
 	Box2DDirectSpaceState2D *direct_access = nullptr;
 	RID rid;
 
@@ -84,13 +84,14 @@ class Box2DSpace2D : public b2ContactFilter, public b2ContactListener {
 		Box2DCollisionObject2D *object2 = nullptr;
 	};
 
-	virtual bool ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB) override;
-	virtual void BeginContact(b2Contact *contact) override;
+	virtual bool ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB, b2Manifold *manifold) override;
+	/*
+		void BeginContact(b2Contact *contact);
 
-	virtual void EndContact(b2Contact *contact) override;
-	virtual void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) override;
-	virtual void PostSolve(b2Contact *contact, const b2ContactImpulse *impulse) override;
-
+		void EndContact(b2Contact *contact);
+		void PreSolve(b2Contact *contact, const b2Manifold *oldManifold);
+		void PostSolve(b2Contact *contact, const b2ContactImpulse *impulse);
+	*/
 	static bool collision_filter_common_callback(b2WorldId world_handle, const box2d::CollisionFilterInfo *filter_info, CollidersInfo &r_colliders_info);
 	static box2d::OneWayDirection collision_modify_contacts_callback(b2WorldId world_handle, const box2d::CollisionFilterInfo *filter_info);
 

@@ -10,6 +10,5 @@ public:
 
 	static bool should_run_on_separate_thread();
 	static int get_max_threads();
-	static int get_position_iterations();
-	static int get_velocity_iterations();
+	static int get_sub_step_count();
 };

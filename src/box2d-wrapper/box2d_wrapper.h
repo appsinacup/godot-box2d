@@ -25,6 +25,11 @@
 class Box2DCollisionObject2D;
 class Box2DShape2D;
 
+class b2ContactFilter {
+public:
+	virtual bool ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB, b2Manifold *manifold) = 0;
+};
+
 // You can define this to inject whatever data you want in b2Fixture
 struct b2FixtureUserData {
 	b2FixtureUserData() :
@@ -61,6 +66,10 @@ struct ShapeData {
 		b2Capsule capsule;
 		b2Segment segment;
 	} data;
+};
+
+struct FixtureHandle {
+	std::vector<b2ShapeId> handles;
 };
 
 struct ShapeHandle {
@@ -203,30 +212,16 @@ using CollisionModifyContactsCallback = OneWayDirection (*)(b2WorldId world_hand
 
 struct SimulationSettings {
 	real_t dt;
-	size_t max_velocity_iterations;
-	size_t max_position_iterations;
+	size_t sub_step_count;
 	b2Vec2 gravity;
 };
 
 b2Vec2 Vector2_to_b2Vec2(godot::Vector2 vec);
 godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
-b2Vec2 b2Vec2_add(b2Vec2 vec, b2Vec2 other) {
-	vec.x += other.x;
-	vec.y += other.y;
-	return vec;
-}
-b2Vec2 b2Vec2_mul(b2Vec2 vec, real_t other) {
-	vec.x *= other;
-	vec.y *= other;
-	return vec;
-}
-
-b2Vec2 b2Vec2_sub(b2Vec2 vec, b2Vec2 other) {
-	vec.x -= other.x;
-	vec.y -= other.y;
-	return vec;
-}
+b2Vec2 b2Vec2_add(b2Vec2 vec, b2Vec2 other);
+b2Vec2 b2Vec2_mul(b2Vec2 vec, real_t other);
+b2Vec2 b2Vec2_sub(b2Vec2 vec, b2Vec2 other);
 
 void body_add_force(b2BodyId body_handle, b2Vec2 force);
 
@@ -290,7 +285,8 @@ void body_update_material(b2BodyId body_handle, Material mat);
 
 void body_wake_up(b2BodyId body_handle);
 
-FixtureHandle collider_create_sensor(ShapeHandle shape_handles,
+FixtureHandle collider_create_sensor(b2WorldId world_handle,
+		ShapeHandle shape_handles,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data);
 
@@ -298,7 +294,7 @@ FixtureHandle collider_create_solid(b2WorldId world_handle,
 		ShapeHandle shape_handle,
 		const Material *mat,
 		b2BodyId body_handle,
-		b2FixtureUserData user_data);
+		b2FixtureUserData *user_data);
 
 void collider_destroy(b2WorldId world_handle, FixtureHandle handle);
 
@@ -464,9 +460,6 @@ void world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback c
 
 void world_set_collision_filter_callback(b2WorldId world_handle,
 		b2ContactFilter *callback);
-
-void world_set_contact_listener(b2WorldId world_handle,
-		b2ContactListener *callback);
 
 void world_step(b2WorldId world_handle, const SimulationSettings settings);
 

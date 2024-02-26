@@ -4,15 +4,14 @@
 #include <box2d/geometry.h>
 #include <box2d/hull.h>
 #include <box2d/math.h>
-#include <world.h>
 #include <godot_cpp/templates/hash_set.hpp>
 
 using namespace box2d;
 using namespace godot;
 
 struct Box2DHolder {
-	HashMap<b2WorldId, ActiveBodyCallback> active_body_callbacks;
-	HashMap<b2WorldId, int> active_objects;
+	HashMap<int, ActiveBodyCallback> active_body_callbacks;
+	HashMap<int, int> active_objects;
 };
 
 Box2DHolder holder;
@@ -241,6 +240,7 @@ b2BodyId box2d::body_create(b2WorldId world_handle,
 }
 
 void box2d::body_destroy(b2BodyId body_handle) {
+	// TODO destroy user data too
 	b2DestroyBody(body_handle);
 }
 
@@ -366,25 +366,29 @@ void box2d::body_wake_up(b2BodyId body_handle) {
 	b2Body_Wake(body_handle);
 }
 
-FixtureHandle box2d::collider_create_sensor(ShapeHandle shape_handles,
+FixtureHandle box2d::collider_create_sensor(b2WorldId world_handle,
+		ShapeHandle shape_handles,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data) {
+	FixtureHandle fixture_handle{};
 	b2MassData mass_data = b2Body_GetMassData(body_handle);
 	for (int i = 0; i < shape_handles.handles.size(); i++) {
+		/*
 		ShapeData shape_data = shape_handles.handles[i];
 		switch (shape_data.type) {
-			case b2ShapeType::e_polygon: {
-			}
+			//case b2ShapeType::e_polygon: {
+			//}
 		}
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
 		fixture_def.density = 1.0;
 		fixture_def.isSensor = true;
 		fixture_def.userData = user_data;
-		b2ShapeId fixture = body_handle->CreateFixture(&fixture_def);
-		fixture_handle.handles[i] = fixture;
+		*/
+		b2ShapeId shapeId;
+		fixture_handle.handles[i] = shapeId;
 	}
-	body_handle->SetMassData(&mass_data);
+	b2Body_SetMassData(body_handle, mass_data);
 	return fixture_handle;
 }
 
@@ -392,13 +396,12 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 		ShapeHandle shape_handle,
 		const Material *mat,
 		b2BodyId body_handle,
-		b2FixtureUserData user_data) {
-	FixtureHandle fixture_handle{
-		(b2ShapeId *)memalloc((shape_handle.count) * sizeof(b2ShapeId)),
-		shape_handle.count
-	};
-	b2MassData mass_data = body_handle->GetMassData();
-	for (int i = 0; i < shape_handle.count; i++) {
+		b2FixtureUserData *user_data) {
+	FixtureHandle fixture_handle{};
+	b2MassData mass_data = b2Body_GetMassData(body_handle);
+	for (int i = 0; i < shape_handle.handles.size(); i++) {
+		// Create shape
+		/*
 		b2FixtureDef fixture_def;
 		fixture_def.shape = shape_handle.handles[i];
 		fixture_def.density = 1.0;
@@ -407,25 +410,17 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 		fixture_def.isSensor = false;
 		fixture_def.userData = user_data;
 		b2ShapeId fixture = body_handle->CreateFixture(&fixture_def);
-		fixture_handle.handles[i] = fixture;
+		*/
+		b2ShapeId shapeId;
+		fixture_handle.handles[i] = shapeId;
 	}
-	body_handle->SetMassData(&mass_data);
+	b2Body_SetMassData(body_handle, mass_data);
 	return fixture_handle;
 }
 
 void box2d::collider_destroy(b2WorldId world_handle, FixtureHandle handle) {
-	ERR_FAIL_COND(!is_handle_valid(handle));
-	b2BodyId body = handle.handles[0]->GetBody();
-	if (!is_handle_valid(body)) {
-		// already destroyed
-		return;
-	}
-	for (b2ShapeId fixture = body->GetFixtureList(); fixture != nullptr; fixture = fixture->GetNext()) {
-		for (int i = 0; i < handle.count; i++) {
-			if (fixture == handle.handles[i]) {
-				body->DestroyFixture(fixture);
-			}
-		}
+	for (b2ShapeId shapeId : handle.handles) {
+		b2DestroyShape(shapeId);
 	}
 }
 
@@ -444,18 +439,33 @@ Transform2D b2Transform_to_Transform2D(b2Transform transform) {
 Vector2 box2d::b2Vec2_to_Vector2(b2Vec2 vec) {
 	return Vector2(vec.x, vec.y);
 }
+b2Vec2 box2d::b2Vec2_add(b2Vec2 vec, b2Vec2 other) {
+	vec.x += other.x;
+	vec.y += other.y;
+	return vec;
+}
+b2Vec2 box2d::b2Vec2_mul(b2Vec2 vec, real_t other) {
+	vec.x *= other;
+	vec.y *= other;
+	return vec;
+}
+
+b2Vec2 box2d::b2Vec2_sub(b2Vec2 vec, b2Vec2 other) {
+	vec.x -= other.x;
+	vec.y -= other.y;
+	return vec;
+}
 
 b2Vec2 xform_b2Vec2(b2Vec2 vec, Transform2D transform) {
 	return Vector2_to_b2Vec2(transform.xform(b2Vec2_to_Vector2(vec)));
 }
 
 void box2d::collider_set_transform(b2WorldId world_handle, FixtureHandle handles, ShapeInfo shape_info) {
-	for (int i = 0; i < handles.count; i++) {
-		b2ShapeId handle = handles.handles[i];
-		handle->GetUserData().transform = shape_info.transform;
-		ERR_FAIL_COND(!handle);
-		ERR_FAIL_COND(!is_handle_valid(shape_info.handle));
-		ERR_FAIL_COND(handles.count != shape_info.handle.count);
+	ERR_FAIL_COND(!is_handle_valid(shape_info.handle));
+	for (b2ShapeId handle : handles.handles) {
+		b2FixtureUserData *user_data = static_cast<b2FixtureUserData *>(b2Shape_GetUserData(handle));
+		user_data->transform = shape_info.transform;
+		/*
 		b2Shape *shape_template = shape_info.handle.handles[i];
 		b2Shape *shape = handle->GetShape();
 		ERR_FAIL_COND(!shape);
@@ -509,12 +519,14 @@ void box2d::collider_set_transform(b2WorldId world_handle, FixtureHandle handles
 				ERR_FAIL_MSG("Invalid Shape Type");
 			}
 		}
+		*/
 	}
 }
 
 Transform2D box2d::collider_get_transform(b2WorldId world_handle, FixtureHandle handle) {
 	ERR_FAIL_COND_V(!is_handle_valid(handle), Transform2D());
-	return handle.handles[0]->GetUserData().transform;
+	b2FixtureUserData *user_data = static_cast<b2FixtureUserData *>(b2Shape_GetUserData(handle.handles[0]));
+	return user_data->transform;
 }
 
 Transform2D box2d::collider_get_transform(b2WorldId world_handle, b2ShapeId handle) {
@@ -556,6 +568,7 @@ public:
 		if (!b2Shape_IsSensor(shapeId) && !collide_with_body) {
 			return true;
 		}
+		/*
 		if (!handle_excluded_callback(world, shapeId, fixture->GetUserData(), handle_excluded_info)) {
 			hit_info_array[count++] = PointHitInfo{
 				fixture,
@@ -567,6 +580,7 @@ public:
 				return true;
 			}
 		}
+		*/
 		return count < hit_info_length;
 	}
 };
@@ -640,12 +654,13 @@ public:
 	/// closest hit, 1 to continue
 	float ReportFixture(b2ShapeId fixture, const b2Vec2 &point,
 			const b2Vec2 &normal, float fraction) {
-		if (fixture->IsSensor() && !collide_with_area) {
+		if (b2Shape_IsSensor(fixture) && !collide_with_area) {
 			return -1;
 		}
-		if (!fixture->IsSensor() && !collide_with_body) {
+		if (!b2Shape_IsSensor(fixture) && !collide_with_body) {
 			return -1;
 		}
+		/*
 		if (!handle_excluded_callback(world, fixture, fixture->GetUserData(), handle_excluded_info)) {
 			hit_info_array[0] = RayHitInfo{
 				point,
@@ -655,6 +670,7 @@ public:
 			};
 			count = 1;
 		}
+		*/
 		return 1;
 	}
 };
@@ -690,10 +706,7 @@ b2WorldId box2d::invalid_world_handle() {
 	return b2_nullWorldId;
 }
 FixtureHandle box2d::invalid_fixture_handle() {
-	return FixtureHandle{
-		nullptr,
-		0
-	};
+	return FixtureHandle{};
 }
 b2BodyId box2d::invalid_body_handle() {
 	return b2_nullBodyId;
@@ -719,7 +732,7 @@ bool box2d::is_user_data_valid(b2BodyUserData user_data) {
 }
 
 bool box2d::is_handle_valid(FixtureHandle handle) {
-	return handle.count > 0 || handle.handles != nullptr;
+	return handle.handles.size() > 0;
 }
 bool box2d::is_handle_valid(b2WorldId handle) {
 	return B2_IS_NON_NULL(handle);
@@ -751,7 +764,7 @@ void box2d::joint_change_revolute_params(b2JointId joint_handle,
 	//joint->SetLimits(angular_limit_lower, angular_limit_upper);
 	b2RevoluteJoint_EnableMotor(joint_handle, motor_enabled);
 	b2RevoluteJoint_SetMotorSpeed(joint_handle, motor_target_velocity);
-	b2RevoluteJoint_EnableLimit(joint_handle, angular_limit_enabled)
+	b2RevoluteJoint_EnableLimit(joint_handle, angular_limit_enabled);
 }
 
 b2JointId box2d::joint_create_prismatic(b2WorldId world_handle,
@@ -850,6 +863,7 @@ ShapeCastResult box2d::shape_casting(b2WorldId world_handle,
 		bool first_time = true;
 		b2Transform shape_transform = Transform2D_to_b2Transform(shape_info.body_transform * shape_info.transform);
 		b2Transform shape_transform_motion = shape_transform;
+		/*
 		shape_transform_motion.p += motion;
 		for (int j = 0; j < shape_info.handle.handles[i]->GetChildCount(); j++) {
 			shape_info.handle.handles[i]->ComputeAABB(&shape_aabb, shape_transform, j);
@@ -899,6 +913,7 @@ ShapeCastResult box2d::shape_casting(b2WorldId world_handle,
 		if (result.collided) {
 			return result;
 		}
+		*/
 	}
 	return ShapeCastResult{
 		false
@@ -913,6 +928,7 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 		for (int j = 0; j < shape_info2.handle.handles.size(); j++) {
 			b2Transform transformA = Transform2D_to_b2Transform(shape_info1.body_transform * shape_info1.transform);
 			b2Transform transformB = Transform2D_to_b2Transform(shape_info2.body_transform * shape_info2.transform);
+			/*
 			b2TOIOutput toi_output = _time_of_impact(shape_info1.handle.handles[i],
 					transformA,
 					b2Vec2_zero,
@@ -932,6 +948,7 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 			result.witness1 = distance_output.pointA;
 			result.witness2 = distance_output.pointB;
 			return result;
+			*/
 		}
 	}
 	return ShapeCollideResult{
@@ -1031,6 +1048,7 @@ ContactResult box2d::shapes_contact(b2WorldId world_handle,
 		ShapeInfo shape_info1,
 		ShapeInfo shape_info2,
 		real_t margin) {
+	/*
 	for (int i = 0; i < shape_info1.handle.count; i++) {
 		for (int j = 0; j < shape_info2.handle.count; j++) {
 			b2Transform transform_A = Transform2D_to_b2Transform(shape_info1.body_transform * shape_info1.transform);
@@ -1090,42 +1108,44 @@ ContactResult box2d::shapes_contact(b2WorldId world_handle,
 			};
 		}
 	}
+	*/
 	return ContactResult{
 		false
 	};
 }
 
 b2WorldId box2d::world_create(WorldSettings settings) {
-	b2WorldDef world_def = b2_defaultWorldDef;
-	return b2CreateWorld(b2WorldDef);
+	b2WorldDef world_def = b2DefaultWorldDef();
+	return b2CreateWorld(&world_def);
 }
 
-void box2d::world_destroy(b2WorldId world_handle){
-	b2DestroyWorld(world_handle)
+void box2d::world_destroy(b2WorldId world_handle) {
+	b2DestroyWorld(world_handle);
 }
 
 size_t box2d::world_get_active_objects_count(b2WorldId world_handle) {
-	return holder.active_objects[world_handle];
+	return holder.active_objects[handle_hash(world_handle)];
 }
 
 void box2d::world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback callback) {
-	holder.active_body_callbacks[world_handle] = callback;
+	holder.active_body_callbacks[handle_hash(world_handle)] = callback;
+}
+
+bool presolve_fcn(b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Manifold *manifold, void *context) {
+	b2ContactFilter *callback = static_cast<b2ContactFilter *>(context);
+	return callback->ShouldCollide(shapeIdA, shapeIdB, manifold);
 }
 
 void box2d::world_set_collision_filter_callback(b2WorldId world_handle,
 		b2ContactFilter *callback) {
-	world_handle->SetContactFilter(callback);
-}
-
-void box2d::world_set_contact_listener(b2WorldId world_handle,
-		b2ContactListener *callback) {
-	world_handle->SetContactListener(callback);
+	b2World_SetPreSolveCallback(world_handle, presolve_fcn, callback);
 }
 
 void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
 	//world_handle->SetGravity(settings->gravity);
 	// TODO set world gravity
-	b2World_Step(world_handle, settings->dt, settings->max_velocity_iterations, settings->max_position_iterations);
+	//settings.max_velocity_iterations, settings.max_position_iterations
+	b2World_Step(world_handle, settings.dt, settings.sub_step_count);
 	int active_objects = 0;
 	/*
 	if (holder.active_body_callbacks.has(world_handle)) {

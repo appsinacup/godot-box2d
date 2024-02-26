@@ -198,8 +198,8 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 	box2d::ShapeHandle shape_handle = shape.shape->get_box2d_shape();
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape_handle));
 
-	b2FixtureUserData user_data;
-	set_collider_user_data(user_data, p_shape_index);
+	b2FixtureUserData *user_data = memnew(b2FixtureUserData);
+	set_collider_user_data(*user_data, p_shape_index);
 
 	switch (type) {
 		case TYPE_BODY: {
@@ -226,7 +226,7 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 
 	if (area_detection_counter > 0) {
 		// Keep track of body information for delayed removal
-		for (int i = 0; i < shape.collider_handle.count; i++) {
+		for (int i = 0; i < shape.collider_handle.handles.size(); i++) {
 			space->add_removed_collider(shape.collider_handle.handles[i], this, p_shape_index);
 		}
 	}
@@ -279,8 +279,8 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 
 		ERR_FAIL_COND(box2d::is_handle_valid(body_handle));
 
-		b2BodyUserData user_data;
-		set_body_user_data(user_data);
+		b2BodyUserData *user_data = memnew(b2BodyUserData);
+		set_body_user_data(*user_data);
 
 		b2Vec2 position = { transform.get_origin().x, transform.get_origin().y };
 		real_t angle = transform.get_rotation();
