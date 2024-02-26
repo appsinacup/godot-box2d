@@ -14,10 +14,12 @@
 
 // You can use this to change the length scale used by your game.
 // For example for inches you could use 39.4.
+#undef b2_lengthUnitsPerMeter
 #define b2_lengthUnitsPerMeter 100.0f
 
 // The maximum number of vertices on a convex polygon. You cannot increase
 // this too much because b2BlockAllocator has a maximum object size.
+#undef b2_maxPolygonVertices
 #define b2_maxPolygonVertices 64
 
 class Box2DCollisionObject2D;
@@ -209,7 +211,6 @@ struct SimulationSettings {
 b2Vec2 Vector2_to_b2Vec2(godot::Vector2 vec);
 godot::Vector2 b2Vec2_to_Vector2(b2Vec2 vec);
 
-
 b2Vec2 b2Vec2_add(b2Vec2 vec, b2Vec2 other) {
 	vec.x += other.x;
 	vec.y += other.y;
@@ -220,7 +221,6 @@ b2Vec2 b2Vec2_mul(b2Vec2 vec, real_t other) {
 	vec.y *= other;
 	return vec;
 }
-
 
 b2Vec2 b2Vec2_sub(b2Vec2 vec, b2Vec2 other) {
 	vec.x -= other.x;
@@ -439,7 +439,7 @@ ShapeHandle shape_create_box(const b2Vec2 size);
 
 ShapeHandle shape_create_capsule(real_t half_height, real_t radius);
 
-ShapeHandle shape_create_circle(real_t radius, b2Vec2 = b2Vec2_zero);
+ShapeHandle shape_create_circle(real_t radius, b2Vec2 = { 0, 0 });
 
 ShapeHandle shape_create_concave_polyline(const b2Vec2 *points, size_t point_count);
 

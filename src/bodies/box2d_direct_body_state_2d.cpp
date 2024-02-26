@@ -57,7 +57,7 @@ double Box2DDirectBodyState2D::_get_angular_velocity() const {
 }
 
 void Box2DDirectBodyState2D::_set_transform(const Transform2D &p_transform) {
-	body->set_transform(p_transform, true);
+	body->set_transform(p_transform);
 }
 
 Transform2D Box2DDirectBodyState2D::_get_transform() const {

@@ -15,6 +15,7 @@ public:
 	real_t get_param(PhysicsServer2D::DampedSpringParam p_param) const;
 
 	Box2DDampedSpringJoint2D(const Vector2 &p_anchor_a, const Vector2 &p_anchor_b, Box2DBody2D *p_body_a, Box2DBody2D *p_body_b);
+	~Box2DDampedSpringJoint2D();
 };
 
 #endif // BOX2D_DAMPED_SPRING_JOINT_2D_H

@@ -1,9 +1,9 @@
 #include "box2d_wrapper.h"
 #include "../bodies/box2d_collision_object_2d.h"
 #include <box2d/box2d.h>
-#include <box2d/math.h>
 #include <box2d/geometry.h>
 #include <box2d/hull.h>
+#include <box2d/math.h>
 #include <world.h>
 #include <godot_cpp/templates/hash_set.hpp>
 
@@ -394,7 +394,7 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 		b2BodyId body_handle,
 		b2FixtureUserData user_data) {
 	FixtureHandle fixture_handle{
-		(b2ShapeId *)memalloc((shape_handle.count) * sizeof(b2ShapeId )),
+		(b2ShapeId *)memalloc((shape_handle.count) * sizeof(b2ShapeId)),
 		shape_handle.count
 	};
 	b2MassData mass_data = body_handle->GetMassData();
@@ -430,11 +430,11 @@ void box2d::collider_destroy(b2WorldId world_handle, FixtureHandle handle) {
 }
 
 b2Vec2 box2d::Vector2_to_b2Vec2(Vector2 vec) {
-	return b2Vec2{vec.x, vec.y};
+	return b2Vec2{ vec.x, vec.y };
 }
 
 b2Transform Transform2D_to_b2Transform(Transform2D transform) {
-	return b2Transform{Vector2_to_b2Vec2(transform.get_origin()), b2Rot{transform.get_rotation()}};
+	return b2Transform{ Vector2_to_b2Vec2(transform.get_origin()), b2Rot{ transform.get_rotation() } };
 }
 
 Transform2D b2Transform_to_Transform2D(b2Transform transform) {
@@ -518,7 +518,7 @@ Transform2D box2d::collider_get_transform(b2WorldId world_handle, FixtureHandle 
 }
 
 Transform2D box2d::collider_get_transform(b2WorldId world_handle, b2ShapeId handle) {
-	return static_cast<b2FixtureUserData*>(b2Shape_GetUserData(handle))->transform;
+	return static_cast<b2FixtureUserData *>(b2Shape_GetUserData(handle))->transform;
 }
 
 Material box2d::default_material() {
@@ -527,7 +527,7 @@ Material box2d::default_material() {
 
 QueryExcludedInfo box2d::default_query_excluded_info() {
 	//return QueryExcludedInfo{ 0, 0, nullptr, 0, 0 };
-	return QueryExcludedInfo{ };
+	return QueryExcludedInfo{};
 }
 
 WorldSettings box2d::default_world_settings() {
@@ -549,7 +549,7 @@ public:
 
 	/// Called for each fixture found in the query AABB.
 	/// @return false to terminate the query.
-	bool ReportFixture(b2ShapeId shapeId, void* context) {
+	bool ReportFixture(b2ShapeId shapeId, void *context) {
 		if (b2Shape_IsSensor(shapeId) && !collide_with_area) {
 			return true;
 		}
@@ -945,7 +945,7 @@ ShapeHandle box2d::shape_create_box(const b2Vec2 size) {
 	b2Polygon polygon_shape = b2MakeBox(size.x * 0.5, size.y * 0.5);
 	return ShapeHandle{
 		std::vector<ShapeData>{
-				{ b2_polygonShape, {.polygon = polygon_shape} } }
+				{ b2_polygonShape, { .polygon = polygon_shape } } }
 	};
 }
 
@@ -960,7 +960,7 @@ ShapeHandle box2d::shape_create_capsule(real_t half_height, real_t radius) {
 	};
 	return ShapeHandle{
 		std::vector<ShapeData>{
-				{ b2_capsuleShape, {.capsule = capsule_shape} } }
+				{ b2_capsuleShape, { .capsule = capsule_shape } } }
 	};
 }
 
@@ -972,7 +972,7 @@ ShapeHandle box2d::shape_create_circle(real_t radius, b2Vec2 pos) {
 	};
 	return ShapeHandle{
 		std::vector<ShapeData>{
-				{ b2_circleShape, {.circle=circle_shape} } }
+				{ b2_circleShape, { .circle = circle_shape } } }
 	};
 }
 
@@ -981,9 +981,9 @@ ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t po
 	//hull.points = points;
 	hull.count = point_count;
 	b2Polygon polygon_shape = b2MakePolygon(&hull, 0.0);
-	return ShapeHandle {
+	return ShapeHandle{
 		std::vector<ShapeData>{
-				{ b2_polygonShape, {.polygon =polygon_shape } } }
+				{ b2_polygonShape, { .polygon = polygon_shape } } }
 	};
 }
 
@@ -1001,8 +1001,8 @@ ShapeHandle box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t poi
 ShapeHandle box2d::shape_create_halfspace(const b2Vec2 normal, real_t distance) {
 	real_t world_size = 1000000.0;
 	b2Vec2 points[4];
-	b2Vec2 right{normal.y, -normal.x};
-	b2Vec2 left{-right.x, -right.y};
+	b2Vec2 right{ normal.y, -normal.x };
+	b2Vec2 left{ -right.x, -right.y };
 	left = b2Vec2_mul(left, world_size);
 	right = b2Vec2_mul(right, world_size);
 	left = b2Vec2_add(left, b2Vec2_mul(normal, distance));
@@ -1027,132 +1027,132 @@ void box2d::shape_destroy(ShapeHandle shape_handle) {
 	shape_handle.handles.clear();
 }
 
-	ContactResult box2d::shapes_contact(b2WorldId world_handle,
-			ShapeInfo shape_info1,
-			ShapeInfo shape_info2,
-			real_t margin) {
-		for (int i = 0; i < shape_info1.handle.count; i++) {
-			for (int j = 0; j < shape_info2.handle.count; j++) {
-				b2Transform transform_A = Transform2D_to_b2Transform(shape_info1.body_transform * shape_info1.transform);
-				b2Transform transform_B = Transform2D_to_b2Transform(shape_info2.body_transform * shape_info2.transform);
-				IntersectionResult intersection_result = _intersect_shape(shape_info1.handle.handles[i],
-						transform_A,
-						shape_info2.handle.handles[j],
-						transform_B,
-						margin);
-				if (intersection_result.distance_output.distance > margin) {
-					continue;
-				}
-				b2Vec2 point_A = intersection_result.distance_output.pointA;
-				b2Vec2 point_B = intersection_result.distance_output.pointB;
-				b2Vec2 normal = -point_A + point_B;
-				real_t dist = (normal).Length();
-				// manually compute normal
-				if (dist != 0) {
-					normal = b2Vec2(normal.x / dist, normal.y / dist);
-				} else {
-					normal = (transform_A.p - transform_B.p);
-					normal.Normalize();
-				}
-				//normal = -intersection_result.world_manifold.normal;
+ContactResult box2d::shapes_contact(b2WorldId world_handle,
+		ShapeInfo shape_info1,
+		ShapeInfo shape_info2,
+		real_t margin) {
+	for (int i = 0; i < shape_info1.handle.count; i++) {
+		for (int j = 0; j < shape_info2.handle.count; j++) {
+			b2Transform transform_A = Transform2D_to_b2Transform(shape_info1.body_transform * shape_info1.transform);
+			b2Transform transform_B = Transform2D_to_b2Transform(shape_info2.body_transform * shape_info2.transform);
+			IntersectionResult intersection_result = _intersect_shape(shape_info1.handle.handles[i],
+					transform_A,
+					shape_info2.handle.handles[j],
+					transform_B,
+					margin);
+			if (intersection_result.distance_output.distance > margin) {
+				continue;
+			}
+			b2Vec2 point_A = intersection_result.distance_output.pointA;
+			b2Vec2 point_B = intersection_result.distance_output.pointB;
+			b2Vec2 normal = -point_A + point_B;
+			real_t dist = (normal).Length();
+			// manually compute normal
+			if (dist != 0) {
+				normal = b2Vec2(normal.x / dist, normal.y / dist);
+			} else {
+				normal = (transform_A.p - transform_B.p);
+				normal.Normalize();
+			}
+			//normal = -intersection_result.world_manifold.normal;
 
-				if (intersection_result.world_manifold.normal.x != 0.0 && intersection_result.world_manifold.normal.y != 0.0) {
-					//normal = -intersection_result.world_manifold.normal;
-					//normal.Normalize();
-				}
-				if (intersection_result.distance_output.distance <= 0.0) {
-					// Still not perfect, because of polygon skin
-					point_A -= margin * 1.07 * normal;
-				} else {
-					point_A += margin * 1.07 * normal;
-				}
-				normal = -point_A + point_B;
-				dist = normal.Length();
-				if (dist != 0) {
-					normal = b2Vec2(normal.x / dist, normal.y / dist);
-				} else {
-					normal = transform_A.p - transform_B.p;
-					normal.Normalize();
-				}
+			if (intersection_result.world_manifold.normal.x != 0.0 && intersection_result.world_manifold.normal.y != 0.0) {
 				//normal = -intersection_result.world_manifold.normal;
-				if (intersection_result.world_manifold.normal.x != 0.0 && intersection_result.world_manifold.normal.y != 0.0) {
-					//normal = -intersection_result.world_manifold.normal;
-					//normal.Normalize();
-				}
-				return ContactResult{
-					intersection_result.distance_output.distance <= margin,
-					dist >= 0.0,
-					dist,
-					point_A,
-					point_B,
-					normal,
-					-normal,
-				};
+				//normal.Normalize();
+			}
+			if (intersection_result.distance_output.distance <= 0.0) {
+				// Still not perfect, because of polygon skin
+				point_A -= margin * 1.07 * normal;
+			} else {
+				point_A += margin * 1.07 * normal;
+			}
+			normal = -point_A + point_B;
+			dist = normal.Length();
+			if (dist != 0) {
+				normal = b2Vec2(normal.x / dist, normal.y / dist);
+			} else {
+				normal = transform_A.p - transform_B.p;
+				normal.Normalize();
+			}
+			//normal = -intersection_result.world_manifold.normal;
+			if (intersection_result.world_manifold.normal.x != 0.0 && intersection_result.world_manifold.normal.y != 0.0) {
+				//normal = -intersection_result.world_manifold.normal;
+				//normal.Normalize();
+			}
+			return ContactResult{
+				intersection_result.distance_output.distance <= margin,
+				dist >= 0.0,
+				dist,
+				point_A,
+				point_B,
+				normal,
+				-normal,
+			};
+		}
+	}
+	return ContactResult{
+		false
+	};
+}
+
+b2WorldId box2d::world_create(WorldSettings settings) {
+	b2WorldDef world_def = b2_defaultWorldDef;
+	return b2CreateWorld(b2WorldDef);
+}
+
+void box2d::world_destroy(b2WorldId world_handle){
+	b2DestroyWorld(world_handle)
+}
+
+size_t box2d::world_get_active_objects_count(b2WorldId world_handle) {
+	return holder.active_objects[world_handle];
+}
+
+void box2d::world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback callback) {
+	holder.active_body_callbacks[world_handle] = callback;
+}
+
+void box2d::world_set_collision_filter_callback(b2WorldId world_handle,
+		b2ContactFilter *callback) {
+	world_handle->SetContactFilter(callback);
+}
+
+void box2d::world_set_contact_listener(b2WorldId world_handle,
+		b2ContactListener *callback) {
+	world_handle->SetContactListener(callback);
+}
+
+void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
+	//world_handle->SetGravity(settings->gravity);
+	// TODO set world gravity
+	b2World_Step(world_handle, settings->dt, settings->max_velocity_iterations, settings->max_position_iterations);
+	int active_objects = 0;
+	/*
+	if (holder.active_body_callbacks.has(world_handle)) {
+		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
+		for (b2BodyId body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
+			if (body->GetType() == b2_kinematicBody) {
+				b2BodyUserData &userData = body->GetUserData();
+				userData.old_angular_velocity = body->GetAngularVelocity();
+				userData.old_linear_velocity = b2Vec2_to_Vector2(body->GetLinearVelocity());
+				body->SetLinearVelocity(b2Vec2_zero);
+				body->SetAngularVelocity(0);
+			}
+			Vector2 constant_force = body->GetUserData().constant_force;
+			if (constant_force != Vector2()) {
+				body->ApplyForceToCenter(Vector2_to_b2Vec2(constant_force), true);
+			}
+			real_t constant_torque = body->GetUserData().constant_torque;
+			if (constant_torque != 0.0) {
+				body->ApplyTorque(constant_torque, true);
+			}
+			if (body->IsAwake() && body->GetUserData().collision_object->get_type() == Box2DCollisionObject2D::Type::TYPE_BODY) {
+				active_objects++;
+				ActiveBodyInfo info{ body, body->GetUserData() };
+				callback(info);
 			}
 		}
-		return ContactResult{
-			false
-		};
 	}
-
-	b2WorldId box2d::world_create(WorldSettings settings) {
-		b2WorldDef world_def = b2_defaultWorldDef;
-		return b2CreateWorld(b2WorldDef);
-	}
-
-	void box2d::world_destroy(b2WorldId world_handle){
-		b2DestroyWorld(world_handle)
-	}
-
-	size_t box2d::world_get_active_objects_count(b2WorldId  world_handle) {
-		return holder.active_objects[world_handle];
-	}
-
-	void box2d::world_set_active_body_callback(b2WorldId  world_handle, ActiveBodyCallback callback) {
-		holder.active_body_callbacks[world_handle] = callback;
-	}
-
-	void box2d::world_set_collision_filter_callback(b2WorldId  world_handle,
-			b2ContactFilter * callback) {
-		world_handle->SetContactFilter(callback);
-	}
-
-	void box2d::world_set_contact_listener(b2WorldId  world_handle,
-			b2ContactListener * callback) {
-		world_handle->SetContactListener(callback);
-	}
-
-	void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
-		//world_handle->SetGravity(settings->gravity);
-		// TODO set world gravity
-		b2World_Step(world_handle, settings->dt, settings->max_velocity_iterations, settings->max_position_iterations);
-		int active_objects = 0;
-		/*
-		if (holder.active_body_callbacks.has(world_handle)) {
-			ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
-			for (b2BodyId body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
-				if (body->GetType() == b2_kinematicBody) {
-					b2BodyUserData &userData = body->GetUserData();
-					userData.old_angular_velocity = body->GetAngularVelocity();
-					userData.old_linear_velocity = b2Vec2_to_Vector2(body->GetLinearVelocity());
-					body->SetLinearVelocity(b2Vec2_zero);
-					body->SetAngularVelocity(0);
-				}
-				Vector2 constant_force = body->GetUserData().constant_force;
-				if (constant_force != Vector2()) {
-					body->ApplyForceToCenter(Vector2_to_b2Vec2(constant_force), true);
-				}
-				real_t constant_torque = body->GetUserData().constant_torque;
-				if (constant_torque != 0.0) {
-					body->ApplyTorque(constant_torque, true);
-				}
-				if (body->IsAwake() && body->GetUserData().collision_object->get_type() == Box2DCollisionObject2D::Type::TYPE_BODY) {
-					active_objects++;
-					ActiveBodyInfo info{ body, body->GetUserData() };
-					callback(info);
-				}
-			}
-		}
-		*/
-		//holder.active_objects[world_handle] = active_objects;
-	}
+	*/
+	//holder.active_objects[world_handle] = active_objects;
+}

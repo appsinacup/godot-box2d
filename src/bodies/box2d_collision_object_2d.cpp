@@ -145,17 +145,10 @@ void Box2DCollisionObject2D::_unregister_shapes() {
 }
 
 void Box2DCollisionObject2D::_update_transform() {
-	if (!space) {
-		return;
-	}
-
-	b2WorldId space_handle = space->get_handle();
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
-	b2Vec2 position = box2d::body_get_position(space_handle, body_handle);
-	real_t angle = box2d::body_get_angle(space_handle, body_handle);
+	b2Vec2 position = box2d::body_get_position(body_handle);
+	real_t angle = box2d::body_get_angle(body_handle);
 
 	transform.set_origin(Vector2(position.x, position.y));
 	transform.set_rotation(angle);
@@ -163,7 +156,7 @@ void Box2DCollisionObject2D::_update_transform() {
 	inv_transform = transform.affine_inverse();
 }
 
-void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool wake_up) {
+void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform) {
 	transform = p_transform;
 	inv_transform = transform.affine_inverse();
 
@@ -176,7 +169,7 @@ void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool 
 		const Vector2 &origin = transform.get_origin();
 		b2Vec2 position = { origin.x, origin.y };
 		real_t rotation = transform.get_rotation();
-		box2d::body_set_transform(space_handle, body_handle, position, rotation, wake_up, space->get_last_step());
+		box2d::body_set_transform(body_handle, position, rotation, space->get_last_step());
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
 			Shape &shape = shapes[i];
@@ -260,9 +253,6 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 
 void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	if (space) {
-		b2WorldId space_handle = space->get_handle();
-		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
@@ -274,7 +264,7 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 			_destroy_shape(shape, i);
 		}
 		// This call also destroys the colliders
-		box2d::body_destroy(space_handle, body_handle);
+		box2d::body_destroy(body_handle);
 		body_handle = box2d::invalid_body_handle();
 
 		// Reset area detection counter to keep it consistent for new detections
@@ -302,8 +292,8 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_dynamicBody);
 		}
 		if (type == TYPE_AREA) {
-			box2d::body_set_can_sleep(space_handle, body_handle, false);
-			box2d::body_set_gravity_scale(space_handle, body_handle, 0.0, true);
+			box2d::body_set_can_sleep(body_handle, false);
+			box2d::body_set_gravity_scale(body_handle, 0.0);
 		}
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {

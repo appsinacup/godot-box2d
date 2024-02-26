@@ -17,7 +17,6 @@ protected:
 	Box2DBody2D *A;
 	Box2DBody2D *B;
 
-	b2WorldId space_handle = box2d::invalid_world_handle();
 	b2JointId handle = box2d::invalid_joint_handle();
 
 public:

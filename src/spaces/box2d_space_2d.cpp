@@ -813,7 +813,7 @@ int Box2DSpace2D::box2d_intersect_aabb(Rect2 p_aabb, uint32_t p_collision_mask, 
 	b2Vec2 rect_begin{ p_aabb.position.x, p_aabb.position.y };
 	b2Vec2 rect_end{ p_aabb.get_end().x, p_aabb.get_end().y };
 	box2d::QueryExcludedInfo handle_excluded_info = box2d::default_query_excluded_info();
-	handle_excluded_info.query_exclude = (b2ShapeId *)memalloc((p_max_results) * sizeof(b2ShapeId ));
+	handle_excluded_info.query_exclude = (b2ShapeId *)memalloc((p_max_results) * sizeof(b2ShapeId));
 	handle_excluded_info.query_collision_layer_mask = p_collision_mask;
 	handle_excluded_info.query_exclude_size = 0;
 	handle_excluded_info.query_exclude_body = p_exclude_body.get_id();

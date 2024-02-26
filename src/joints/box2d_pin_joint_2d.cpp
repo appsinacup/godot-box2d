@@ -16,9 +16,8 @@ void Box2DPinJoint2D::set_param(PhysicsServer2D::PinJointParam p_param, real_t p
 			return;
 		}
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-	box2d::joint_change_revolute_params(space_handle, handle, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
+	box2d::joint_change_revolute_params(handle, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
 }
 
 real_t Box2DPinJoint2D::get_param(PhysicsServer2D::PinJointParam p_param) const {
@@ -48,9 +47,8 @@ void Box2DPinJoint2D::set_flag(PhysicsServer2D::PinJointFlag p_flag, bool p_enab
 			motor_enabled = p_enabled;
 		} break;
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-	box2d::joint_change_revolute_params(space_handle, handle, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
+	box2d::joint_change_revolute_params(handle, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled);
 }
 
 bool Box2DPinJoint2D::get_flag(PhysicsServer2D::PinJointFlag p_flag) const {
@@ -69,13 +67,13 @@ Box2DPinJoint2D::Box2DPinJoint2D(const Vector2 &p_pos, Box2DBody2D *p_body_a, Bo
 		Box2DJoint2D(p_body_a, p_body_b) {
 	Vector2 anchor_A = p_body_a->get_inv_transform().xform(p_pos);
 	Vector2 anchor_B = p_body_b ? p_body_b->get_inv_transform().xform(p_pos) : p_pos;
- 
+
 	b2Vec2 box2d_anchor_A = { anchor_A.x, anchor_A.y };
 	b2Vec2 box2d_anchor_B = { anchor_B.x, anchor_B.y };
 
 	ERR_FAIL_COND(!p_body_a->get_space());
 	ERR_FAIL_COND(p_body_a->get_space() != p_body_b->get_space());
-	space_handle = p_body_a->get_space()->get_handle();
+	b2WorldId space_handle = p_body_a->get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	handle = box2d::joint_create_revolute(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), box2d_anchor_A, box2d_anchor_B, angular_limit_lower, angular_limit_upper, angular_limit_enabled, motor_target_velocity, motor_enabled, is_disabled_collisions_between_bodies());
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));

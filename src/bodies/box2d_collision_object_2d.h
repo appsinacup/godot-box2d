@@ -100,7 +100,7 @@ public:
 		return shapes[p_index].xform;
 	}
 
-	void set_transform(const Transform2D &p_transform, bool wake_up = false);
+	void set_transform(const Transform2D &p_transform);
 
 	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
 	_FORCE_INLINE_ const Transform2D &get_inv_transform() const { return inv_transform; }
