@@ -459,8 +459,7 @@ void Box2DBody2D::_init_collider(box2d::FixtureHandle collider_handle) const {
 	if (mode >= PhysicsServer2D::BODY_MODE_KINEMATIC) {
 		// Only send contacts if contact monitor is enabled
 		bool send_contacts = can_report_contacts();
-		// TODO set contacts callback only if needed
-		//box2d::collider_set_contact_force_events_enabled(space_handle, collider_handle, send_contacts);
+		box2d::collider_set_contact_force_events_enabled(collider_handle, send_contacts);
 	}
 }
 

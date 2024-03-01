@@ -130,7 +130,7 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 	box2d::ShapeInfo shape_info = box2d::shape_info_from_body_shape(shape_handle, Transform2D(), transform);
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
-	//query_excluded_info.query_exclude = (b2ShapeId *)memalloc((max_results) * sizeof(b2ShapeId));
+	query_excluded_info.query_exclude = (b2ShapeId *)memalloc((max_results) * sizeof(b2ShapeId));
 	query_excluded_info.query_exclude_size = 0;
 
 	int cpt = 0;
@@ -141,7 +141,7 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 			break;
 		}
 		(*result_count)++;
-		//query_excluded_info.query_exclude[query_excluded_info.query_exclude_size++] = result.collider;
+		query_excluded_info.query_exclude[query_excluded_info.query_exclude_size++] = result.collider;
 		if (results_out != nullptr) {
 			results_out[array_idx++] = Vector2(result.witness1.x, result.witness1.y);
 			results_out[array_idx++] = Vector2(result.witness2.x, result.witness2.y);
@@ -149,7 +149,7 @@ bool Box2DDirectSpaceState2D::_collide_shape(const RID &shape_rid, const Transfo
 
 		cpt++;
 	} while (cpt < max_results);
-	//memfree(query_excluded_info.query_exclude);
+	memfree(query_excluded_info.query_exclude);
 	return array_idx > 0;
 }
 
@@ -164,7 +164,7 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 
 	box2d::QueryExcludedInfo query_excluded_info = box2d::default_query_excluded_info();
 	query_excluded_info.query_collision_layer_mask = collision_mask;
-	//query_excluded_info.query_exclude = (b2ShapeId *)memalloc((p_result_max) * sizeof(b2ShapeId));
+	query_excluded_info.query_exclude = (b2ShapeId *)memalloc((p_result_max) * sizeof(b2ShapeId));
 	query_excluded_info.query_exclude_size = 0;
 
 	int cpt = 0;
@@ -173,7 +173,7 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 		if (!result.collided) {
 			break;
 		}
-		//query_excluded_info.query_exclude[query_excluded_info.query_exclude_size++] = result.collider;
+		query_excluded_info.query_exclude[query_excluded_info.query_exclude_size++] = result.collider;
 
 		ERR_CONTINUE_MSG(!box2d::is_user_data_valid(result.user_data), "Invalid user data");
 		uint32_t shape_index = 0;
@@ -194,7 +194,7 @@ int Box2DDirectSpaceState2D::_intersect_shape(const RID &shape_rid, const Transf
 
 	} while (cpt < p_result_max);
 
-	//memfree(query_excluded_info.query_exclude);
+	memfree(query_excluded_info.query_exclude);
 	return cpt;
 }
 

@@ -85,7 +85,7 @@ struct ShapeInfo {
 struct QueryExcludedInfo {
 	uint32_t query_collision_layer_mask;
 	uint64_t query_canvas_instance_id;
-	//b2ShapeId *query_exclude;
+	b2ShapeId *query_exclude;
 	uint32_t query_exclude_size;
 	int64_t query_exclude_body;
 };
@@ -127,7 +127,7 @@ struct ShapeCastResult {
 	b2Vec2 witness2;
 	b2Vec2 normal1;
 	b2Vec2 normal2;
-	//b2ShapeId collider;
+	b2ShapeId collider;
 	b2FixtureUserData user_data;
 };
 
@@ -460,6 +460,8 @@ void world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback c
 
 void world_set_collision_filter_callback(b2WorldId world_handle,
 		b2ContactFilter *callback);
+
+void collider_set_contact_force_events_enabled(FixtureHandle collider_handle, bool send_contacts);
 
 void world_step(b2WorldId world_handle, const SimulationSettings settings);
 

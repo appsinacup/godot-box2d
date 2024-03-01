@@ -117,6 +117,7 @@ bool Box2DSpace2D::ShouldCollide(b2ShapeId fixtureA, b2ShapeId fixtureB, b2Manif
 
 	return true;
 }
+// TODO
 /*
 box2d::CollisionEventInfo event_info_from_contact(b2Contact *contact) {
 	box2d::CollisionEventInfo event_info;
@@ -550,6 +551,7 @@ void Box2DSpace2D::step(real_t p_step) {
 	active_objects = box2d::world_get_active_objects_count(handle);
 }
 
+// TODO
 // Returns true to ignore the collider
 bool Box2DSpace2D::_is_handle_excluded_callback(b2WorldId world_handle, b2ShapeId collider_handle, b2FixtureUserData user_data, const box2d::QueryExcludedInfo *handle_excluded_info) {
 	/*

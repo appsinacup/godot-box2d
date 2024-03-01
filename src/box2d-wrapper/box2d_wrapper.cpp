@@ -418,6 +418,12 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 	return fixture_handle;
 }
 
+void box2d::collider_set_contact_force_events_enabled(FixtureHandle collider_handle, bool send_contacts) {
+	for (int i = 0; i < collider_handle.handles.size(); i++) {
+		b2ShapeId shape_id = collider_handle.handles[i];
+	}
+}
+
 void box2d::collider_destroy(b2WorldId world_handle, FixtureHandle handle) {
 	for (b2ShapeId shapeId : handle.handles) {
 		b2DestroyShape(shapeId);

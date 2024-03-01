@@ -19,10 +19,6 @@ void Box2DCollisionObject2D::add_shape(Box2DShape2D *p_shape, const Transform2D 
 	shapes.push_back(shape);
 	p_shape->add_owner(this);
 
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
-
 	if (space) {
 		_shapes_changed();
 	}
@@ -45,10 +41,6 @@ void Box2DCollisionObject2D::set_shape(int p_index, Box2DShape2D *p_shape) {
 		_update_shape_transform(shape);
 	}
 
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
-
 	if (space) {
 		_shapes_changed();
 	}
@@ -61,10 +53,6 @@ void Box2DCollisionObject2D::set_shape_transform(int p_index, const Transform2D 
 	shape.xform = p_transform;
 
 	_update_shape_transform(shape);
-
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
 
 	if (space) {
 		_shapes_changed();
@@ -87,22 +75,6 @@ void Box2DCollisionObject2D::set_shape_disabled(int p_index, bool p_disabled) {
 		_create_shape(shape, p_index);
 		_update_shape_transform(shape);
 	}
-
-	// if (p_disabled && shape.bpid != 0) {
-	// 	space->get_broadphase()->remove(shape.bpid);
-	// 	shape.bpid = 0;
-	// 	if (!pending_shape_update_list.in_list()) {
-	// 		Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	// 	}
-	// } else if (!p_disabled && shape.bpid == 0) {
-	// 	if (!pending_shape_update_list.in_list()) {
-	// 		Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	// 	}
-	// }
-
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
 
 	if (space) {
 		_shapes_changed();
@@ -131,10 +103,6 @@ void Box2DCollisionObject2D::remove_shape(int p_index) {
 
 	shape.shape->remove_owner(this);
 	shapes.remove_at(p_index);
-
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
 
 	if (space) {
 		_shapes_changed();
@@ -350,6 +318,5 @@ void Box2DCollisionObject2D::_shape_changed(Box2DShape2D *p_shape) {
 }
 
 Box2DCollisionObject2D::Box2DCollisionObject2D(Type p_type) {
-	//: pending_shape_update_list(this) {
 	type = p_type;
 }
