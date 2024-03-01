@@ -5,9 +5,12 @@
 #include <box2d/hull.h>
 #include <box2d/math.h>
 #include <godot_cpp/templates/hash_set.hpp>
+#include <godot_cpp/variant/utility_functions.hpp>
 
 using namespace box2d;
 using namespace godot;
+
+#define B2_DEBUG true
 
 struct Box2DHolder {
 	HashMap<int, ActiveBodyCallback> active_body_callbacks;
@@ -190,30 +193,48 @@ b2BodyUserData *get_body_user_data(b2BodyId body_handle) {
 }
 
 void box2d::body_add_force(b2BodyId body_handle, b2Vec2 force) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_add_force: ", rtos(body_handle.index), ", ", rtos(force.x), ", ", rtos(force.y));
+#endif
 	b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 	ERR_FAIL_NULL(body_user_data);
 	body_user_data->constant_force += b2Vec2_to_Vector2(force);
 }
 
 void box2d::body_add_torque(b2BodyId body_handle, real_t torque) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_add_torque: ", rtos(body_handle.index), ", ", rtos(torque));
+#endif
 	b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 	ERR_FAIL_NULL(body_user_data);
 	body_user_data->constant_torque += torque;
 }
 
 void box2d::body_apply_impulse(b2BodyId body_handle, b2Vec2 impulse) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_apply_impulse: ", rtos(body_handle.index), ", ", rtos(impulse.x), ", ", rtos(impulse.y));
+#endif
 	b2Body_ApplyLinearImpulseToCenter(body_handle, impulse, true);
 }
 
 void box2d::body_apply_impulse_at_point(b2BodyId body_handle, b2Vec2 impulse, b2Vec2 point) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_apply_impulse_at_point: ", rtos(body_handle.index), ", ", rtos(impulse.x), ", ", rtos(impulse.y), ", ", rtos(point.x), ", ", rtos(point.y));
+#endif
 	b2Body_ApplyLinearImpulse(body_handle, impulse, point, true);
 }
 
 void box2d::body_apply_torque_impulse(b2BodyId body_handle, real_t torque_impulse) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_apply_torque_impulse: ", rtos(body_handle.index), ", ", rtos(torque_impulse));
+#endif
 	b2Body_ApplyAngularImpulse(body_handle, torque_impulse, true);
 }
 
 void box2d::body_change_mode(b2BodyId body_handle, b2BodyType body_type, bool fixed_rotation) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_change_mode: ", rtos(body_handle.index), ", ", rtos(body_type), ", ", fixed_rotation);
+#endif
 	// this updates body mass too
 	b2Body_SetType(body_handle, body_type);
 	b2Body_Wake(body_handle);
@@ -226,6 +247,9 @@ b2BodyId box2d::body_create(b2WorldId world_handle,
 		real_t rot,
 		b2BodyUserData *user_data,
 		b2BodyType body_type) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_create: ", rtos(world_handle.index), ", ", rtos(pos.x), ", ", rtos(pos.y), ", ", rtos(rot), ", ", rtos(body_type));
+#endif
 	b2BodyDef body_def = {
 		body_type, // bodyType
 		pos, // position
@@ -245,11 +269,17 @@ b2BodyId box2d::body_create(b2WorldId world_handle,
 }
 
 void box2d::body_destroy(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_destroy: ", rtos(body_handle.index));
+#endif
 	// TODO destroy user data too
 	b2DestroyBody(body_handle);
 }
 
 void box2d::body_force_sleep(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_force_sleep: ", rtos(body_handle.index));
+#endif
 	// TODO no function yet
 	//if (body_handle->IsSleepingAllowed()) {
 	//	body_handle->SetAwake(false);
@@ -257,10 +287,16 @@ void box2d::body_force_sleep(b2BodyId body_handle) {
 }
 
 real_t box2d::body_get_angle(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_get_angle: ", rtos(body_handle.index));
+#endif
 	return b2Body_GetAngle(body_handle);
 }
 
 real_t box2d::body_get_angular_velocity(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_get_angular_velocity: ", rtos(body_handle.index));
+#endif
 	if (b2Body_GetType(body_handle) == b2_kinematicBody) {
 		b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 		ERR_FAIL_NULL_V(body_user_data, 0.0);
@@ -270,18 +306,27 @@ real_t box2d::body_get_angular_velocity(b2BodyId body_handle) {
 }
 
 b2Vec2 box2d::body_get_constant_force(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_get_constant_force: ", rtos(body_handle.index));
+#endif
 	b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 	ERR_FAIL_NULL_V(body_user_data, b2Vec2_zero);
 	return Vector2_to_b2Vec2(body_user_data->constant_force);
 }
 
 real_t box2d::body_get_constant_torque(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_get_constant_torque: ", rtos(body_handle.index));
+#endif
 	b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 	ERR_FAIL_NULL_V(body_user_data, 0.0);
 	return body_user_data->constant_torque;
 }
 
 b2Vec2 box2d::body_get_linear_velocity(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_get_linear_velocity: ", rtos(body_handle.index));
+#endif
 	if (b2Body_GetType(body_handle) == b2_kinematicBody) {
 		b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 		ERR_FAIL_NULL_V(body_user_data, b2Vec2_zero);
@@ -291,55 +336,88 @@ b2Vec2 box2d::body_get_linear_velocity(b2BodyId body_handle) {
 }
 
 b2Vec2 box2d::body_get_position(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_get_position: ", rtos(body_handle.index));
+#endif
 	return b2Body_GetPosition(body_handle);
 }
 
 bool box2d::body_is_ccd_enabled(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_is_ccd_enabled: ", rtos(body_handle.index));
+#endif
 	return false;
 	// TODO no function yet
 	//return b2Body_GetBullet(body_handle);
 }
 
 void box2d::body_reset_forces(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_reset_forces: ", rtos(body_handle.index));
+#endif
 	b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 	ERR_FAIL_NULL(body_user_data);
 	body_user_data->constant_force = Vector2();
 }
 
 void box2d::body_reset_torques(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_reset_torques: ", rtos(body_handle.index));
+#endif
 	b2BodyUserData *body_user_data = get_body_user_data(body_handle);
 	ERR_FAIL_NULL(body_user_data);
 	body_user_data->constant_torque = 0.0;
 }
 
 void box2d::body_set_angular_damping(b2BodyId body_handle, real_t angular_damping) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_angular_damping: ", rtos(body_handle.index), ", ", rtos(angular_damping));
+#endif
 	b2Body_SetAngularDamping(body_handle, angular_damping);
 }
 
 void box2d::body_set_angular_velocity(b2BodyId body_handle, real_t vel) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_angular_velocity: ", rtos(body_handle.index), ", ", rtos(vel));
+#endif
 	b2Body_SetAngularVelocity(body_handle, vel);
 }
 
 void box2d::body_set_can_sleep(b2BodyId body_handle, bool can_sleep) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_can_sleep: ", rtos(body_handle.index), ", ", rtos(can_sleep));
+#endif
 	// TODO no function yet
 	//b2Body_SetSleepingAllowed(body_handle, can_sleep);
 }
 
 void box2d::body_set_ccd_enabled(b2BodyId body_handle, bool enable) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_ccd_enabled: ", rtos(body_handle.index), ", ", rtos(enable));
+#endif
 	// TODO no function yet
 	// body_handle->SetBullet(enable);
 }
 
 void box2d::body_set_gravity_scale(b2BodyId body_handle,
 		real_t gravity_scale) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_gravity_scale: ", rtos(body_handle.index), ", ", rtos(gravity_scale));
+#endif
 	b2Body_SetGravityScale(body_handle, gravity_scale);
 }
 
 void box2d::body_set_linear_damping(b2BodyId body_handle, real_t linear_damping) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_linear_damping: ", rtos(body_handle.index), ", ", rtos(linear_damping));
+#endif
 	b2Body_SetLinearDamping(body_handle, linear_damping);
 }
 
 void box2d::body_set_linear_velocity(b2BodyId body_handle, b2Vec2 vel) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_linear_velocity: ", rtos(body_handle.index));
+#endif
 	if (b2Body_GetType(body_handle) == b2_kinematicBody) {
 		// for kinematic setting velocity is like moving the object, we want it to happen all the time
 		b2Body_SetLinearVelocity(body_handle, b2Vec2_add(vel, b2Body_GetLinearVelocity(body_handle)));
@@ -349,11 +427,17 @@ void box2d::body_set_linear_velocity(b2BodyId body_handle, b2Vec2 vel) {
 }
 
 void box2d::body_set_mass_properties(b2BodyId body_handle, real_t mass, real_t inertia, b2Vec2 local_com) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_mass_properties: ", rtos(body_handle.index), ", ", rtos(mass), ", ", rtos(inertia), ", ", rtos(local_com.x), ", ", rtos(local_com.y));
+#endif
 	b2MassData mass_data{ mass, local_com, inertia };
 	b2Body_SetMassData(body_handle, mass_data);
 }
 
 void box2d::body_set_transform(b2BodyId body_handle, b2Vec2 pos, real_t rot, real_t step) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_set_transform: ", rtos(body_handle.index), ", ", rtos(pos.x), ", ", rtos(pos.y), ", ", rtos(rot), ", ", rtos(step));
+#endif
 	b2Vec2 new_pos = b2Vec2_sub(pos, b2Body_GetPosition(body_handle));
 	new_pos.x /= step;
 	new_pos.y /= step;
@@ -373,6 +457,9 @@ void box2d::body_set_transform(b2BodyId body_handle, b2Vec2 pos, real_t rot, rea
 }
 
 void box2d::body_update_material(b2BodyId body_handle, Material mat) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_update_material: ", rtos(body_handle.index), ", ", rtos(mat.friction), ", ", rtos(mat.restitution));
+#endif
 	for (b2ShapeId shape_handle = b2Body_GetFirstShape(body_handle); B2_IS_NON_NULL(shape_handle); b2Body_GetNextShape(shape_handle)) {
 		b2Shape_SetFriction(shape_handle, mat.friction);
 		b2Shape_SetRestitution(shape_handle, mat.restitution);
@@ -380,6 +467,9 @@ void box2d::body_update_material(b2BodyId body_handle, Material mat) {
 }
 
 void box2d::body_wake_up(b2BodyId body_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::body_wake_up: ", rtos(body_handle.index));
+#endif
 	b2Body_Wake(body_handle);
 }
 
@@ -387,6 +477,9 @@ FixtureHandle box2d::collider_create_sensor(b2WorldId world_handle,
 		ShapeHandle shape_handles,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_create_sensor: ", rtos(world_handle.index), ", ", rtos(shape_handles.handles.size()), ", ", rtos(body_handle.index));
+#endif
 	FixtureHandle fixture_handle{};
 	b2MassData mass_data = b2Body_GetMassData(body_handle);
 	for (int i = 0; i < shape_handles.handles.size(); i++) {
@@ -411,13 +504,16 @@ FixtureHandle box2d::collider_create_sensor(b2WorldId world_handle,
 }
 
 FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
-		ShapeHandle shape_handle,
+		ShapeHandle shape_handles,
 		const Material *mat,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_create_solid: ", rtos(world_handle.index), ", ", rtos(shape_handles.handles.size()), ", ", rtos(body_handle.index));
+#endif
 	FixtureHandle fixture_handle{};
 	b2MassData mass_data = b2Body_GetMassData(body_handle);
-	for (int i = 0; i < shape_handle.handles.size(); i++) {
+	for (int i = 0; i < shape_handles.handles.size(); i++) {
 		// TODO
 		// Create shape
 		/*
@@ -438,6 +534,9 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 }
 
 void box2d::collider_set_contact_force_events_enabled(FixtureHandle collider_handle, bool send_contacts) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_create_solid: ", rtos(collider_handle.handles.size()), ", ", rtos(send_contacts));
+#endif
 	for (int i = 0; i < collider_handle.handles.size(); i++) {
 		b2ShapeId shape_id = collider_handle.handles[i];
 		// TODO when API exists for enableContactEvents
@@ -445,7 +544,10 @@ void box2d::collider_set_contact_force_events_enabled(FixtureHandle collider_han
 	}
 }
 
-void box2d::collider_destroy(b2WorldId world_handle, FixtureHandle handle) {
+void box2d::collider_destroy(FixtureHandle handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_destroy: ", rtos(handle.handles.size()));
+#endif
 	for (b2ShapeId shapeId : handle.handles) {
 		b2DestroyShape(shapeId);
 	}
@@ -489,6 +591,9 @@ b2Vec2 xform_b2Vec2(b2Vec2 vec, Transform2D transform) {
 
 // TODO
 void box2d::collider_set_transform(b2WorldId world_handle, FixtureHandle handles, ShapeInfo shape_info) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_set_transform: ", rtos(world_handle.index), ", ", rtos(handles.handles.size()));
+#endif
 	ERR_FAIL_COND(!is_handle_valid(shape_info.handle));
 	for (b2ShapeId handle : handles.handles) {
 		b2FixtureUserData *user_data = static_cast<b2FixtureUserData *>(b2Shape_GetUserData(handle));
@@ -552,6 +657,9 @@ void box2d::collider_set_transform(b2WorldId world_handle, FixtureHandle handles
 }
 
 Transform2D box2d::collider_get_transform(b2WorldId world_handle, FixtureHandle handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_get_transform: ", rtos(world_handle.index));
+#endif
 	ERR_FAIL_COND_V(!is_handle_valid(handle), Transform2D());
 	b2FixtureUserData *user_data = static_cast<b2FixtureUserData *>(b2Shape_GetUserData(handle.handles[0]));
 	ERR_FAIL_NULL_V(user_data, Transform2D());
@@ -559,6 +667,9 @@ Transform2D box2d::collider_get_transform(b2WorldId world_handle, FixtureHandle 
 }
 
 Transform2D box2d::collider_get_transform(b2WorldId world_handle, b2ShapeId handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::collider_get_transform: ", rtos(world_handle.index), ", ", rtos(handle.index));
+#endif
 	ERR_FAIL_COND_V(!is_handle_valid(handle), Transform2D());
 	b2FixtureUserData *user_data = static_cast<b2FixtureUserData *>(b2Shape_GetUserData(handle));
 	ERR_FAIL_NULL_V(user_data, Transform2D());
@@ -628,6 +739,9 @@ size_t box2d::intersect_aabb(b2WorldId world_handle,
 		size_t hit_info_length,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::intersect_aabb: ", rtos(world_handle.index));
+#endif
 	AABBQueryCallback callback;
 	callback.world = world_handle;
 	callback.collide_with_body = collide_with_body;
@@ -651,6 +765,9 @@ size_t box2d::intersect_point(b2WorldId world_handle,
 		size_t hit_info_length,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::intersect_point: ", rtos(world_handle.index));
+#endif
 	AABBQueryCallback callback;
 	callback.world = world_handle;
 	callback.collide_with_body = collide_with_body;
@@ -722,6 +839,9 @@ bool box2d::intersect_ray(b2WorldId world_handle,
 		RayHitInfo *hit_info,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::intersect_ray: ", rtos(world_handle.index));
+#endif
 	RayCastQueryCallback callback;
 	callback.world = world_handle;
 	callback.collide_with_body = collide_with_body;
@@ -800,6 +920,9 @@ void box2d::joint_change_revolute_params(b2JointId joint_handle,
 		bool angular_limit_enabled,
 		real_t motor_target_velocity,
 		bool motor_enabled) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::joint_change_revolute_params: ", rtos(joint_handle.index));
+#endif
 	//joint->SetLimits(angular_limit_lower, angular_limit_upper);
 	b2RevoluteJoint_EnableMotor(joint_handle, motor_enabled);
 	b2RevoluteJoint_SetMotorSpeed(joint_handle, motor_target_velocity);
@@ -814,6 +937,9 @@ b2JointId box2d::joint_create_prismatic(b2WorldId world_handle,
 		const b2Vec2 anchor_2,
 		const b2Vec2 limits,
 		bool disable_collision) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::joint_create_prismatic: ", rtos(world_handle.index));
+#endif
 	b2PrismaticJointDef joint_def;
 	joint_def.localAnchorA = anchor_1;
 	joint_def.localAnchorB = anchor_2;
@@ -836,6 +962,9 @@ b2JointId box2d::joint_create_revolute(b2WorldId world_handle,
 		real_t motor_target_velocity,
 		bool motor_enabled,
 		bool disable_collision) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::joint_create_revolute: ", rtos(world_handle.index));
+#endif
 	b2RevoluteJointDef joint_def;
 	joint_def.localAnchorA = anchor_1;
 	joint_def.localAnchorB = anchor_2;
@@ -853,6 +982,9 @@ void box2d::joint_change_distance_joint(b2JointId joint_handle,
 		real_t rest_length,
 		real_t stiffness,
 		real_t damping) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::joint_change_distance_joint: ", rtos(joint_handle.index));
+#endif
 	b2DistanceJoint_SetLength(joint_handle, rest_length);
 	b2DistanceJoint_SetTuning(joint_handle, stiffness, damping);
 }
@@ -867,6 +999,9 @@ b2JointId box2d::joint_create_distance_joint(b2WorldId world_handle,
 		real_t stiffness,
 		real_t damping,
 		bool disable_collision) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::joint_create_distance_joint: ", rtos(world_handle.index));
+#endif
 	b2DistanceJointDef joint_def;
 	joint_def.bodyIdA = body_handle_1;
 	joint_def.bodyIdB = body_handle_2;
@@ -882,6 +1017,9 @@ b2JointId box2d::joint_create_distance_joint(b2WorldId world_handle,
 }
 
 void box2d::joint_destroy(b2JointId joint_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::joint_destroy: ", rtos(joint_handle.index));
+#endif
 	b2DestroyJoint(joint_handle);
 }
 
@@ -894,6 +1032,9 @@ ShapeCastResult box2d::shape_casting(b2WorldId world_handle,
 		QueryHandleExcludedCallback handle_excluded_callback,
 		const QueryExcludedInfo *handle_excluded_info,
 		double margin) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_casting: ", rtos(world_handle.index));
+#endif
 	for (int i = 0; i < shape_info.handle.handles.size(); i++) {
 		// TODO
 		//shape_info.handle.handles[i].m_radius += margin;
@@ -965,6 +1106,9 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 		ShapeInfo shape_info1,
 		const b2Vec2 motion2,
 		ShapeInfo shape_info2) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_collide: ");
+#endif
 	for (int i = 0; i < shape_info1.handle.handles.size(); i++) {
 		for (int j = 0; j < shape_info2.handle.handles.size(); j++) {
 			b2Transform transformA = Transform2D_to_b2Transform(shape_info1.body_transform * shape_info1.transform);
@@ -998,6 +1142,9 @@ ShapeCollideResult box2d::shape_collide(const b2Vec2 motion1,
 }
 
 ShapeHandle box2d::shape_create_box(const b2Vec2 size) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_create_box: ");
+#endif
 	ERR_FAIL_COND_V(size.x < CMP_EPSILON, invalid_shape_handle());
 	ERR_FAIL_COND_V(size.y < CMP_EPSILON, invalid_shape_handle());
 	b2Polygon polygon_shape = b2MakeBox(size.x * 0.5, size.y * 0.5);
@@ -1008,6 +1155,9 @@ ShapeHandle box2d::shape_create_box(const b2Vec2 size) {
 }
 
 ShapeHandle box2d::shape_create_capsule(real_t half_height, real_t radius) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_create_capsule: ");
+#endif
 	ERR_FAIL_COND_V(radius < CMP_EPSILON, invalid_shape_handle());
 	ERR_FAIL_COND_V(half_height < CMP_EPSILON, invalid_shape_handle());
 	ERR_FAIL_COND_V(half_height < radius, invalid_shape_handle());
@@ -1023,6 +1173,9 @@ ShapeHandle box2d::shape_create_capsule(real_t half_height, real_t radius) {
 }
 
 ShapeHandle box2d::shape_create_circle(real_t radius, b2Vec2 pos) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_create_circle: ");
+#endif
 	ERR_FAIL_COND_V(radius < CMP_EPSILON, invalid_shape_handle());
 	b2Circle circle_shape = {
 		pos,
@@ -1036,6 +1189,9 @@ ShapeHandle box2d::shape_create_circle(real_t radius, b2Vec2 pos) {
 
 // TODO
 ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t point_count) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_create_concave_polyline: ");
+#endif
 	b2Hull hull;
 	ERR_FAIL_COND_V(point_count > b2_maxPolygonVertices, invalid_shape_handle());
 	for (int i = 0; i < point_count; i++) {
@@ -1051,6 +1207,9 @@ ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t po
 
 // TODO
 ShapeHandle box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t point_count) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_create_convex_polyline: ");
+#endif
 	b2Hull hull;
 	ERR_FAIL_COND_V(point_count > b2_maxPolygonVertices, invalid_shape_handle());
 	for (int i = 0; i < point_count; i++) {
@@ -1065,6 +1224,9 @@ ShapeHandle box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t poi
 }
 
 ShapeHandle box2d::shape_create_halfspace(const b2Vec2 normal, real_t distance) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_create_halfspace: ");
+#endif
 	real_t world_size = 1000000.0;
 	b2Vec2 points[4];
 	b2Vec2 right{ normal.y, -normal.x };
@@ -1092,6 +1254,9 @@ ShapeHandle box2d::shape_create_halfspace(const b2Vec2 normal, real_t distance) 
 }
 
 void box2d::shape_destroy(ShapeHandle shape_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shape_destroy: ");
+#endif
 	shape_handle.handles.clear();
 }
 
@@ -1100,6 +1265,9 @@ ContactResult box2d::shapes_contact(b2WorldId world_handle,
 		ShapeInfo shape_info1,
 		ShapeInfo shape_info2,
 		real_t margin) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::shapes_contact: ", rtos(world_handle.index));
+#endif
 	/*
 	for (int i = 0; i < shape_info1.handle.count; i++) {
 		for (int j = 0; j < shape_info2.handle.count; j++) {
@@ -1167,19 +1335,31 @@ ContactResult box2d::shapes_contact(b2WorldId world_handle,
 }
 
 b2WorldId box2d::world_create(WorldSettings settings) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::world_create");
+#endif
 	b2WorldDef world_def = b2DefaultWorldDef();
 	return b2CreateWorld(&world_def);
 }
 
 void box2d::world_destroy(b2WorldId world_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::world_destroy", rtos(world_handle.index));
+#endif
 	b2DestroyWorld(world_handle);
 }
 
 size_t box2d::world_get_active_objects_count(b2WorldId world_handle) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::world_get_active_objects_count", rtos(world_handle.index));
+#endif
 	return holder.active_objects[handle_hash(world_handle)];
 }
 
 void box2d::world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback callback) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::world_set_active_body_callback", rtos(world_handle.index));
+#endif
 	holder.active_body_callbacks[handle_hash(world_handle)] = callback;
 }
 
@@ -1190,11 +1370,17 @@ bool presolve_fcn(b2ShapeId shapeIdA, b2ShapeId shapeIdB, b2Manifold *manifold, 
 
 void box2d::world_set_collision_filter_callback(b2WorldId world_handle,
 		b2ContactFilter *callback) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::world_set_collision_filter_callback", rtos(world_handle.index));
+#endif
 	b2World_SetPreSolveCallback(world_handle, presolve_fcn, callback);
 }
 
 // TODO
 void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
+#ifdef B2_DEBUG
+	UtilityFunctions::print("box2d::world_step", rtos(world_handle.index));
+#endif
 	//world_handle->SetGravity(settings->gravity);
 	// TODO set world gravity
 	//settings.max_velocity_iterations, settings.max_position_iterations

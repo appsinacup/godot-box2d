@@ -186,10 +186,6 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 	if (!space) {
 		return;
 	}
-
-	b2WorldId space_handle = space->get_handle();
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape.collider_handle));
 
 	if (area_detection_counter > 0) {
@@ -198,7 +194,7 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 			space->add_removed_collider(shape.collider_handle.handles[i], this, p_shape_index);
 		}
 	}
-	box2d::collider_destroy(space_handle, shape.collider_handle);
+	box2d::collider_destroy(shape.collider_handle);
 	shape.collider_handle = box2d::invalid_fixture_handle(); // collider_handle = box2d ID
 }
 

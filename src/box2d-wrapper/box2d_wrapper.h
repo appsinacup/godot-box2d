@@ -296,7 +296,7 @@ FixtureHandle collider_create_solid(b2WorldId world_handle,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data);
 
-void collider_destroy(b2WorldId world_handle, FixtureHandle handle);
+void collider_destroy(FixtureHandle handle);
 
 void collider_set_transform(b2WorldId world_handle, FixtureHandle handle, ShapeInfo shape_info);
 
