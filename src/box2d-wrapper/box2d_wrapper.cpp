@@ -1038,7 +1038,9 @@ ShapeHandle box2d::shape_create_circle(real_t radius, b2Vec2 pos) {
 ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t point_count) {
 	b2Hull hull;
 	ERR_FAIL_COND_V(point_count > b2_maxPolygonVertices, invalid_shape_handle());
-	std::copy(&hull.points[0], &hull.points[point_count], points);
+	for (int i = 0; i < point_count; i++) {
+		hull.points[i] = points[i];
+	}
 	hull.count = point_count;
 	b2Polygon polygon_shape = b2MakePolygon(&hull, 0.0);
 	return ShapeHandle{
@@ -1051,7 +1053,9 @@ ShapeHandle box2d::shape_create_concave_polyline(const b2Vec2 *points, size_t po
 ShapeHandle box2d::shape_create_convex_polyline(const b2Vec2 *points, size_t point_count) {
 	b2Hull hull;
 	ERR_FAIL_COND_V(point_count > b2_maxPolygonVertices, invalid_shape_handle());
-	std::copy(&hull.points[0], &hull.points[point_count], points);
+	for (int i = 0; i < point_count; i++) {
+		hull.points[i] = points[i];
+	}
 	hull.count = point_count;
 	b2Polygon polygon_shape = b2MakePolygon(&hull, 0.0);
 	return ShapeHandle{
@@ -1076,7 +1080,9 @@ ShapeHandle box2d::shape_create_halfspace(const b2Vec2 normal, real_t distance) 
 
 	b2Hull hull;
 	ERR_FAIL_COND_V(4 > b2_maxPolygonVertices, invalid_shape_handle());
-	std::copy(&hull.points[0], &hull.points[4], points);
+	for (int i = 0; i < 4; i++) {
+		hull.points[i] = points[i];
+	}
 	hull.count = 4;
 	b2Polygon polygon_shape = b2MakePolygon(&hull, 0.0);
 	return ShapeHandle{
