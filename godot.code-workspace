@@ -24,5 +24,26 @@
 			"string_view": "cpp",
 			"__config": "cpp"
 		}
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch",
+				"program": "/Users/dragosdaian/Documents/GitHub/godot/bin/godot.macos.editor.arm64",
+				"type": "cppdbg",
+				"request": "launch",
+				"cwd": "/Users/dragosdaian/Documents/GitHub/godot-box2d",
+				"osx": {
+					"MIMode": "lldb"
+				},
+				"args": [
+					"--path",
+					"/Users/dragosdaian/Documents/GitHub/godot-box2d/Godot-Physics-Tests",
+					"--debug-collisions",
+					"test.tscn"
+				]
+			}
+		]
 	}
 }

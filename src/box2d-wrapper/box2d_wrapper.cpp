@@ -460,7 +460,7 @@ void box2d::body_update_material(b2BodyId body_handle, Material mat) {
 #ifdef B2_DEBUG
 	UtilityFunctions::print("box2d::body_update_material: ", rtos(body_handle.index), ", ", rtos(mat.friction), ", ", rtos(mat.restitution));
 #endif
-	for (b2ShapeId shape_handle = b2Body_GetFirstShape(body_handle); B2_IS_NON_NULL(shape_handle); b2Body_GetNextShape(shape_handle)) {
+	for (b2ShapeId shape_handle = b2Body_GetFirstShape(body_handle); B2_IS_NON_NULL(shape_handle); shape_handle = b2Body_GetNextShape(shape_handle)) {
 		b2Shape_SetFriction(shape_handle, mat.friction);
 		b2Shape_SetRestitution(shape_handle, mat.restitution);
 	}
@@ -473,6 +473,34 @@ void box2d::body_wake_up(b2BodyId body_handle) {
 	b2Body_Wake(body_handle);
 }
 
+b2ShapeId create_collider(b2BodyId body_handle, b2FixtureUserData *user_data, Material mat, ShapeData shape_data, bool isSensor) {
+	b2ShapeId shapeId = b2_nullShapeId;
+	b2ShapeDef shape_def = b2DefaultShapeDef();
+	shape_def.userData = user_data;
+	shape_def.friction = mat.friction;
+	shape_def.restitution = mat.restitution;
+	shape_def.density = 1.0;
+	shape_def.isSensor = isSensor;
+	switch (shape_data.type) {
+		case b2ShapeType::b2_capsuleShape: {
+			shapeId = b2CreateCapsuleShape(body_handle, &shape_def, &shape_data.data.capsule);
+		} break;
+		case b2ShapeType::b2_circleShape: {
+			shapeId = b2CreateCircleShape(body_handle, &shape_def, &shape_data.data.circle);
+		} break;
+		case b2ShapeType::b2_polygonShape: {
+			shapeId = b2CreatePolygonShape(body_handle, &shape_def, &shape_data.data.polygon);
+		} break;
+		case b2ShapeType::b2_segmentShape: {
+			shapeId = b2CreateSegmentShape(body_handle, &shape_def, &shape_data.data.segment);
+		} break;
+		default: {
+			ERR_PRINT("Wrong shape type.");
+		} break;
+	}
+	return shapeId;
+}
+
 FixtureHandle box2d::collider_create_sensor(b2WorldId world_handle,
 		ShapeHandle shape_handles,
 		b2BodyId body_handle,
@@ -483,21 +511,8 @@ FixtureHandle box2d::collider_create_sensor(b2WorldId world_handle,
 	FixtureHandle fixture_handle{};
 	b2MassData mass_data = b2Body_GetMassData(body_handle);
 	for (int i = 0; i < shape_handles.handles.size(); i++) {
-		// TODO
-		/*
 		ShapeData shape_data = shape_handles.handles[i];
-		switch (shape_data.type) {
-			//case b2ShapeType::e_polygon: {
-			//}
-		}
-		b2FixtureDef fixture_def;
-		fixture_def.shape = shape_handle.handles[i];
-		fixture_def.density = 1.0;
-		fixture_def.isSensor = true;
-		fixture_def.userData = user_data;
-		*/
-		b2ShapeId shapeId;
-		fixture_handle.handles[i] = shapeId;
+		fixture_handle.handles.push_back(create_collider(body_handle, user_data, Material{}, shape_data, true));
 	}
 	b2Body_SetMassData(body_handle, mass_data);
 	return fixture_handle;
@@ -505,7 +520,7 @@ FixtureHandle box2d::collider_create_sensor(b2WorldId world_handle,
 
 FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 		ShapeHandle shape_handles,
-		const Material *mat,
+		Material mat,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data) {
 #ifdef B2_DEBUG
@@ -514,20 +529,8 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 	FixtureHandle fixture_handle{};
 	b2MassData mass_data = b2Body_GetMassData(body_handle);
 	for (int i = 0; i < shape_handles.handles.size(); i++) {
-		// TODO
-		// Create shape
-		/*
-		b2FixtureDef fixture_def;
-		fixture_def.shape = shape_handle.handles[i];
-		fixture_def.density = 1.0;
-		fixture_def.restitution = mat->restitution;
-		fixture_def.friction = mat->friction;
-		fixture_def.isSensor = false;
-		fixture_def.userData = user_data;
-		b2ShapeId fixture = body_handle->CreateFixture(&fixture_def);
-		*/
-		b2ShapeId shapeId;
-		fixture_handle.handles[i] = shapeId;
+		ShapeData shape_data = shape_handles.handles[i];
+		fixture_handle.handles.push_back(create_collider(body_handle, user_data, mat, shape_data, false));
 	}
 	b2Body_SetMassData(body_handle, mass_data);
 	return fixture_handle;
@@ -535,7 +538,7 @@ FixtureHandle box2d::collider_create_solid(b2WorldId world_handle,
 
 void box2d::collider_set_contact_force_events_enabled(FixtureHandle collider_handle, bool send_contacts) {
 #ifdef B2_DEBUG
-	UtilityFunctions::print("box2d::collider_create_solid: ", rtos(collider_handle.handles.size()), ", ", rtos(send_contacts));
+	UtilityFunctions::print("box2d::collider_set_contact_force_events_enabled: ", rtos(collider_handle.handles.size()), ", ", rtos(send_contacts));
 #endif
 	for (int i = 0; i < collider_handle.handles.size(); i++) {
 		b2ShapeId shape_id = collider_handle.handles[i];

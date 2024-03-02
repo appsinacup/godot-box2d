@@ -171,7 +171,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 
 	switch (type) {
 		case TYPE_BODY: {
-			shape.collider_handle = box2d::collider_create_solid(space_handle, shape_handle, &mat, body_handle, user_data);
+			shape.collider_handle = box2d::collider_create_solid(space_handle, shape_handle, mat, body_handle, user_data);
 		} break;
 		case TYPE_AREA: {
 			shape.collider_handle = box2d::collider_create_sensor(space_handle, shape_handle, body_handle, user_data);

@@ -292,7 +292,7 @@ FixtureHandle collider_create_sensor(b2WorldId world_handle,
 
 FixtureHandle collider_create_solid(b2WorldId world_handle,
 		ShapeHandle shape_handle,
-		const Material *mat,
+		Material mat,
 		b2BodyId body_handle,
 		b2FixtureUserData *user_data);
 

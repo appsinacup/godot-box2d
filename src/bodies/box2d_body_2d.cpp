@@ -18,15 +18,18 @@ void Box2DBody2D::_mass_properties_changed() {
 }
 
 void Box2DBody2D::_apply_mass_properties(bool force_update) {
-	ERR_FAIL_COND(mode < PhysicsServer2D::BODY_MODE_RIGID);
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (mode < PhysicsServer2D::BODY_MODE_RIGID || !box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 
 	real_t inertia_value = (mode == PhysicsServer2D::BODY_MODE_RIGID_LINEAR) ? 0.0 : inertia;
 	box2d::body_set_mass_properties(body_handle, mass, inertia_value, { center_of_mass.x, center_of_mass.y });
 }
 
 void Box2DBody2D::update_mass_properties(bool force_update) {
-	ERR_FAIL_COND(mode < PhysicsServer2D::BODY_MODE_RIGID);
+	if (mode < PhysicsServer2D::BODY_MODE_RIGID) {
+		return;
+	}
 
 	mass_properties_update_list.remove_from_list();
 
@@ -125,7 +128,9 @@ void Box2DBody2D::set_active(bool p_active) {
 }
 
 void Box2DBody2D::set_can_sleep(bool p_can_sleep) {
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_set_can_sleep(body_handle, p_can_sleep);
 }
 
@@ -174,8 +179,6 @@ void Box2DBody2D::on_update_active() {
 }
 
 void Box2DBody2D::set_param(PhysicsServer2D::BodyParameter p_param, const Variant &p_value) {
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
-
 	switch (p_param) {
 		case PhysicsServer2D::BODY_PARAM_BOUNCE:
 		case PhysicsServer2D::BODY_PARAM_FRICTION: {
@@ -187,6 +190,9 @@ void Box2DBody2D::set_param(PhysicsServer2D::BodyParameter p_param, const Varian
 			box2d::Material mat;
 			mat.friction = friction;
 			mat.restitution = bounce;
+			if (!box2d::is_handle_valid(body_handle)) {
+				return;
+			}
 			box2d::body_update_material(body_handle, mat);
 		} break;
 		case PhysicsServer2D::BODY_PARAM_MASS: {
@@ -320,17 +326,19 @@ void Box2DBody2D::set_mode(PhysicsServer2D::BodyMode p_mode) {
 	}
 	PhysicsServer2D::BodyMode prev_mode = mode;
 	mode = p_mode;
-	switch (p_mode) {
-		case PhysicsServer2D::BODY_MODE_KINEMATIC: {
-			box2d::body_change_mode(get_body_handle(), b2BodyType::b2_kinematicBody, false);
-		} break;
-		case PhysicsServer2D::BODY_MODE_STATIC: {
-			box2d::body_change_mode(get_body_handle(), b2BodyType::b2_staticBody, false);
-		} break;
-		case PhysicsServer2D::BODY_MODE_RIGID:
-		case PhysicsServer2D::BODY_MODE_RIGID_LINEAR: {
-			box2d::body_change_mode(get_body_handle(), b2BodyType::b2_dynamicBody, p_mode == PhysicsServer2D::BODY_MODE_RIGID_LINEAR);
-		} break;
+	if (get_space()) {
+		switch (p_mode) {
+			case PhysicsServer2D::BODY_MODE_KINEMATIC: {
+				box2d::body_change_mode(get_body_handle(), b2BodyType::b2_kinematicBody, false);
+			} break;
+			case PhysicsServer2D::BODY_MODE_STATIC: {
+				box2d::body_change_mode(get_body_handle(), b2BodyType::b2_staticBody, false);
+			} break;
+			case PhysicsServer2D::BODY_MODE_RIGID:
+			case PhysicsServer2D::BODY_MODE_RIGID_LINEAR: {
+				box2d::body_change_mode(get_body_handle(), b2BodyType::b2_dynamicBody, p_mode == PhysicsServer2D::BODY_MODE_RIGID_LINEAR);
+			} break;
+		}
 	}
 	if (p_mode == PhysicsServer2D::BODY_MODE_STATIC) {
 		force_sleep();
@@ -435,7 +443,9 @@ Variant Box2DBody2D::get_state(PhysicsServer2D::BodyState p_state) const {
 }
 
 void Box2DBody2D::set_continuous_collision_detection_mode(PhysicsServer2D::CCDMode p_mode) {
-	ERR_FAIL_COND(mode < PhysicsServer2D::BODY_MODE_RIGID);
+	if (!box2d::is_handle_valid(body_handle) || mode < PhysicsServer2D::BODY_MODE_RIGID) {
+		return;
+	}
 	if (ccd_mode == p_mode) {
 		return;
 	}
@@ -617,7 +627,9 @@ void Box2DBody2D::apply_central_impulse(const Vector2 &p_impulse) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 impulse = { p_impulse.x, p_impulse.y };
 	box2d::body_apply_impulse(body_handle, impulse);
 }
@@ -633,7 +645,9 @@ void Box2DBody2D::apply_impulse(const Vector2 &p_impulse, const Vector2 &p_posit
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 impulse = { p_impulse.x, p_impulse.y };
 	Vector2 point_centered = get_transform().get_origin() + p_position + get_center_of_mass();
 	b2Vec2 pos = { point_centered.x, point_centered.y };
@@ -647,7 +661,9 @@ void Box2DBody2D::apply_torque_impulse(real_t p_torque) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_apply_torque_impulse(body_handle, p_torque);
 }
 
@@ -664,7 +680,9 @@ void Box2DBody2D::apply_central_force(const Vector2 &p_force) {
 	// Note: using last delta assuming constant physics time
 	real_t last_delta = get_space()->get_last_step();
 
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 force = { p_force.x * last_delta, p_force.y * last_delta };
 	box2d::body_apply_impulse(body_handle, force);
 }
@@ -681,7 +699,9 @@ void Box2DBody2D::apply_force(const Vector2 &p_force, const Vector2 &p_position)
 		update_mass_properties(true);
 	}
 
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	// Note: using last delta assuming constant physics time
 	real_t last_delta = get_space()->get_last_step();
 	b2Vec2 force = { p_force.x * last_delta, p_force.y * last_delta };
@@ -700,7 +720,9 @@ void Box2DBody2D::apply_torque(real_t p_torque) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	// Note: using last delta assuming constant physics time
 	real_t last_delta = get_space()->get_last_step();
 	box2d::body_apply_torque_impulse(body_handle, p_torque * last_delta);
@@ -713,7 +735,9 @@ void Box2DBody2D::add_constant_central_force(const Vector2 &p_force) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 force = { p_force.x, p_force.y };
 	box2d::body_add_force(body_handle, force);
 }
@@ -726,7 +750,9 @@ void Box2DBody2D::add_constant_force(const Vector2 &p_force, const Vector2 &p_po
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 force = { p_force.x, p_force.y };
 	b2Vec2 pos = { p_position.x, p_position.y };
 	box2d::body_add_force(body_handle, force);
@@ -739,7 +765,9 @@ void Box2DBody2D::add_constant_torque(real_t p_torque) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_add_torque(body_handle, p_torque);
 }
 
@@ -749,14 +777,18 @@ void Box2DBody2D::set_constant_force(const Vector2 &p_force) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 force = { p_force.x, p_force.y };
 	box2d::body_reset_forces(body_handle);
 	box2d::body_add_force(body_handle, force);
 }
 
 Vector2 Box2DBody2D::get_constant_force() const {
-	ERR_FAIL_COND_V(!box2d::is_handle_valid(body_handle), constant_force);
+	if (!box2d::is_handle_valid(body_handle)) {
+		return constant_force;
+	}
 
 	b2Vec2 force = box2d::body_get_constant_force(body_handle);
 
@@ -769,13 +801,17 @@ void Box2DBody2D::set_constant_torque(real_t p_torque) {
 		// Force update internal mass properties to calculate proper impulse
 		update_mass_properties(true);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_reset_torques(body_handle);
 	box2d::body_add_torque(body_handle, p_torque);
 }
 
 real_t Box2DBody2D::get_constant_torque() const {
-	ERR_FAIL_COND_V(!box2d::is_handle_valid(body_handle), constant_torque);
+	if (!box2d::is_handle_valid(body_handle)) {
+		return constant_torque;
+	}
 	return box2d::body_get_constant_torque(body_handle);
 }
 
@@ -784,13 +820,17 @@ void Box2DBody2D::wakeup() {
 	if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
 		return;
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_wake_up(body_handle);
 }
 
 void Box2DBody2D::force_sleep() {
 	sleep = true;
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_force_sleep(body_handle);
 }
 
@@ -834,14 +874,17 @@ void Box2DBody2D::set_linear_velocity(const Vector2 &p_linear_velocity) {
 	if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
 		return;
 	}
-	// TODO: apply delta
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 velocity = { linear_velocity.x, linear_velocity.y };
 	box2d::body_set_linear_velocity(body_handle, velocity);
 }
 
 Vector2 Box2DBody2D::get_linear_velocity() const {
-	ERR_FAIL_COND_V(!box2d::is_handle_valid(body_handle), linear_velocity);
+	if (!box2d::is_handle_valid(body_handle)) {
+		return linear_velocity;
+	}
 	b2Vec2 vel = box2d::body_get_linear_velocity(body_handle);
 	return Vector2(vel.x, vel.y);
 }
@@ -852,19 +895,16 @@ Vector2 Box2DBody2D::get_static_linear_velocity() const {
 
 void Box2DBody2D::set_angular_velocity(real_t p_angular_velocity) {
 	angular_velocity = p_angular_velocity;
-	if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
+	if (mode == PhysicsServer2D::BODY_MODE_STATIC || !box2d::is_handle_valid(body_handle)) {
 		return;
 	}
-	// TODO: apply delta
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 	box2d::body_set_angular_velocity(body_handle, angular_velocity);
 }
 
 real_t Box2DBody2D::get_angular_velocity() const {
-	if (!get_space()) {
+	if (!get_space() || !box2d::is_handle_valid(body_handle)) {
 		return angular_velocity;
 	}
-	ERR_FAIL_COND_V(!box2d::is_handle_valid(body_handle), angular_velocity);
 	return box2d::body_get_angular_velocity(body_handle);
 }
 
@@ -882,7 +922,9 @@ void Box2DBody2D::_apply_linear_damping(real_t new_value, bool apply_default) {
 	if (apply_default) {
 		total_linear_damping += (real_t)get_space()->get_default_area_param(PhysicsServer2D::AREA_PARAM_LINEAR_DAMP);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_set_linear_damping(body_handle, total_linear_damping);
 }
 
@@ -896,7 +938,9 @@ void Box2DBody2D::_apply_angular_damping(real_t new_value, bool apply_default) {
 	if (apply_default) {
 		total_angular_damping += (real_t)get_space()->get_default_area_param(PhysicsServer2D::AREA_PARAM_ANGULAR_DAMP);
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_set_angular_damping(body_handle, total_angular_damping);
 }
 
@@ -904,7 +948,9 @@ void Box2DBody2D::_apply_gravity_scale(real_t new_value) {
 	if (!get_space()) {
 		return;
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	box2d::body_set_gravity_scale(body_handle, new_value);
 }
 
@@ -1041,7 +1087,9 @@ void Box2DBody2D::update_gravity(real_t p_step) {
 	ERR_FAIL_COND(!using_area_gravity);
 
 	Vector2 gravity_impulse = total_gravity * mass * p_step;
-	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
+	if (!box2d::is_handle_valid(body_handle)) {
+		return;
+	}
 	b2Vec2 impulse = { gravity_impulse.x, gravity_impulse.y };
 	box2d::body_apply_impulse(body_handle, impulse);
 }
