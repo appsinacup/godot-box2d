@@ -13,7 +13,7 @@ using namespace godot;
 #define B2_DEBUG true
 
 struct Box2DHolder {
-	HashMap<int, ActiveBodyCallback> active_body_callbacks;
+	HashMap<b2WorldId, ActiveBodyCallback> active_body_callbacks;
 	HashMap<int, int> active_objects;
 };
 
@@ -1386,10 +1386,8 @@ void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
 #endif
 	//world_handle->SetGravity(settings->gravity);
 	// TODO set world gravity
-	//settings.max_velocity_iterations, settings.max_position_iterations
 	b2World_Step(world_handle, settings.dt, settings.sub_step_count);
 	int active_objects = 0;
-	/*
 	if (holder.active_body_callbacks.has(world_handle)) {
 		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
 		for (b2BodyId body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
@@ -1415,6 +1413,5 @@ void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
 			}
 		}
 	}
-	*/
 	//holder.active_objects[world_handle] = active_objects;
 }
