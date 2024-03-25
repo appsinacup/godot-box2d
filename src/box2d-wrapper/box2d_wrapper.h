@@ -454,8 +454,6 @@ b2WorldId world_create(WorldSettings settings);
 
 void world_destroy(b2WorldId world_handle);
 
-size_t world_get_active_objects_count(b2WorldId world_handle);
-
 void world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback callback);
 
 void world_set_collision_filter_callback(b2WorldId world_handle,
@@ -463,7 +461,7 @@ void world_set_collision_filter_callback(b2WorldId world_handle,
 
 void collider_set_contact_force_events_enabled(FixtureHandle collider_handle, bool send_contacts);
 
-void world_step(b2WorldId world_handle, const SimulationSettings settings);
+void world_step(b2WorldId world_handle, const SimulationSettings settings, std::vector<b2BodyId> active_bodies);
 
 } // namespace box2d
 

@@ -13,8 +13,7 @@ using namespace godot;
 #define B2_DEBUG true
 
 struct Box2DHolder {
-	HashMap<b2WorldId, ActiveBodyCallback> active_body_callbacks;
-	HashMap<int, int> active_objects;
+	HashMap<int, ActiveBodyCallback> active_body_callbacks;
 };
 
 Box2DHolder holder;
@@ -470,7 +469,9 @@ void box2d::body_wake_up(b2BodyId body_handle) {
 #ifdef B2_DEBUG
 	UtilityFunctions::print("box2d::body_wake_up: ", rtos(body_handle.index));
 #endif
-	b2Body_Wake(body_handle);
+	if (b2Body_GetType(body_handle) == b2BodyType::b2_kinematicBody) {
+		b2Body_Wake(body_handle);
+	}
 }
 
 b2ShapeId create_collider(b2BodyId body_handle, b2FixtureUserData *user_data, Material mat, ShapeData shape_data, bool isSensor) {
@@ -1352,13 +1353,6 @@ void box2d::world_destroy(b2WorldId world_handle) {
 	b2DestroyWorld(world_handle);
 }
 
-size_t box2d::world_get_active_objects_count(b2WorldId world_handle) {
-#ifdef B2_DEBUG
-	UtilityFunctions::print("box2d::world_get_active_objects_count", rtos(world_handle.index));
-#endif
-	return holder.active_objects[handle_hash(world_handle)];
-}
-
 void box2d::world_set_active_body_callback(b2WorldId world_handle, ActiveBodyCallback callback) {
 #ifdef B2_DEBUG
 	UtilityFunctions::print("box2d::world_set_active_body_callback", rtos(world_handle.index));
@@ -1380,38 +1374,39 @@ void box2d::world_set_collision_filter_callback(b2WorldId world_handle,
 }
 
 // TODO
-void box2d::world_step(b2WorldId world_handle, SimulationSettings settings) {
+void box2d::world_step(b2WorldId world_handle, SimulationSettings settings, std::vector<b2BodyId> active_bodies) {
 #ifdef B2_DEBUG
 	UtilityFunctions::print("box2d::world_step", rtos(world_handle.index));
 #endif
 	//world_handle->SetGravity(settings->gravity);
 	// TODO set world gravity
 	b2World_Step(world_handle, settings.dt, settings.sub_step_count);
-	int active_objects = 0;
-	if (holder.active_body_callbacks.has(world_handle)) {
-		ActiveBodyCallback callback = holder.active_body_callbacks[world_handle];
-		for (b2BodyId body = world_handle->GetBodyList(); body != nullptr; body = body->GetNext()) {
-			if (body->GetType() == b2_kinematicBody) {
-				b2BodyUserData &userData = body->GetUserData();
-				userData.old_angular_velocity = body->GetAngularVelocity();
-				userData.old_linear_velocity = b2Vec2_to_Vector2(body->GetLinearVelocity());
-				body->SetLinearVelocity(b2Vec2_zero);
-				body->SetAngularVelocity(0);
+	if (holder.active_body_callbacks.has(handle_hash(world_handle))) {
+		ActiveBodyCallback callback = holder.active_body_callbacks[handle_hash(world_handle)];
+		b2BodyEvents bodyEvents = b2World_GetBodyEvents(world_handle);
+		b2SensorEvents sensorEvents = b2World_GetSensorEvents(world_handle);
+		// get bodies from active_bodies vector
+		for (b2BodyId body_handle : active_bodies) {
+			b2BodyType type = b2Body_GetType(body_handle);
+			b2BodyUserData *userData = get_body_user_data(body_handle);
+			if (type == b2_kinematicBody) {
+				userData->old_angular_velocity = b2Body_GetAngularVelocity(body_handle);
+				userData->old_linear_velocity = b2Vec2_to_Vector2(b2Body_GetLinearVelocity(body_handle));
+				b2Body_SetLinearVelocity(body_handle, b2Vec2_zero);
+				b2Body_SetAngularVelocity(body_handle, 0.0);
 			}
-			Vector2 constant_force = body->GetUserData().constant_force;
+			Vector2 constant_force = userData->constant_force;
 			if (constant_force != Vector2()) {
-				body->ApplyForceToCenter(Vector2_to_b2Vec2(constant_force), true);
+				b2Body_ApplyForceToCenter(body_handle, Vector2_to_b2Vec2(constant_force), true);
 			}
-			real_t constant_torque = body->GetUserData().constant_torque;
+			real_t constant_torque = userData->constant_torque;
 			if (constant_torque != 0.0) {
-				body->ApplyTorque(constant_torque, true);
+				b2Body_ApplyTorque(body_handle, constant_torque, true);
 			}
-			if (body->IsAwake() && body->GetUserData().collision_object->get_type() == Box2DCollisionObject2D::Type::TYPE_BODY) {
-				active_objects++;
-				ActiveBodyInfo info{ body, body->GetUserData() };
+			if (userData->collision_object->get_type() == Box2DCollisionObject2D::Type::TYPE_BODY) {
+				ActiveBodyInfo info{ body_handle, *userData };
 				callback(info);
 			}
 		}
 	}
-	//holder.active_objects[world_handle] = active_objects;
 }

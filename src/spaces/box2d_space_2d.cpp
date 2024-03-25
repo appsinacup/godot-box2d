@@ -492,8 +492,10 @@ bool Box2DSpace2D::contact_point_callback(b2WorldId world_handle, const box2d::C
 
 void Box2DSpace2D::step(real_t p_step) {
 	last_step = p_step;
+	std::vector<b2BodyId> active_bodies;
 	for (SelfList<Box2DBody2D> *body_iterator = active_list.first(); body_iterator;) {
 		Box2DBody2D *body = body_iterator->self();
+		active_bodies.push_back(body->get_body_handle());
 		body_iterator = body_iterator->next();
 		body->reset_contact_count();
 	}
@@ -538,7 +540,7 @@ void Box2DSpace2D::step(real_t p_step) {
 	settings.gravity.y = default_gravity_dir.y * default_gravity_value;
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-	box2d::world_step(handle, settings);
+	box2d::world_step(handle, settings, active_bodies);
 
 	// Needed only for one physics step to retrieve lost info
 	removed_colliders.clear();
@@ -548,7 +550,6 @@ void Box2DSpace2D::step(real_t p_step) {
 		body_iterator = body_iterator->next();
 		body->on_update_active();
 	}
-	active_objects = box2d::world_get_active_objects_count(handle);
 }
 
 // TODO
@@ -747,7 +748,7 @@ Box2DSpace2D::Box2DSpace2D() {
 
 	handle = box2d::world_create(world_settings);
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-
+	
 	box2d::world_set_active_body_callback(handle, active_body_callback);
 	box2d::world_set_collision_filter_callback(handle, this);
 }
