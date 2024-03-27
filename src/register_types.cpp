@@ -40,6 +40,8 @@ void initialize_box2d_module(ModuleInitializationLevel p_level) {
 		} break;
 		case MODULE_INITIALIZATION_LEVEL_SCENE: {
 			Box2DProjectSettings::register_settings();
+			b2SetAssertFcn(box2d::assert_callback);
+			box2d::set_logging_enabled(Box2DProjectSettings::get_logging_enabled());
 		} break;
 		default: {
 		} break;

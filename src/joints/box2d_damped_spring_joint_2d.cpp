@@ -13,9 +13,8 @@ void Box2DDampedSpringJoint2D::set_param(PhysicsServer2D::DampedSpringParam p_pa
 			stiffness = p_value;
 		} break;
 	}
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-	box2d::joint_change_distance_joint(space_handle, handle, rest_length, stiffness, damping);
+	box2d::joint_change_distance_joint(handle, rest_length, stiffness, damping);
 }
 
 real_t Box2DDampedSpringJoint2D::get_param(PhysicsServer2D::DampedSpringParam p_param) const {
@@ -44,7 +43,7 @@ Box2DDampedSpringJoint2D::Box2DDampedSpringJoint2D(const Vector2 &p_anchor_a, co
 
 	ERR_FAIL_COND(!p_body_a->get_space());
 	ERR_FAIL_COND(p_body_a->get_space() != p_body_b->get_space());
-	space_handle = p_body_a->get_space()->get_handle();
+	b2WorldId space_handle = p_body_a->get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	handle = box2d::joint_create_distance_joint(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), box2d_anchor_A, box2d_anchor_B, rest_length, p_anchor_a.distance_to(p_anchor_b), stiffness, damping, is_disabled_collisions_between_bodies());
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));

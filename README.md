@@ -7,8 +7,8 @@
 	<a href="https://github.com/appsinacup/godot-box2d/actions/workflows/runner.yml">
         <img src="https://github.com/appsinacup/godot-box2d/actions/workflows/runner.yml/badge.svg?branch=main"
             alt="chat on Discord"></a>
-    <a href="https://github.com/erincatto/box2d" alt="Box2D Version">
-        <img src="https://img.shields.io/badge/Box2D-v2.4.1-%23478cbf?logoColor=white" /></a>
+    <a href="https://github.com/erincatto/box2c" alt="Box2C Version">
+        <img src="https://img.shields.io/badge/Box2C-v3.0.0-%23478cbf?logoColor=white" /></a>
     <a href="https://github.com/godotengine/godot-cpp" alt="Godot Version">
         <img src="https://img.shields.io/badge/Godot-v4.2-%23478cbf?logo=godot-engine&logoColor=white" /></a>
     <a href="https://github.com/appsinacup/godot-box2d/graphs/contributors" alt="Contributors">

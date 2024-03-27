@@ -22,7 +22,6 @@ void Box2DJoint2D::disable_collisions_between_bodies(const bool p_disabled) {
 
 Box2DJoint2D::~Box2DJoint2D() {
 	if (box2d::is_handle_valid(handle)) {
-		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-		box2d::joint_destroy(space_handle, handle);
+		box2d::joint_destroy(handle);
 	}
 };

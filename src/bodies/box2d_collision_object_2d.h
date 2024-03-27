@@ -49,7 +49,7 @@ private:
 
 protected:
 	PhysicsServer2D::BodyMode mode = PhysicsServer2D::BODY_MODE_RIGID;
-	b2Body *body_handle = box2d::invalid_body_handle();
+	b2BodyId body_handle = box2d::invalid_body_handle();
 	uint32_t area_detection_counter = 0;
 
 	void _unregister_shapes();
@@ -70,7 +70,7 @@ public:
 
 	_FORCE_INLINE_ void set_instance_id(const ObjectID &p_instance_id) { instance_id = p_instance_id; }
 	_FORCE_INLINE_ ObjectID get_instance_id() const { return instance_id; }
-	_FORCE_INLINE_ b2Body *get_body_handle() { return body_handle; }
+	_FORCE_INLINE_ b2BodyId get_body_handle() { return body_handle; }
 
 	_FORCE_INLINE_ void set_canvas_instance_id(const ObjectID &p_canvas_instance_id) { canvas_instance_id = p_canvas_instance_id; }
 	_FORCE_INLINE_ ObjectID get_canvas_instance_id() const { return canvas_instance_id; }
@@ -100,7 +100,7 @@ public:
 		return shapes[p_index].xform;
 	}
 
-	void set_transform(const Transform2D &p_transform, bool wake_up = false);
+	void set_transform(const Transform2D &p_transform);
 
 	_FORCE_INLINE_ const Transform2D &get_transform() const { return transform; }
 	_FORCE_INLINE_ const Transform2D &get_inv_transform() const { return inv_transform; }

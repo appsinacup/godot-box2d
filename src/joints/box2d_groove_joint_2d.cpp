@@ -20,7 +20,7 @@ Box2DGrooveJoint2D::Box2DGrooveJoint2D(const Vector2 &p_a_groove1, const Vector2
 
 	ERR_FAIL_COND(!p_body_a->get_space());
 	ERR_FAIL_COND(p_body_a->get_space() != p_body_b->get_space());
-	space_handle = p_body_a->get_space()->get_handle();
+	b2WorldId space_handle = p_body_a->get_space()->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 	handle = box2d::joint_create_prismatic(space_handle, p_body_a->get_body_handle(), p_body_b->get_body_handle(), box2d_axis, box2d_anchor_A, box2d_anchor_B, box2d_limits, is_disabled_collisions_between_bodies());
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));

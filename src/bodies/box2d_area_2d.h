@@ -55,11 +55,11 @@ class Box2DArea2D : public Box2DCollisionObject2D {
 	void _reset_space_override();
 
 public:
-	void on_body_enter(b2Fixture *p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape);
-	void on_body_exit(b2Fixture *p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape, bool p_update_detection = true);
+	void on_body_enter(b2ShapeId p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape);
+	void on_body_exit(b2ShapeId p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape, bool p_update_detection = true);
 
-	void on_area_enter(b2Fixture *p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape);
-	void on_area_exit(b2Fixture *p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape);
+	void on_area_enter(b2ShapeId p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape);
+	void on_area_exit(b2ShapeId p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape);
 
 	void update_area_override();
 	bool has_any_space_override() const;
