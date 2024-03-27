@@ -14,12 +14,16 @@
 
 // You can use this to change the length scale used by your game.
 // For example for inches you could use 39.4.
+#ifdef b2_lengthUnitsPerMeter
 #undef b2_lengthUnitsPerMeter
+#endif
 #define b2_lengthUnitsPerMeter 100.0f
 
 // The maximum number of vertices on a convex polygon. You cannot increase
 // this too much because b2BlockAllocator has a maximum object size.
+#ifdef b2_maxPolygonVertices
 #undef b2_maxPolygonVertices
+#endif
 #define b2_maxPolygonVertices 64
 
 class Box2DCollisionObject2D;
@@ -450,7 +454,7 @@ ContactResult shapes_contact(b2WorldId world_handle,
 		ShapeInfo shape_info2,
 		real_t margin);
 
-b2WorldId world_create(WorldSettings settings);
+b2WorldId world_create(WorldSettings settings, SimulationSettings simulation_settings);
 
 void world_destroy(b2WorldId world_handle);
 
@@ -462,6 +466,10 @@ void world_set_collision_filter_callback(b2WorldId world_handle,
 void collider_set_contact_force_events_enabled(FixtureHandle collider_handle, bool send_contacts);
 
 void world_step(b2WorldId world_handle, const SimulationSettings settings, std::vector<b2BodyId> active_bodies);
+
+int assert_callback(const char *condition, const char *fileName, int lineNumber);
+
+void set_logging_enabled(bool enabled);
 
 } // namespace box2d
 

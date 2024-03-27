@@ -501,14 +501,6 @@ void Box2DSpace2D::step(real_t p_step) {
 	}
 	contact_debug_count = 0;
 
-	ProjectSettings *project_settings = ProjectSettings::get_singleton();
-
-	default_gravity_dir = project_settings->get_setting_with_override("physics/2d/default_gravity_vector");
-	default_gravity_value = project_settings->get_setting_with_override("physics/2d/default_gravity");
-
-	default_linear_damping = project_settings->get_setting_with_override("physics/2d/default_linear_damp");
-	default_angular_damping = project_settings->get_setting_with_override("physics/2d/default_angular_damp");
-
 	for (SelfList<Box2DBody2D> *body_iterator = mass_properties_update_list.first(); body_iterator;) {
 		Box2DBody2D *body = body_iterator->self();
 		body_iterator = body_iterator->next();
@@ -736,6 +728,12 @@ Box2DSpace2D::Box2DSpace2D() {
 	contact_bias = project_settings->get_setting_with_override("physics/2d/solver/default_contact_bias");
 	constraint_bias = project_settings->get_setting_with_override("physics/2d/solver/default_constraint_bias");
 
+	default_gravity_dir = project_settings->get_setting_with_override("physics/2d/default_gravity_vector");
+	default_gravity_value = project_settings->get_setting_with_override("physics/2d/default_gravity");
+
+	default_linear_damping = project_settings->get_setting_with_override("physics/2d/default_linear_damp");
+	default_angular_damping = project_settings->get_setting_with_override("physics/2d/default_angular_damp");
+
 	direct_access = memnew(Box2DDirectSpaceState2D);
 	direct_access->space = this;
 
@@ -746,9 +744,13 @@ Box2DSpace2D::Box2DSpace2D() {
 	world_settings.sleep_angular_threshold = body_angular_velocity_sleep_threshold;
 	world_settings.sleep_time_until_sleep = body_time_to_sleep;
 
-	handle = box2d::world_create(world_settings);
+	box2d::SimulationSettings simulation_settings;
+	simulation_settings.sub_step_count = Box2DProjectSettings::get_sub_step_count();
+	simulation_settings.gravity.x = default_gravity_dir.x * default_gravity_value;
+	simulation_settings.gravity.y = default_gravity_dir.y * default_gravity_value;
+	handle = box2d::world_create(world_settings, simulation_settings);
 	ERR_FAIL_COND(!box2d::is_handle_valid(handle));
-	
+
 	box2d::world_set_active_body_callback(handle, active_body_callback);
 	box2d::world_set_collision_filter_callback(handle, this);
 }

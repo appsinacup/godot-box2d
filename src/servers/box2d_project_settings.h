@@ -10,5 +10,6 @@ public:
 
 	static bool should_run_on_separate_thread();
 	static int get_max_threads();
+	static bool get_logging_enabled();
 	static int get_sub_step_count();
 };

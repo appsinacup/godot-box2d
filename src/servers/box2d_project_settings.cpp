@@ -6,7 +6,8 @@ using namespace godot;
 
 constexpr char RUN_ON_SEPARATE_THREAD[] = "physics/2d/run_on_separate_thread";
 constexpr char MAX_THREADS[] = "threading/worker_pool/max_threads";
-constexpr char SUB_STEP_COUNT[] = "physics/box_2d/solver/sub_step_count";
+constexpr char SUB_STEP_COUNT[] = "physics/box_2d/sub_step_count";
+constexpr char LOGGING_ENABLED[] = "physics/box_2d/logging";
 
 void register_setting(
 		const String &p_name,
@@ -64,6 +65,7 @@ void register_setting_ranged(
 
 void Box2DProjectSettings::register_settings() {
 	register_setting_ranged(SUB_STEP_COUNT, 4, U"1,16,or_greater");
+	register_setting_plain(LOGGING_ENABLED, false, true);
 }
 
 template <typename TType>
@@ -88,4 +90,8 @@ int Box2DProjectSettings::get_max_threads() {
 
 int Box2DProjectSettings::get_sub_step_count() {
 	return get_setting<int>(SUB_STEP_COUNT);
+}
+
+bool Box2DProjectSettings::get_logging_enabled() {
+	return get_setting<bool>(LOGGING_ENABLED);
 }

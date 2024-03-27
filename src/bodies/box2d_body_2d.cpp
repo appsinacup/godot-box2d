@@ -139,7 +139,7 @@ void Box2DBody2D::on_marked_active() {
 	ERR_FAIL_COND(!get_space());
 
 	// TODO: Check how that happens, probably not good for performance
-	//ERR_FAIL_COND(mode == PhysicsServer2D::BODY_MODE_STATIC);
+	ERR_FAIL_COND(mode == PhysicsServer2D::BODY_MODE_STATIC);
 	if (mode == PhysicsServer2D::BODY_MODE_STATIC) {
 		return;
 	}
