@@ -3,6 +3,10 @@
 	<h1 align="center">Godot Box2D</h1> 
 </p>
 
+## NOTE
+
+Currently waiting for [box2c](https://github.com/erincatto/box2c) to be released. New issues won't be fixed until then. In meantime try [rapier2d](https://github.com/appsinacup/godot-rapier-2d) physics engine.
+
 <p align="center">
 	<a href="https://github.com/appsinacup/godot-box2d/actions/workflows/runner.yml">
         <img src="https://github.com/appsinacup/godot-box2d/actions/workflows/runner.yml/badge.svg?branch=main"
@@ -22,6 +26,7 @@
 <p align="center">
 <img src="stability-comparison.gif"/>
 </p>
+
 
 A [Box2D](https://github.com/erincatto/box2d) physics server for [Godot Engine](https://github.com/godotengine/godot), implemented as a GDExtension.
 
