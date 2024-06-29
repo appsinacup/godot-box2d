@@ -1,7 +1,18 @@
 <p align="center">
 	<img width="128px" src="box2d_icon.svg"/> 
-	<h1 align="center">Godot Box2D</h1> 
+	<h1 align="center">Godot Box2D - UNMAINTAINED</h1> 
 </p>
+
+## NOTE
+
+Currently focusing more on the [godot rapier physics](https://github.com/appsinacup/godot-rapier-physics) lib. And since this is pretty much identical in functionality with that one, but, at least at the time of writting, the rapier one has:
+- Serialization thanks to rust language
+- Cross platform determinism
+- 2d and 3d
+- API that is much closer to godot one than box2d one.
+- Better safety (this one is copied after Godot Physics, and that one has a lot of raw pointers, as does this implementation)
+
+If anyone wants to continue on this or contribute, they can make a fork or ask on discord about it.
 
 ## NOTE
 
