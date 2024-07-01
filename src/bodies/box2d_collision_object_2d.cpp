@@ -1,6 +1,5 @@
 #include "box2d_collision_object_2d.h"
 
-#include "../b2_user_settings.h"
 #include "../servers/box2d_physics_server_2d.h"
 #include "../spaces/box2d_space_2d.h"
 
@@ -19,10 +18,6 @@ void Box2DCollisionObject2D::add_shape(Box2DShape2D *p_shape, const Transform2D 
 
 	shapes.push_back(shape);
 	p_shape->add_owner(this);
-
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
 
 	if (space) {
 		_shapes_changed();
@@ -46,10 +41,6 @@ void Box2DCollisionObject2D::set_shape(int p_index, Box2DShape2D *p_shape) {
 		_update_shape_transform(shape);
 	}
 
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
-
 	if (space) {
 		_shapes_changed();
 	}
@@ -62,10 +53,6 @@ void Box2DCollisionObject2D::set_shape_transform(int p_index, const Transform2D 
 	shape.xform = p_transform;
 
 	_update_shape_transform(shape);
-
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
 
 	if (space) {
 		_shapes_changed();
@@ -88,22 +75,6 @@ void Box2DCollisionObject2D::set_shape_disabled(int p_index, bool p_disabled) {
 		_create_shape(shape, p_index);
 		_update_shape_transform(shape);
 	}
-
-	// if (p_disabled && shape.bpid != 0) {
-	// 	space->get_broadphase()->remove(shape.bpid);
-	// 	shape.bpid = 0;
-	// 	if (!pending_shape_update_list.in_list()) {
-	// 		Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	// 	}
-	// } else if (!p_disabled && shape.bpid == 0) {
-	// 	if (!pending_shape_update_list.in_list()) {
-	// 		Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	// 	}
-	// }
-
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
 
 	if (space) {
 		_shapes_changed();
@@ -133,10 +104,6 @@ void Box2DCollisionObject2D::remove_shape(int p_index) {
 	shape.shape->remove_owner(this);
 	shapes.remove_at(p_index);
 
-	//if (!pending_shape_update_list.in_list()) {
-	//	Box2DPhysicsServer2D::singleton->pending_shape_update_list.add(&pending_shape_update_list);
-	//}
-
 	if (space) {
 		_shapes_changed();
 	}
@@ -146,17 +113,10 @@ void Box2DCollisionObject2D::_unregister_shapes() {
 }
 
 void Box2DCollisionObject2D::_update_transform() {
-	if (!space) {
-		return;
-	}
-
-	b2World *space_handle = space->get_handle();
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 	ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
-	b2Vec2 position = box2d::body_get_position(space_handle, body_handle);
-	real_t angle = box2d::body_get_angle(space_handle, body_handle);
+	b2Vec2 position = box2d::body_get_position(body_handle);
+	real_t angle = box2d::body_get_angle(body_handle);
 
 	transform.set_origin(Vector2(position.x, position.y));
 	transform.set_rotation(angle);
@@ -164,12 +124,12 @@ void Box2DCollisionObject2D::_update_transform() {
 	inv_transform = transform.affine_inverse();
 }
 
-void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool wake_up) {
+void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform) {
 	transform = p_transform;
 	inv_transform = transform.affine_inverse();
 
 	if (space) {
-		b2World *space_handle = space->get_handle();
+		b2WorldId space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
@@ -177,7 +137,7 @@ void Box2DCollisionObject2D::set_transform(const Transform2D &p_transform, bool 
 		const Vector2 &origin = transform.get_origin();
 		b2Vec2 position = { origin.x, origin.y };
 		real_t rotation = transform.get_rotation();
-		box2d::body_set_transform(space_handle, body_handle, position, rotation, wake_up, space->get_last_step());
+		box2d::body_set_transform(body_handle, position, rotation, space->get_last_step());
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
 			Shape &shape = shapes[i];
@@ -195,7 +155,7 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 		return;
 	}
 
-	b2World *space_handle = space->get_handle();
+	b2WorldId space_handle = space->get_handle();
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 	ERR_FAIL_COND(box2d::is_handle_valid(shape.collider_handle));
@@ -206,12 +166,12 @@ void Box2DCollisionObject2D::_create_shape(Shape &shape, uint32_t p_shape_index)
 	box2d::ShapeHandle shape_handle = shape.shape->get_box2d_shape();
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape_handle));
 
-	b2FixtureUserData user_data;
-	set_collider_user_data(user_data, p_shape_index);
+	b2FixtureUserData *user_data = memnew(b2FixtureUserData);
+	set_collider_user_data(*user_data, p_shape_index);
 
 	switch (type) {
 		case TYPE_BODY: {
-			shape.collider_handle = box2d::collider_create_solid(space_handle, shape_handle, &mat, body_handle, user_data);
+			shape.collider_handle = box2d::collider_create_solid(space_handle, shape_handle, mat, body_handle, user_data);
 		} break;
 		case TYPE_AREA: {
 			shape.collider_handle = box2d::collider_create_sensor(space_handle, shape_handle, body_handle, user_data);
@@ -226,19 +186,15 @@ void Box2DCollisionObject2D::_destroy_shape(Shape &shape, uint32_t p_shape_index
 	if (!space) {
 		return;
 	}
-
-	b2World *space_handle = space->get_handle();
-	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 	ERR_FAIL_COND(!box2d::is_handle_valid(shape.collider_handle));
 
 	if (area_detection_counter > 0) {
 		// Keep track of body information for delayed removal
-		for (int i = 0; i < shape.collider_handle.count; i++) {
+		for (int i = 0; i < shape.collider_handle.handles.size(); i++) {
 			space->add_removed_collider(shape.collider_handle.handles[i], this, p_shape_index);
 		}
 	}
-	box2d::collider_destroy(space_handle, shape.collider_handle);
+	box2d::collider_destroy(shape.collider_handle);
 	shape.collider_handle = box2d::invalid_fixture_handle(); // collider_handle = box2d ID
 }
 
@@ -247,7 +203,7 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 		return;
 	}
 
-	b2World *space_handle = space->get_handle();
+	b2WorldId space_handle = space->get_handle();
 
 	ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
@@ -261,9 +217,6 @@ void Box2DCollisionObject2D::_update_shape_transform(const Shape &shape) {
 
 void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	if (space) {
-		b2World *space_handle = space->get_handle();
-		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
-
 		ERR_FAIL_COND(!box2d::is_handle_valid(body_handle));
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
@@ -275,7 +228,7 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 			_destroy_shape(shape, i);
 		}
 		// This call also destroys the colliders
-		box2d::body_destroy(space_handle, body_handle);
+		box2d::body_destroy(body_handle);
 		body_handle = box2d::invalid_body_handle();
 
 		// Reset area detection counter to keep it consistent for new detections
@@ -285,13 +238,13 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 	space = p_space;
 
 	if (space) {
-		b2World *space_handle = space->get_handle();
+		b2WorldId space_handle = space->get_handle();
 		ERR_FAIL_COND(!box2d::is_handle_valid(space_handle));
 
 		ERR_FAIL_COND(box2d::is_handle_valid(body_handle));
 
-		b2BodyUserData user_data;
-		set_body_user_data(user_data);
+		b2BodyUserData *user_data = memnew(b2BodyUserData);
+		set_body_user_data(*user_data);
 
 		b2Vec2 position = { transform.get_origin().x, transform.get_origin().y };
 		real_t angle = transform.get_rotation();
@@ -303,8 +256,8 @@ void Box2DCollisionObject2D::_set_space(Box2DSpace2D *p_space) {
 			body_handle = box2d::body_create(space_handle, position, angle, user_data, b2BodyType::b2_dynamicBody);
 		}
 		if (type == TYPE_AREA) {
-			box2d::body_set_can_sleep(space_handle, body_handle, false);
-			box2d::body_set_gravity_scale(space_handle, body_handle, 0.0, true);
+			box2d::body_set_can_sleep(body_handle, false);
+			box2d::body_set_gravity_scale(body_handle, 0.0);
 		}
 
 		for (uint32_t i = 0; i < shapes.size(); i++) {
@@ -361,6 +314,5 @@ void Box2DCollisionObject2D::_shape_changed(Box2DShape2D *p_shape) {
 }
 
 Box2DCollisionObject2D::Box2DCollisionObject2D(Type p_type) {
-	//: pending_shape_update_list(this) {
 	type = p_type;
 }

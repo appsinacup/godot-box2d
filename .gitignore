@@ -1,5 +1,4 @@
 # Binaries
-*.os
 *.os.tmp
 *.o
 *.dblite
@@ -10,3 +9,4 @@ bin/addons/godot-box2d/bin/libgodot-box2d.macos.template_release.framework/libgo
 
 .DS_Store
 .vscode
+*.os

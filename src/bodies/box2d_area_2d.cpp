@@ -31,7 +31,7 @@ void Box2DArea2D::set_space(Box2DSpace2D *p_space) {
 	_set_space(p_space);
 }
 
-void Box2DArea2D::on_body_enter(b2Fixture *p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape) {
+void Box2DArea2D::on_body_enter(b2ShapeId p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape) {
 	ERR_FAIL_COND(!p_body); // Shouldn't happen after removal
 
 	// Add to keep track of currently detected bodies
@@ -56,7 +56,7 @@ void Box2DArea2D::on_body_enter(b2Fixture *p_collider_handle, Box2DBody2D *p_bod
 	}
 }
 
-void Box2DArea2D::on_body_exit(b2Fixture *p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape, bool p_update_detection) {
+void Box2DArea2D::on_body_exit(b2ShapeId p_collider_handle, Box2DBody2D *p_body, uint32_t p_body_shape, RID p_body_rid, ObjectID p_body_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape, bool p_update_detection) {
 	if (p_update_detection) {
 		// Remove from currently detected bodies
 		auto foundIt = detected_bodies.find(p_body_rid);
@@ -93,7 +93,7 @@ void Box2DArea2D::on_body_exit(b2Fixture *p_collider_handle, Box2DBody2D *p_body
 	}
 }
 
-void Box2DArea2D::on_area_enter(b2Fixture *p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape) {
+void Box2DArea2D::on_area_enter(b2ShapeId p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape) {
 	ERR_FAIL_COND(!p_other_area); // Shouldn't happen after removal
 
 	if (area_monitor_callback.is_null()) {
@@ -117,7 +117,7 @@ void Box2DArea2D::on_area_enter(b2Fixture *p_collider_handle, Box2DArea2D *p_oth
 	}
 }
 
-void Box2DArea2D::on_area_exit(b2Fixture *p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2Fixture *p_area_collider_handle, uint32_t p_area_shape) {
+void Box2DArea2D::on_area_exit(b2ShapeId p_collider_handle, Box2DArea2D *p_other_area, uint32_t p_other_area_shape, RID p_other_area_rid, ObjectID p_other_area_instance_id, b2ShapeId p_area_collider_handle, uint32_t p_area_shape) {
 	if (area_monitor_callback.is_null()) {
 		return;
 	}

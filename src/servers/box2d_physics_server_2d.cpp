@@ -47,9 +47,6 @@ RID Box2DPhysicsServer2D::_shape_create(ShapeType p_shape) {
 		case SHAPE_CONCAVE_POLYGON: {
 			shape = memnew(Box2DConcavePolygonShape2D);
 		} break;
-		case SHAPE_CUSTOM: {
-			ERR_FAIL_V_MSG(RID(), "Unsupported shape");
-		} break;
 		default:
 			ERR_FAIL_V_MSG(RID(), "Unsupported shape");
 	}
